@@ -1,0 +1,29 @@
+plugins {
+    id 'java'
+    id 'com.vanniktech.maven.publish' version '0.32.0'
+}
+
+repositories {
+    mavenCentral()
+}
+
+group = 'com.example.publisher'
+version = '1.0.0'
+archivesBaseName = 'pluginsModule'
+
+dependencies {
+    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation project(':dependenciesModule')
+}
+
+tasks.whenTaskAdded { task ->
+    if (task.name.startsWith('publish') &&
+        !task.name.contains('ToMavenLocal') &&
+        !task.name.contains('Local')) {
+        task.enabled = false
+    }
+}
+
+tasks.withType(Sign) {
+    enabled = false
+}
