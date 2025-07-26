@@ -1,0 +1,12 @@
+initscript {
+    repositories {
+        flatDir {
+            dirs '{{PLUGINS_DIR}}'
+        }
+    }
+    dependencies {
+        classpath name: 'xgradle'
+    }
+}
+
+gradle.apply plugin: org.altlinux.gradlePlugin.plugin.XGradlePlugin
