@@ -1,0 +1,3 @@
+tar: @version@:.
+spec: .gear/xgradle.spec
+
