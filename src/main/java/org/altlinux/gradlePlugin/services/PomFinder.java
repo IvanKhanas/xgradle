@@ -150,14 +150,14 @@ public class PomFinder {
             logger.lifecycle("Invalid coordinate in POM");
             return false;
         }
-        if (!groupId.equals(coord.groupId)) {
+        if (!groupId.equals(coord.getGroupId())) {
             logger.lifecycle("Group ID mismatch: expected {} but found {}",
-                    groupId, coord.groupId);
+                    groupId, coord.getGroupId());
             return false;
         }
-        if (!artifactId.equals(coord.artifactId)) {
+        if (!artifactId.equals(coord.getArtifactId())) {
             logger.lifecycle("Artifact ID mismatch: expected {} but found {}",
-                    artifactId, coord.artifactId);
+                    artifactId, coord.getArtifactId());
             return false;
         }
         return true;
@@ -240,7 +240,7 @@ public class PomFinder {
                         .filter(path -> path.toString().endsWith(".pom"))
                         .forEach(pomPath -> {
                             MavenCoordinate coord = pomParser.parsePom(pomPath, logger);
-                            if (coord != null && coord.isValid() && groupId.equals(coord.groupId)) {
+                            if (coord != null && coord.isValid() && groupId.equals(coord.getGroupId())) {
                                 candidates.add(coord);
                             }
                         });

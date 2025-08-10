@@ -16,6 +16,7 @@
 package org.altlinux.gradlePlugin.model;
 
 import java.nio.file.Path;
+import java.util.Objects;
 
 /**
  * Represents Maven artifact coordinates according to the Maven naming convention.
@@ -37,12 +38,40 @@ import java.nio.file.Path;
  * </ul>
  */
 public class MavenCoordinate {
-    public String groupId;
-    public String artifactId;
-    public String version;
-    public Path pomPath;
-    public String packaging;
-    public String scope;
+
+    private String groupId;
+    private String artifactId;
+    private String version;
+    private Path pomPath;
+    private String packaging;
+    private String scope;
+    private boolean testContext;
+
+    public MavenCoordinate () {}
+
+    public MavenCoordinate(MavenCoordinate other) {
+        this.groupId = other.groupId;
+        this.artifactId = other.artifactId;
+        this.version = other.version;
+        this.scope = other.scope;
+        this.packaging = other.packaging;
+        this.pomPath = other.pomPath;
+        this.testContext = other.testContext;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MavenCoordinate that = (MavenCoordinate) o;
+        return Objects.equals(groupId, that.groupId) &&
+                Objects.equals(artifactId, that.artifactId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(groupId, artifactId);
+    }
 
     /**
      * Validates that the coordinate contains essential information.
@@ -72,5 +101,121 @@ public class MavenCoordinate {
      */
     public boolean isBom() {
         return "pom".equals(packaging);
+    }
+
+    /**
+     * Returns the group identifier of the artifact.
+     *
+     * @return group identifier string
+     */
+    public String getGroupId() {
+        return groupId;
+    }
+
+    /**
+     * Sets the group identifier of the artifact.
+     *
+     * @param groupId new group identifier
+     */
+    public void setGroupId(String groupId) {
+        this.groupId = groupId;
+    }
+
+    /**
+     * Returns the scope of the artifact.
+     *
+     * @return scope string
+     */
+    public String getScope() {
+        return scope;
+    }
+
+    /**
+     * Sets the scope of the artifact.
+     *
+     * @param scope new scope value
+     */
+    public void setScope(String scope) {
+        this.scope = scope;
+    }
+
+    /**
+     * Returns the packaging type of the artifact.
+     *
+     * @return packaging type string
+     */
+    public String getPackaging() {
+        return packaging;
+    }
+
+    /**
+     * Sets the packaging type of the artifact.
+     *
+     * @param packaging new packaging type
+     */
+    public void setPackaging(String packaging) {
+        this.packaging = packaging;
+    }
+
+    /**
+     * Returns the path to the POM file.
+     *
+     * @return path to POM file
+     */
+    public Path getPomPath() {
+        return pomPath;
+    }
+
+    /**
+     * Sets the path to the POM file.
+     *
+     * @param pomPath new POM file path
+     */
+    public void setPomPath(Path pomPath) {
+        this.pomPath = pomPath;
+    }
+
+    /**
+     * Returns the version of the artifact.
+     *
+     * @return version string
+     */
+    public String getVersion() {
+        return version;
+    }
+
+    /**
+     * Sets the version of the artifact.
+     *
+     * @param version new version value
+     */
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    /**
+     * Returns the artifact identifier.
+     *
+     * @return artifact ID string
+     */
+    public String getArtifactId() {
+        return artifactId;
+    }
+
+    /**
+     * Sets the artifact identifier.
+     *
+     * @param artifactId new artifact ID
+     */
+    public void setArtifactId(String artifactId) {
+        this.artifactId = artifactId;
+    }
+
+    public boolean isTestContext() {
+        return testContext;
+    }
+
+    public void setTestContext(boolean testContext) {
+        this.testContext = testContext;
     }
 }

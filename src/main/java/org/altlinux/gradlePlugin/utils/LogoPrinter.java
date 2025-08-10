@@ -61,6 +61,7 @@ public class LogoPrinter {
             for (String line : artLines) {
                 System.out.println(" ".repeat(padding) + line);
             }
+            System.out.println("\n");
         } catch (Exception e) {
             throw new RuntimeException("Banner printing error",e);
         }

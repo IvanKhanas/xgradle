@@ -60,17 +60,17 @@ public class FileSystemArtifactVerifier implements ArtifactVerifier {
             return false;
         }
 
-        if ("pom".equals(coord.packaging)) {
+        if ("pom".equals(coord.getPackaging())) {
             return true;
         }
 
         Path basePath = Paths.get(SystemDepsExtension.getJarsPath());
-        String basePattern = coord.artifactId;
-        String versionedPattern = coord.artifactId + "-" + coord.version;
+        String basePattern = coord.getArtifactId();
+        String versionedPattern = coord.getArtifactId() + "-" + coord.getVersion();
 
         return checkArtifactExists(basePath, basePattern + ".jar") ||
                 checkArtifactExists(basePath, versionedPattern + ".jar") ||
-                checkRecursively(basePath, basePattern, coord.version);
+                checkRecursively(basePath, basePattern, coord.getVersion());
     }
 
     /**

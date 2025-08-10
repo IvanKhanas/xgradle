@@ -1,17 +1,32 @@
 plugins {
     `java-gradle-plugin`
     java
+    id("com.gradleup.shadow") version "8.3.8"
+    id("com.vanniktech.maven.publish") version "0.34.0"
 }
 
 group = "org.altlinux.xgradle"
-version = "0.0.1"
+version = "0.0.2"
 
 repositories {
     mavenCentral()
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    options.release.set(17)
+}
+
 dependencies {
-    implementation(gradleApi())
+    implementation("org.apache.maven:maven-model-builder:3.8.6")
+    implementation("org.apache.maven:maven-model:3.8.6")
+    implementation("org.codehaus.plexus:plexus-utils:3.5.0")
+    compileOnly(gradleApi())
     testImplementation(gradleTestKit())
     testImplementation(platform("org.junit:junit-bom:5.10.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
@@ -27,29 +42,48 @@ gradlePlugin{
     }
 }
 
-tasks.register<Copy>("copyInitScript"){
+tasks.register<Copy>("copyInitScript") {
     from("src/main/resources/xgradle-plugin.gradle")
     into(layout.buildDirectory.dir("."))
 }
 
-tasks.named<Jar>("jar") {
+tasks.shadowJar {
+    archiveFileName.set("xgradle.jar")
+
     metaInf {
-        from(rootProject.projectDir){
+        from(rootProject.projectDir) {
             include("LICENSE")
-	    include("NOTICE")
+            include("NOTICE")
         }
     }
 
-    exclude("xgradle-plugin.gradle")
-    archiveFileName.set("xgradle.jar")
+    minimize()
+
+    exclude(
+        "**/*.properties", "**/*.svg",
+        "**/*.jpg", "**/*.kotlin_module", "**/*.pro",
+        "**/*.template", "**/*.gif", "**/*.bsh",
+        "**/*.xml", "**/*.groovy", "**/*.html",
+        "**/*.bin", "**/*.json", "**/*.png",
+        "**/*.so", "**/*.dll", "groovy*/**",
+        "kotlin*/**", "**/*.css", "**/*wrapper.jar",
+        "gradle*/**", "**/*.xsl"
+    )
+    exclude("org/junit/**")
+    exclude("org/opentest4j/**")
 }
 
-tasks.named("build"){
+tasks.named<Jar>("jar") {
+    enabled = false
+}
+
+tasks.named("build") {
+    dependsOn(tasks.shadowJar)
     finalizedBy("copyInitScript")
 }
 
 tasks.test {
-    useJUnitPlatform{
+    useJUnitPlatform {
         excludeEngines("junit-vintage")
     }
 

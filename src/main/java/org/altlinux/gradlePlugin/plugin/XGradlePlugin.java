@@ -65,7 +65,6 @@ public class XGradlePlugin implements Plugin<Gradle> {
      */
     @Override
     public void apply(@NotNull Gradle gradle) {
-
         if(LogoPrinter.isLogoEnabled()) {
             LogoPrinter.printCenteredBanner();
         }
