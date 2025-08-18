@@ -10,26 +10,22 @@
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
+ * See the License  for the specific language governing permissions and
  * limitations under the License.
  */
 package org.altlinux.gradlePlugin.core;
 
+import org.altlinux.gradlePlugin.core.managers.RepositoryManager;
 import org.altlinux.gradlePlugin.extensions.SystemDepsExtension;
 import org.altlinux.gradlePlugin.model.MavenCoordinate;
-import org.altlinux.gradlePlugin.services.DefaultPomParser;
-import org.altlinux.gradlePlugin.services.FileSystemArtifactVerifier;
-import org.altlinux.gradlePlugin.services.PomFinder;
+import org.altlinux.gradlePlugin.services.VersionScanner;
+import org.altlinux.gradlePlugin.services.*;
 
 import org.gradle.api.initialization.Settings;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 import static org.altlinux.gradlePlugin.utils.Painter.green;
 
@@ -45,6 +41,7 @@ import static org.altlinux.gradlePlugin.utils.Painter.green;
  */
 public class PluginsDependenciesHandler {
     private static final Logger logger = Logging.getLogger(PluginsDependenciesHandler.class);
+    private final RepositoryManager pluginsRepository;
     private final VersionScanner versionScanner;
 
     /**
@@ -53,6 +50,7 @@ public class PluginsDependenciesHandler {
      * - a FileSystemArtifactVerifier
      */
     public PluginsDependenciesHandler() {
+        this.pluginsRepository = new RepositoryManager(logger);
         this.versionScanner = new VersionScanner(
                 new PomFinder(new DefaultPomParser()),
                 new FileSystemArtifactVerifier()
@@ -70,16 +68,14 @@ public class PluginsDependenciesHandler {
      * @param settings Gradle Settings object for configuration
      */
     public void handle(Settings settings) {
-        logger.lifecycle("Initializing plugins dependencies handler");
-        File libDir = new File(SystemDepsExtension.getJarsPath());
-        if (!libDir.exists() || !libDir.isDirectory()) {
-            logger.warn("System jars directory unavailable: {}", libDir.getAbsolutePath());
+        File baseDir = new File(SystemDepsExtension.getJarsPath());
+        if (!baseDir.exists() || !baseDir.isDirectory()) {
+            logger.warn("System jars directory unavailable: {}", baseDir.getAbsolutePath());
             return;
         }
-        addRepository(settings, libDir);
+        pluginsRepository.configurePluginsRepository(settings, baseDir);
         configurePluginResolution(settings);
     }
-
 
     /**
      * Configures the plugin resolution strategy in the given settings.
@@ -98,41 +94,13 @@ public class PluginsDependenciesHandler {
 
             MavenCoordinate coord = versionScanner.findPluginArtifact(pluginId, logger);
             if (coord != null && coord.isValid()) {
-                String module = coord.groupId + ":" + coord.artifactId + ":" + coord.version;
+                String module = coord.getGroupId() + ":" + coord.getArtifactId() + ":" + coord.getVersion();
                 requested.useModule(module);
-                requested.useVersion(coord.version);
+                requested.useVersion(coord.getVersion());
                 logger.lifecycle(green("Resolved plugin: {} → {}"), pluginId, module);
             } else {
                 logger.warn("Plugin not resolved: {}", pluginId);
             }
-        });
-    }
-
-    /**
-     * Adds a flat directory repository to the plugin management repositories,
-     * including all subdirectories (up to 3 levels deep) under the given base directory.
-     * The repository is given a unique name for identification.
-     *
-     * @param settings Gradle Settings object
-     * @param libDir the base directory containing plugin jars
-     */
-    private void addRepository(Settings settings, File libDir) {
-        settings.getPluginManagement().getRepositories().flatDir(repo -> {
-            String repoName = "SystemPluginsRepo-" + UUID.randomUUID();
-            repo.setName(repoName);
-            List<File> allDirs = new ArrayList<>(List.of(libDir));
-
-            try {
-                Files.walk(libDir.toPath(), 3)
-                        .filter(Files::isDirectory)
-                        .filter(path -> !path.equals(libDir.toPath()))
-                        .forEach(path -> allDirs.add(path.toFile()));
-            } catch (Exception e) {
-                logger.error("Directory scan error: {}", e.getMessage());
-            }
-
-            allDirs.forEach(repo::dir);
-            logger.lifecycle("Repository '{}' with {} directories", repoName, allDirs.size());
         });
     }
 }
