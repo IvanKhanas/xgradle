@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.altlinux.gradlePlugin.core;
+package org.altlinux.gradlePlugin.core.managers;
 
 import org.altlinux.gradlePlugin.extensions.SystemDepsExtension;
 
 import org.gradle.api.GradleException;
 import org.gradle.api.artifacts.dsl.RepositoryHandler;
 import org.gradle.api.artifacts.repositories.FlatDirectoryArtifactRepository;
+import org.gradle.api.initialization.Settings;
 import org.gradle.api.logging.Logger;
 
 import java.io.File;
@@ -58,6 +59,7 @@ public class RepositoryManager {
         this.logger = logger;
     }
 
+
     /**
      * Sets the logger instance used by this manager.
      *
@@ -68,18 +70,41 @@ public class RepositoryManager {
     }
 
     /**
-     * Adds a flat directory repository pointing to system dependency JAR directories.
+     * Configures a Flat Directory repository for Gradle plugin resolution.
      *
-     * <p>The repository is named with a unique UUID to avoid collisions.
-     * The directory and its subdirectories (up to depth 3) are added to the repository paths.
+     * <p>This method is intended for use in {@link Settings} phase, where
+     * plugin repositories are declared. It scans the given base directory
+     * (including its subdirectories up to depth 3) and adds them as search
+     * locations for resolving plugins.
      *
-     * <p>The repository is added at the first position in the repository handler list,
-     * giving it the highest priority during dependency resolution.
+     * <p>The repository is registered under the name {@code SystemPluginsRepo}.
      *
-     * @param repos the Gradle {@link RepositoryHandler} to modify
-     * @throws GradleException if the configured system dependency directory is invalid or unreadable
+     * @param settings the Gradle settings instance used to configure plugin management
+     * @param baseDir  the base directory containing plugin JARs and subdirectories
      */
-    public void addRepository(RepositoryHandler repos) {
+    public void configurePluginsRepository(Settings settings, File baseDir) {
+        List<File> dirs = scanDirectories(baseDir);
+        settings.getPluginManagement().getRepositories().flatDir(repo -> {
+            repo.setName("SystemPluginsRepo");
+            dirs.forEach(repo::dir);
+            logger.lifecycle("Configured PluginManagement repository with {} directories", dirs.size());
+        });
+    }
+
+    /**
+     * Configures a Flat Directory repository for system-provided dependencies.
+     *
+     * <p>The base library path is taken from {@link SystemDepsExtension#getJarsPath()}.
+     * The repository is created with a unique name ({@code SystemDepsRepo-<UUID>}),
+     * scanned for subdirectories, and inserted at the beginning of the repository
+     * list to ensure it has the highest priority.
+     *
+     * <p>If the base directory is invalid or unreadable, a {@link GradleException}
+     * will be thrown.
+     *
+     * @param repos the Gradle repository handler used to register repositories
+     */
+    public void configureDependenciesRepository(RepositoryHandler repos) {
         File libDir = new File(JARS_PATH);
         validateDirectory(libDir);
 
@@ -88,6 +113,30 @@ public class RepositoryManager {
 
         repos.remove(flatRepo);
         repos.addFirst(flatRepo);
+    }
+
+    /**
+     * Scans the given base directory for all subdirectories up to a maximum depth of 3.
+     *
+     * <p>Includes the base directory itself.
+     *
+     * @param baseDir the directory to scan
+     *
+     * @return a list of directories including the base directory and its subdirectories
+     */
+    public List<File> scanDirectories(File baseDir) {
+        List<File> allDirs = new ArrayList<>(List.of(baseDir));
+        try {
+            Files.walk(baseDir.toPath(), 3)
+                    .filter(Files::isDirectory)
+                    .filter(path -> !path.equals(baseDir.toPath()))
+                    .forEach(path -> allDirs.add(path.toFile()));
+        } catch (Exception e) {
+            if (logger != null) {
+                logger.error("Directory scan error: {}", e.getMessage());
+            }
+        }
+        return allDirs;
     }
 
     /**
@@ -123,32 +172,8 @@ public class RepositoryManager {
             List<File> allDirs = scanDirectories(libDir);
             allDirs.forEach(repo::dir);
             if (logger != null) {
-                logger.lifecycle("Added repository '{}' with {} directories", repoName, allDirs.size());
+                logger.lifecycle("Configured DependencyManagement repository with {} directories", allDirs.size());
             }
         });
-    }
-
-    /**
-     * Scans the given base directory for all subdirectories up to a maximum depth of 3.
-     *
-     * <p>Includes the base directory itself.
-     *
-     * @param baseDir the directory to scan
-     *
-     * @return a list of directories including the base directory and its subdirectories
-     */
-    private List<File> scanDirectories(File baseDir) {
-        List<File> allDirs = new ArrayList<>(List.of(baseDir));
-        try {
-            Files.walk(baseDir.toPath(), 3)
-                    .filter(Files::isDirectory)
-                    .filter(path -> !path.equals(baseDir.toPath()))
-                    .forEach(path -> allDirs.add(path.toFile()));
-        } catch (Exception e) {
-            if (logger != null) {
-                logger.error("Directory scan error: {}", e.getMessage());
-            }
-        }
-        return allDirs;
     }
 }
