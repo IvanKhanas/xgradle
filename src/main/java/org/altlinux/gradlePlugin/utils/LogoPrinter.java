@@ -37,13 +37,28 @@ public class LogoPrinter {
      *
      * @return {@code true} if enabled and {@code false} otherwise
      */
-    public static boolean isLogoEnabled(){
-        if("true".equals(System.getProperty("disable.logo"))) {
-            return false;
-        }
-        return true;
+    public static boolean isLogoEnabled() {
+        return !"true".equals(System.getProperty("disable.logo"));
     }
 
+    /**
+     * Prints the plugin logo centered in the terminal.
+     *
+     * <p>Execution flow:
+     * <ol>
+     *   <li>Loads ASCII art from resources</li>
+     *   <li>Determines terminal width</li>
+     *   <li>Calculates horizontal padding</li>
+     *   <li>Prints each line with appropriate padding</li>
+     * </ol>
+     *
+     * <p>Uses default width (80 columns) if terminal width detection fails.
+     *
+     * @throws RuntimeException if logo loading fails or unexpected error occurs
+     *
+     * @see #isLogoEnabled() For enablement check
+     * @see #loadArtFromResources() For logo loading implementation
+     */
     public static void printCenteredBanner() {
         try {
             List<String> artLines = loadArtFromResources();
@@ -61,6 +76,7 @@ public class LogoPrinter {
             for (String line : artLines) {
                 System.out.println(" ".repeat(padding) + line);
             }
+            System.out.println("\n");
         } catch (Exception e) {
             throw new RuntimeException("Banner printing error",e);
         }
