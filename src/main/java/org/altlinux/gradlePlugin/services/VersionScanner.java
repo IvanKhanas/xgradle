@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.altlinux.gradlePlugin.core;
+package org.altlinux.gradlePlugin.services;
 
 import org.altlinux.gradlePlugin.api.ArtifactVerifier;
 import org.altlinux.gradlePlugin.model.MavenCoordinate;
-import org.altlinux.gradlePlugin.services.PomFinder;
 
 import org.gradle.api.logging.Logger;
 
@@ -68,6 +67,7 @@ public class VersionScanner {
      *
      * @param projectDependencies  Set of dependency identifiers in "groupId:artifactId" format
      * @param logger Gradle logger for diagnostic messages
+     *
      * @return Map linking dependency identifiers to resolved Maven coordinates
      */
     public Map<String, MavenCoordinate> scanSystemArtifacts(Set<String> projectDependencies, Logger logger) {
@@ -89,23 +89,46 @@ public class VersionScanner {
             }
 
             MavenCoordinate coord = versions.get(dep);
-            if (coord != null && coord.pomPath != null) {
+            if (coord != null && coord.getPomPath() != null) {
                 scanProvidedDependencies(coord, dependencyQueue, versions, logger);
             }
         }
         return versions;
     }
 
+    /**
+     * Scans and enqueues provided-scope and runtime-scope dependencies from a parent artifact's POM.
+     *
+     * <p>This method:
+     * <ul>
+     *   <li>Parses dependencies from the parent artifact's POM file</li>
+     *   <li>Filters dependencies with "provided" or "runtime" scope</li>
+     *   <li>Enqueues new dependencies for processing if:
+     *     <ul>
+     *       <li>They haven't been resolved yet</li>
+     *       <li>They're not already in the processing queue</li>
+     *     </ul>
+     *   </li>
+     * </ul>
+     *
+     * <p>This enables recursive resolution of scope-specific dependencies that might be required
+     * for compilation or runtime but aren't directly declared in the project.
+     *
+     * @param parentCoord     Parent artifact coordinates containing the POM to scan
+     * @param dependencyQueue Queue of dependencies pending resolution
+     * @param versions        Map of already resolved dependencies
+     * @param logger          Gradle logger for diagnostic messages
+     */
     private void scanProvidedDependencies(MavenCoordinate parentCoord,
                                           Queue<String> dependencyQueue,
                                           Map<String, MavenCoordinate> versions,
                                           Logger logger) {
         List<MavenCoordinate> dependencies = pomFinder.getPomParser()
-                .parseDependencies(parentCoord.pomPath, logger);
+                .parseDependencies(parentCoord.getPomPath(), logger);
 
         for (MavenCoordinate dep : dependencies) {
-            if ("provided".equals(dep.scope) || "runtime".equals(dep.scope)) {
-                String depKey = dep.groupId + ":" + dep.artifactId;
+            if ("provided".equals(dep.getScope()) || "runtime".equals(dep.getScope())) {
+                String depKey = dep.getGroupId() + ":" + dep.getArtifactId();
                 if (!versions.containsKey(depKey) && !dependencyQueue.contains(depKey)) {
                     dependencyQueue.add(depKey);
                 }
@@ -257,8 +280,8 @@ public class VersionScanner {
     private MavenCoordinate findMainArtifactForGroup(String groupId, Logger logger) {
         ArrayList<MavenCoordinate> candidates = pomFinder.findAllPomsForGroup(groupId, logger);
         return candidates.stream()
-                .filter(coord -> coord.artifactId.contains("gradle") ||
-                        coord.artifactId.contains("plugin"))
+                .filter(coord -> coord.getArtifactId().contains("gradle") ||
+                        coord.getArtifactId().contains("plugin"))
                 .findFirst()
                 .orElse(null);
     }
