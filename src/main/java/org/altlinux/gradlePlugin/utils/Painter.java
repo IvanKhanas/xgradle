@@ -67,12 +67,11 @@ public class Painter {
      * Colors the string yellow.
      *
      * @param text text to color.
-     * @param dep dependency in string format to color.
      *
      * @return Row with inserted ANSI blocks of yellow color.
      */
-    public static String yellow(String text, String dep) {
-        return colorize(text + dep, YELLOW);
+    public static String yellow(String text) {
+        return colorize(text, YELLOW);
     }
 
     /**
