@@ -49,6 +49,65 @@ public class MavenCoordinate {
     private String scope;
     private boolean testContext;
 
+    /**
+     * Default no-argument constructor.
+     *
+     * <p>Creates an empty MavenCoordinate instance.
+     * All fields must be set explicitly using setters before
+     * the coordinate is considered valid.</p>
+     */
+    public MavenCoordinate () {}
+
+    /**
+     * Copy constructor.
+     *
+     * <p>Creates a new {@code MavenCoordinate} instance by copying
+     * all fields from another instance.</p>
+     *
+     * @param other the MavenCoordinate to copy
+     */
+    public MavenCoordinate(MavenCoordinate other) {
+        this.groupId = other.groupId;
+        this.artifactId = other.artifactId;
+        this.version = other.version;
+        this.scope = other.scope;
+        this.packaging = other.packaging;
+        this.pomPath = other.pomPath;
+        this.testContext = other.testContext;
+    }
+
+    /**
+     * Compares this MavenCoordinate to another object for equality.
+     *
+     * <p>Two coordinates are considered equal if they share the same
+     * {@code groupId} and {@code artifactId}, regardless of version,
+     * packaging, or scope.</p>
+     *
+     * @param o the object to compare with
+     * @return {@code true} if the objects represent the same artifact identity,
+     *         {@code false} otherwise
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MavenCoordinate that = (MavenCoordinate) o;
+        return Objects.equals(groupId, that.groupId) &&
+                Objects.equals(artifactId, that.artifactId);
+    }
+
+    /**
+     * Computes the hash code for this MavenCoordinate.
+     *
+     * <p>The hash code is derived from {@code groupId} and {@code artifactId}
+     * to remain consistent with {@link #equals(Object)}.</p>
+     *
+     * @return the hash code value
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(groupId, artifactId);
+    }
 
     /**
      * Validates that the coordinate contains essential information.
