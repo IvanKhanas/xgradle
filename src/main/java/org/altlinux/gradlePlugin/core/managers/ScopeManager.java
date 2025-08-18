@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.altlinux.gradlePlugin.core;
+package org.altlinux.gradlePlugin.core.managers;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,12 +36,8 @@ import java.util.Map;
  * @author Ivan Khanas
  */
 public class ScopeManager {
-
     private final Map<String, String> dependencyScopes = new HashMap<>();
-
-    private static final String[] SCOPE_PRIORITY = {
-            "compile", "runtime", "provided", "test"
-    };
+    private static final String[] SCOPE_PRIORITY = { "compile", "runtime", "provided", "test" };
 
     /**
      * Updates the scope of a dependency if the new scope has higher priority.
@@ -54,10 +50,7 @@ public class ScopeManager {
      * @param newScope the new scope to set (e.g., "compile", "runtime", "provided", "test")
      */
     public void updateScope(String dependencyKey, String newScope) {
-        if (newScope == null || newScope.isEmpty()) {
-            return;
-        }
-
+        if (newScope == null || newScope.isEmpty()) return;
         String currentScope = dependencyScopes.get(dependencyKey);
         if (currentScope == null || hasHigherPriority(newScope, currentScope)) {
             dependencyScopes.put(dependencyKey, newScope);
@@ -103,9 +96,7 @@ public class ScopeManager {
      */
     private int getPriorityIndex(String scope) {
         for (int i = 0; i < SCOPE_PRIORITY.length; i++) {
-            if (SCOPE_PRIORITY[i].equals(scope)) {
-                return i;
-            }
+            if (SCOPE_PRIORITY[i].equals(scope)) return i;
         }
         return Integer.MAX_VALUE;
     }
