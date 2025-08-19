@@ -211,12 +211,16 @@ tasks.register<Copy>("copyPublicationsToDist") {
     }
 }
 
-tasks.named("build"){
-    finalizedBy("copyInitScript")
+tasks.named("build") {
+    setDependsOn(listOf("assemble"))
+    dependsOn("shadowJar", "javadocJar")
+    dependsOn("shadowJar", "javadocJar", "copyInitScript", "copyPublicationsToDist")
+    finalizedBy("check")
 }
 
 tasks.test {
-    useJUnitPlatform{
+    useJUnitPlatform {
+        //Temporary solution wait for 0.0.3
         excludeEngines("junit-vintage")
     }
 
