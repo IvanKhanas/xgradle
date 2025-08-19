@@ -9,4 +9,4 @@ initscript {
     }
 }
 
-gradle.apply plugin: org.altlinux.gradlePlugin.plugin.XGradlePlugin
+gradle.apply plugin: org.altlinux.xgradle.plugin.XGradlePlugin
