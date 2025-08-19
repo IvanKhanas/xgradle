@@ -1,6 +1,7 @@
 plugins {
     `java-gradle-plugin`
     java
+    id("com.gradleup.shadow") version "8.3.8"
 }
 
 group = "org.altlinux.xgradle"
@@ -32,16 +33,36 @@ tasks.register<Copy>("copyInitScript"){
     into(layout.buildDirectory.dir("."))
 }
 
-tasks.named<Jar>("jar") {
+
+tasks.shadowJar {
+    archiveClassifier.set("")
+
     metaInf {
-        from(rootProject.projectDir){
+        from(rootProject.projectDir) {
             include("LICENSE")
-	    include("NOTICE")
+            include("NOTICE")
         }
     }
 
-    exclude("xgradle-plugin.gradle")
-    archiveFileName.set("xgradle.jar")
+    minimize()
+
+    exclude(
+        "**/*.properties", "**/*.svg",
+        "**/*.jpg", "**/*.kotlin_module", "**/*.pro",
+        "**/*.template", "**/*.gif", "**/*.bsh",
+        "**/*.xml", "**/*.groovy", "**/*.html",
+        "**/*.bin", "**/*.json", "**/*.png",
+        "**/*.so", "**/*.dll", "groovy*/**",
+        "kotlin*/**", "**/*.css", "**/*wrapper.jar",
+        "gradle*/**", "**/*.xsl"
+    )
+    exclude("org/junit/**")
+    exclude("org/opentest4j/**")
+}
+
+tasks.named<Jar>("jar") {
+    enabled = false
+}
 }
 
 tasks.named("build"){
