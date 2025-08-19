@@ -29,12 +29,31 @@ dependencies {
     testImplementation("org.assertj:assertj-core:3.25.1")
 }
 
+sourceSets {
+    main {
+        java {
+            setSrcDirs(listOf("xgradle-core/main/java"))
+        }
+        resources {
+            setSrcDirs(listOf("xgradle-core/main/resources"))
+        }
+    }
+    test {
+        java {
+            setSrcDirs(listOf("xgradle-core/test/java"))
+        }
+        resources {
+            setSrcDirs(listOf("xgradle-core/test/resources"))
+        }
+    }
+}
+
 gradlePlugin{
     isAutomatedPublishing = false
     plugins{
-        create("XGradlePlugin") {
+        create("xgradle") {
             id = "org.altlinux.xgradle"
-            implementationClass = "org.altlinux.gradlePlugin.plugin.XGradlePlugin"
+            implementationClass = "org.altlinux.xgradle.plugin.XGradlePlugin"
         }
     }
 }
