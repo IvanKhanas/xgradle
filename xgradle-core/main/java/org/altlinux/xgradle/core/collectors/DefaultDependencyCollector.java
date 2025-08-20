@@ -86,8 +86,8 @@ public class DefaultDependencyCollector implements DependencyCollector {
      *
      * <p>The map contains:</p>
      * <ul>
-     *   <li>Keys → {@code group:artifact}</li>
-     *   <li>Values → a set of versions that were explicitly declared for this key</li>
+     *   <li>Keys -> {@code group:artifact}</li>
+     *   <li>Values -> a set of versions that were explicitly declared for this key</li>
      * </ul>
      *
      * <p>This information is useful for analyzing version conflicts

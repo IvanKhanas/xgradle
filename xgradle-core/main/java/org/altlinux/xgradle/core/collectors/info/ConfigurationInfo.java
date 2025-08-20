@@ -42,11 +42,11 @@ public class ConfigurationInfo {
      *
      * <p>During construction the following metadata is derived:</p>
      * <ul>
-     *   <li>{@link #name} → the configuration name (e.g. {@code implementation})</li>
-     *   <li>{@link #type} → a normalized type label such as {@code API}, {@code IMPLEMENTATION},
+     *   <li>{@link #name} -> the configuration name (e.g. {@code implementation})</li>
+     *   <li>{@link #type} -> a normalized type label such as {@code API}, {@code IMPLEMENTATION},
      *       {@code RUNTIME}, {@code TEST}, or {@code UNKNOWN}, determined by
      *       {@link #determineConfigurationType(Configuration)}</li>
-     *   <li>{@link #testConfigutation} → whether the configuration is considered a test
+     *   <li>{@link #testConfigutation} -> whether the configuration is considered a test
      *       configuration, determined by {@link #isTestConfigutation(Configuration)}</li>
      * </ul>
      *
@@ -64,16 +64,16 @@ public class ConfigurationInfo {
      * <p>The logic first checks the {@code org.gradle.usage} attribute
      * (if available):</p>
      * <ul>
-     *   <li>{@code java-api} → {@code API}</li>
-     *   <li>{@code java-runtime} → {@code RUNTIME}</li>
+     *   <li>{@code java-api} -> {@code API}</li>
+     *   <li>{@code java-runtime} -> {@code RUNTIME}</li>
      * </ul>
      *
      * <p>If no matching attribute is present, the configuration name is analyzed:</p>
      * <ul>
-     *   <li>contains {@code api} → {@code API}</li>
-     *   <li>contains {@code implementation} → {@code IMPLEMENTATION}</li>
-     *   <li>contains {@code runtime} → {@code RUNTIME}</li>
-     *   <li>contains {@code test} → {@code TEST}</li>
+     *   <li>contains {@code api} -> {@code API}</li>
+     *   <li>contains {@code implementation} -> {@code IMPLEMENTATION}</li>
+     *   <li>contains {@code runtime} -> {@code RUNTIME}</li>
+     *   <li>contains {@code test} -> {@code TEST}</li>
      * </ul>
      *
      * <p>If none of the above match, the type is reported as {@code UNKNOWN}.</p>

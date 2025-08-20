@@ -97,7 +97,7 @@ public class PluginsDependenciesHandler {
                 String module = coord.getGroupId() + ":" + coord.getArtifactId() + ":" + coord.getVersion();
                 requested.useModule(module);
                 requested.useVersion(coord.getVersion());
-                logger.lifecycle(green("Resolved plugin: {} → {}"), pluginId, module);
+                logger.lifecycle(green("Resolved plugin: {} -> {}"), pluginId, module);
             } else {
                 logger.warn("Plugin not resolved: {}", pluginId);
             }

@@ -69,8 +69,8 @@ public interface DependencyCollector {
      *
      * <p>The map contains:
      * <ul>
-     *   <li>Keys → dependency identifiers (format: "groupId:artifactId")</li>
-     *   <li>Values → sets of versions explicitly requested for each dependency</li>
+     *   <li>Keys -> dependency identifiers (format: "groupId:artifactId")</li>
+     *   <li>Values -> sets of versions explicitly requested for each dependency</li>
      * </ul>
      *
      * <p>This information is essential for:

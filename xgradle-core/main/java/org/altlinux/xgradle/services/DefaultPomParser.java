@@ -159,7 +159,7 @@ public class DefaultPomParser implements PomParser {
      *   <li>Child values do not overwrite already set parent values</li>
      * </ul>
      *
-     * @param hierarchy list of Maven models (ordered parent → child)
+     * @param hierarchy list of Maven models (ordered parent -> child)
      *
      * @return merged properties map
      */
@@ -232,7 +232,7 @@ public class DefaultPomParser implements PomParser {
      *   <li>Child overrides replace parent-managed entries</li>
      * </ul>
      *
-     * @param hierarchy  list of Maven models (ordered parent → child)
+     * @param hierarchy  list of Maven models (ordered parent -> child)
      * @param properties resolved property map
      *
      * @return list of managed dependencies
@@ -295,9 +295,9 @@ public class DefaultPomParser implements PomParser {
      *   <li>Ensures uniqueness by {@code groupId:artifactId}, child dependencies override parent ones</li>
      * </ul>
      *
-     * @param hierarchy  list of Maven models (ordered parent → child)
+     * @param hierarchy  list of Maven models (ordered parent -> child)
      * @param properties resolved property map
-     * @param depMgmtMap map of managed dependencies ({@code groupId:artifactId → MavenCoordinate})
+     * @param depMgmtMap map of managed dependencies ({@code groupId:artifactId -> MavenCoordinate})
      *
      * @return list of resolved direct dependencies
      */

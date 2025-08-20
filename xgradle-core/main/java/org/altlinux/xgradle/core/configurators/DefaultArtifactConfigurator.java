@@ -255,9 +255,9 @@ public class DefaultArtifactConfigurator implements ArtifactConfigurator {
      * of the dependency and maps it to the closest Gradle configuration:</p>
      *
      * <ul>
-     *   <li>{@code provided} or {@code compileOnly} → {@code compileOnly}</li>
-     *   <li>{@code runtime} or {@code runtimeOnly} → {@code runtimeOnly}</li>
-     *   <li>All other scopes → {@code implementation}</li>
+     *   <li>{@code provided} or {@code compileOnly} -> {@code compileOnly}</li>
+     *   <li>{@code runtime} or {@code runtimeOnly} -> {@code runtimeOnly}</li>
+     *   <li>All other scopes -> {@code implementation}</li>
      * </ul>
      *
      * @param project  the current Gradle project
@@ -303,7 +303,7 @@ public class DefaultArtifactConfigurator implements ArtifactConfigurator {
      * {@code implementation}, {@code api}, {@code runtimeOnly}, etc.) and
      * the set of artifact coordinates assigned to each configuration.
      * This provides a complete overview of how artifacts have been distributed
-     * across the Gradle project’s configurations.</p>
+     * across the Gradle project's configurations.</p>
      *
      * @return a map of configuration names to sets of artifact notations
      */
