@@ -76,7 +76,7 @@ mv build/xgradle-plugin.gradle /path/to/gradle/init.d
 
 **3.Move the plugin`s jar file to the gradle plugins directory**
 ```
-mv build/libs/xgradle.jar /path/to/gradle/lib/plugins
+mv build/libs/xgradle.jar /path/to/gradle/xgradle
 ```
 
 ---
