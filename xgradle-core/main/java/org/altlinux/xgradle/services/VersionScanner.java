@@ -232,7 +232,8 @@ public class VersionScanner {
                 pluginId.substring(pluginId.lastIndexOf('.') + 1) : pluginId;
 
         String[] artifactIds = {
-                baseName, baseName + "-plugin", "gradle-" + baseName,
+                pluginId + ".gradle.plugin", pluginId,
+                baseName + "-plugin", "gradle-" + baseName,
                 "gradle-" + baseName + "-plugin", baseName + "-gradle-plugin",
                 "gradle-plugin-" + baseName, baseName + "-gradle"
         };
