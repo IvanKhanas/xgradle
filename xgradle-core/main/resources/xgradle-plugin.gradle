@@ -1,7 +1,7 @@
 initscript{
     repositories {
         flatDir{
-            dirs(gradle.gradleHomeDir.getAbsolutePath() + "/lib/plugins")
+            dirs(gradle.gradleHomeDir.getAbsolutePath() + "/xgradle")
         }
     }
     dependencies {
