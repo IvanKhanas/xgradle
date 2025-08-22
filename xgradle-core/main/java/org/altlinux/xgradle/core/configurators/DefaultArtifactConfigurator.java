@@ -89,7 +89,7 @@ public class DefaultArtifactConfigurator implements ArtifactConfigurator {
         gradle.allprojects(proj -> {
             configurationArtifacts.clear();
             systemArtifacts.forEach((key, coord) -> {
-                if (shouldSkip(coord)) return;
+                if (shouldSkip(coord) || isSelfDependency(proj, coord)) return;
 
                 Set<String> configNames = dependencyConfigNames.get(key);
                 if (configNames != null && !configNames.isEmpty()) {
@@ -131,10 +131,13 @@ public class DefaultArtifactConfigurator implements ArtifactConfigurator {
      * @param configNames the set of configuration names to which the dependency
      *                    should be explicitly added
      */
-    private void addToOriginalConfigurations(Project project,
-                                             String key,
+    private void addToOriginalConfigurations(Project project, String key,
                                              MavenCoordinate coord,
                                              Set<String> configNames) {
+
+        if (isSelfDependency(project, coord)) {
+            return;
+        }
 
         String notation = key + ":" + coord.getVersion();
         for (String configName : configNames) {
@@ -168,6 +171,10 @@ public class DefaultArtifactConfigurator implements ArtifactConfigurator {
      * @param coord   the Maven coordinate of the artifact
      */
     private void addBasedOnScope(Project project, String key, MavenCoordinate coord) {
+        if (isSelfDependency(project, coord)) {
+            return;
+        }
+
         String notation = key + ":" + coord.getVersion();
 
         if (testContextDependencies.contains(key) || coord.isTestContext()) {
@@ -294,6 +301,55 @@ public class DefaultArtifactConfigurator implements ArtifactConfigurator {
         configurationArtifacts
                 .computeIfAbsent(config, k -> new LinkedHashSet<>())
                 .add(artifact);
+    }
+
+    /**
+     * Determines if the given Maven coordinate represents a dependency on the current project itself.
+     *
+     * <p>This method checks whether the provided artifact coordinates match the current project's
+     * group ID and artifact ID. Such dependencies, known as self-dependencies, should typically
+     * be excluded from configuration to avoid circular dependency issues.</p>
+     *
+     * <p>The comparison is performed using case-sensitive matching of both group ID and artifact ID.
+     * The version component is intentionally ignored since a project cannot depend on different
+     * versions of itself.</p>
+     *
+     * @param project the Gradle project being configured
+     * @param coord the Maven coordinate to check for self-dependency
+     *
+     * @return {@code true} if the coordinate represents the current project (matching group ID
+     *         and artifact ID), {@code false} otherwise
+     *
+     * @see MavenCoordinate#getGroupId()
+     * @see MavenCoordinate#getArtifactId()
+     * @see Project#getGroup()
+     * @see Project#getName()
+     */
+    private boolean isSelfDependency(Project project, MavenCoordinate coord) {
+        if (coord.getGroupId() == null || coord.getArtifactId() == null) {
+            return false;
+        }
+
+        Map<String, Project> projectIndex = new HashMap<>();
+        Project root = project.getRootProject();
+        for (Project p : root.getAllprojects()) {
+            Object group = p.getGroup();
+            String name = p.getName();
+            if (group != null && name != null) {
+                String key = group.toString() + ":" + name;
+                projectIndex.put(key, p);
+            }
+        }
+
+        String coordKey = coord.getGroupId() + ":" + coord.getArtifactId();
+        boolean isSelf = projectIndex.containsKey(coordKey);
+
+        if (isSelf) {
+            project.getLogger().debug("Detected project dependency, skipping: {}:{}:{}",
+                    coord.getGroupId(), coord.getArtifactId(), coord.getVersion());
+        }
+
+        return isSelf;
     }
 
     /**
