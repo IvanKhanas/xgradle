@@ -1,0 +1,3 @@
+tar: @version@:.
+tar: 0.0.1:. name=@name@-stage1 base=xgradle-stage1
+spec: .gear/xgradle.spec
