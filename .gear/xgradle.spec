@@ -10,7 +10,7 @@ License: Apache-2.0
 Group: Development/Java
 Url: https://github.com/IvanKhanas/xgradle
 Vcs: https://github.com/IvanKhanas/xgradle.git
-ExclusiveArch: %java_arches
+ExclusiveArch: x86_64
 
 Source0: %name-%version.tar
 Source1: %name-stage1.tar
