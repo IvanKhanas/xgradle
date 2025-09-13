@@ -24,6 +24,8 @@ subprojects {
 
     dependencies {
         implementation("org.apache.maven:maven-model:3.8.6")
+        implementation("org.apache.maven:maven-model-builder:3.8.6")
+
         testImplementation(platform("org.junit:junit-bom:5.10.1"))
         testImplementation("org.junit.jupiter:junit-jupiter")
     }

@@ -24,7 +24,6 @@ sourceSets {
 dependencies {
     compileOnly(gradleApi())
     runtimeOnly("org.codehaus.plexus:plexus-utils:3.5.0")
-    implementation("org.apache.maven:maven-model-builder:3.8.6")
 
     testImplementation(gradleTestKit())
     testImplementation("org.assertj:assertj-core:3.25.1")
