@@ -5,25 +5,24 @@ plugins {
 sourceSets {
     main {
         java {
-            srcDirs("src/main/java")
+            srcDirs("main/java")
         }
         resources {
-            srcDirs("src/main/resources")
+            srcDirs("main/resources")
         }
     }
     test {
         java {
-            srcDirs("src/test/java")
+            srcDirs("test/java")
         }
         resources {
-            srcDirs("src/test/resources")
+            srcDirs("test/resources")
         }
     }
 }
 
 dependencies {
     compileOnly(gradleApi())
-    runtimeOnly("org.codehaus.plexus:plexus-utils:3.5.0")
 
     testImplementation(gradleTestKit())
     testImplementation("org.assertj:assertj-core:3.25.1")
@@ -50,7 +49,7 @@ tasks.named<Copy>("processResources") {
 tasks.register<Copy>("copyInitScript") {
     dependsOn("processResources")
     from("main/resources/xgradle-plugin.gradle")
-    into(layout.buildDirectory.dir("dist"))
+    into(layout.buildDirectory.dir("dist")) // Уже правильный путь
 }
 
 tasks.shadowJar {
@@ -96,7 +95,7 @@ tasks.withType<Javadoc>().configureEach {
 publishing {
     publications {
         create<MavenPublication>("xgradle") {
-            artifactId = rootProject.name
+            artifactId = "xgradle"
 
             artifact(tasks.shadowJar) {
                 builtBy(tasks.shadowJar)
@@ -165,11 +164,10 @@ tasks.register<Copy>("copyPublicationsToDist") {
     dependsOn("shadowJar", "javadocJar", "publishToMavenLocal")
 
     val groupPath = project.group.toString().replace('.', '/')
-    val artifactId = project.name
+    val artifactId = "xgradle"
     val version = project.version.toString()
     val mavenRepo = File(System.getProperty("user.home"), ".m2/repository")
     val publicationDir = mavenRepo.resolve("$groupPath/$artifactId/$version")
-
 
     from(publicationDir) {
         include("$artifactId-$version.jar")
@@ -195,13 +193,12 @@ tasks.register<Copy>("copyPublicationsToDist") {
 }
 
 tasks.named("build") {
-    setDependsOn(listOf("assemble"))
-    dependsOn("shadowJar", "javadocJar")
+    dependsOn("assemble")
     dependsOn("shadowJar", "javadocJar", "copyInitScript", "copyPublicationsToDist")
-    finalizedBy("check")
 }
 
 tasks.test {
+    mustRunAfter("copyPublicationsToDist")
     useJUnitPlatform ()
 
     testLogging {

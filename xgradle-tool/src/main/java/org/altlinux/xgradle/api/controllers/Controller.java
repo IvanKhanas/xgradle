@@ -13,15 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.altlinux.xgradle.api.collectors;
+package org.altlinux.xgradle.api.controllers;
 
-import org.altlinux.xgradle.ProcessingType;
-
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Optional;
-
-public interface ArtifactCollector {
-
-    HashMap<String, Path> collect(String searchingDirectory, Optional<String> artifactName, ProcessingType processingType);
+public interface Controller {
+    Controller configure();
 }

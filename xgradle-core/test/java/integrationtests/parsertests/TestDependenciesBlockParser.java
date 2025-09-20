@@ -106,8 +106,8 @@ public class TestDependenciesBlockParser {
      */
     @Test
     public void parseMavenSurefireCommonsPom (@TempDir Path tempDir) {
-        preparePom("xgradle-core/test/resources/poms/maven-surefire/maven-surefire-common.pom", tempDir);
-        preparePom("xgradle-core/test/resources/poms/maven-surefire/surefire.pom", tempDir);
+        preparePom("test/resources/poms/maven-surefire/maven-surefire-common.pom", tempDir);
+        preparePom("test/resources/poms/maven-surefire/surefire.pom", tempDir);
 
         parsedDeps = pomParser.parseDependencies(tempDir.resolve(Path.of("maven-surefire-common.pom")), logger);
 
@@ -147,7 +147,7 @@ public class TestDependenciesBlockParser {
      */
     @Test
     public void parsePlexusXmlPom (@TempDir Path tempDir) {
-        preparePom("xgradle-core/test/resources/poms/plexus-xml/plexus-xml.pom", tempDir);
+        preparePom("test/resources/poms/plexus-xml/plexus-xml.pom", tempDir);
 
         parsedDeps = pomParser.parseDependencies(tempDir.resolve(Path.of("plexus-xml.pom")), logger);
 
@@ -186,7 +186,7 @@ public class TestDependenciesBlockParser {
      */
     @Test
     public void parseJunitJupiterPom (@TempDir Path tempDir) {
-        preparePom("xgradle-core/test/resources/poms/junit5/junit-jupiter.pom", tempDir);
+        preparePom("test/resources/poms/junit5/junit-jupiter.pom", tempDir);
 
         parsedDeps = pomParser.parseDependencies(tempDir.resolve(Path.of("junit-jupiter.pom")), logger);
 
@@ -222,7 +222,7 @@ public class TestDependenciesBlockParser {
      */
     @Test
     public void parseAsmCommonsPom(@TempDir Path tempDir) {
-        preparePom("xgradle-core/test/resources/poms/asm/asm-commons.pom", tempDir);
+        preparePom("test/resources/poms/asm/asm-commons.pom", tempDir);
 
         parsedDeps = pomParser.parseDependencies(tempDir.resolve(Path.of("asm-commons.pom")), logger);
 
@@ -257,9 +257,9 @@ public class TestDependenciesBlockParser {
      */
     @Test
     public void parseMavenWagonHttpPom(@TempDir Path tempDir) {
-        preparePom("xgradle-core/test/resources/poms/maven-wagon/wagon-providers.pom", tempDir);
-        preparePom("xgradle-core/test/resources/poms/maven-wagon/wagon-http.pom", tempDir);
-        preparePom("xgradle-core/test/resources/poms/maven-wagon/wagon.pom", tempDir);
+        preparePom("test/resources/poms/maven-wagon/wagon-providers.pom", tempDir);
+        preparePom("test/resources/poms/maven-wagon/wagon-http.pom", tempDir);
+        preparePom("test/resources/poms/maven-wagon/wagon.pom", tempDir);
 
         parsedDeps = pomParser.parseDependencies(tempDir.resolve(Path.of("wagon-http.pom")), logger);
 

@@ -1,12 +1,27 @@
+/*
+ * Copyright 2025 BaseALT Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.altlinux.xgradle.parsers;
 
 import com.google.inject.Inject;
 
 import org.altlinux.xgradle.api.containers.PomContainer;
-import org.altlinux.xgradle.api.parsers.PomParser;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.altlinux.xgradle.api.parsers.PomParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.Model;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
@@ -24,13 +39,18 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class ConcurrentPomParser implements PomParser {
-    private static final Logger logger = LogManager.getLogger(ConcurrentPomParser.class);
+public class ConcurrentLibraryPomParser implements PomParser {
+    private static final Logger logger = LoggerFactory.getLogger(ConcurrentLibraryPomParser.class);
     private final PomContainer pomContainer;
 
     @Inject
-    public ConcurrentPomParser(PomContainer pomContainer){
+    public ConcurrentLibraryPomParser(PomContainer pomContainer){
         this.pomContainer = pomContainer;
+    }
+
+    @Override
+    public ConcurrentLibraryPomParser parsePoms() {
+        return this;
     }
 
     @Override
@@ -51,7 +71,12 @@ public class ConcurrentPomParser implements PomParser {
                     .map(pomPath -> CompletableFuture.runAsync(() -> {
                         try {
                             Path jarPath = getJarPathFromPom(pomPath);
-                            artifactCoordinatesMap.put(pomPath.toString(), jarPath);
+                            if(isSnapshotJar(jarPath)) {
+                                logger.info("Found snapshot jar at: \n{}\t SKIPPING :)", jarPath);
+                            }
+                            if(isJarExists(jarPath) && !isSnapshotJar(jarPath)) {
+                                artifactCoordinatesMap.put(pomPath.toString(), jarPath);
+                            }
                         } catch (Exception e) {
                             logger.error("Failed to parse: {}", pomPath.toString(), e);
                         }
@@ -62,7 +87,7 @@ public class ConcurrentPomParser implements PomParser {
         return new HashMap<>(artifactCoordinatesMap);
     }
 
-    private synchronized Path getJarPathFromPom(Path pomPath) {
+    private Path getJarPathFromPom(Path pomPath) {
         MavenXpp3Reader reader = new MavenXpp3Reader();
         String artifactId;
         String version;
@@ -87,5 +112,13 @@ public class ConcurrentPomParser implements PomParser {
         } catch (IOException | XmlPullParserException e) {
             throw new RuntimeException("Error reading POM file: " + pomPath, e);
         }
+    }
+
+    private boolean isJarExists (Path jarPath) {
+        return jarPath.toFile().exists();
+    }
+
+    private boolean isSnapshotJar(Path jarPath) {
+        return jarPath.toFile().toString().toLowerCase().contains("-snapshot");
     }
 }

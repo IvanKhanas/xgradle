@@ -13,23 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.altlinux.xgradle.cli;
+package org.altlinux.xgradle.api.controllers;
 
-import org.altlinux.xgradle.api.cli.CommandExecutor;
+import com.beust.jcommander.JCommander;
+import org.altlinux.xgradle.cli.CliArgumentsContainer;
+import org.slf4j.Logger;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-
-public class DefaultCommandExecutor implements CommandExecutor {
+public interface XmvnCompatController extends Controller {
 
     @Override
-    public int execute(ProcessBuilder processBuilder) throws IOException, InterruptedException {
-        Process process = processBuilder.start();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-            reader.lines().forEach(System.out::println);
-        }
+    XmvnCompatController configure ();
 
-        return process.waitFor();
-    }
+    void configureXmvnCompatFunctions(JCommander jCommander,
+                                      String[] args,
+                                      CliArgumentsContainer cliArgumentsContainer,
+                                      Logger logger);
 }
