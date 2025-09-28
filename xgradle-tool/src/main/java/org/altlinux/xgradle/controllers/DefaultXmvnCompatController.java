@@ -19,6 +19,7 @@ import com.beust.jcommander.JCommander;
 
 import com.google.inject.Inject;
 
+import com.google.inject.name.Named;
 import org.altlinux.xgradle.api.controllers.XmvnCompatController;
 import org.altlinux.xgradle.api.registrars.Registrar;
 import org.altlinux.xgradle.cli.CliArgumentsContainer;
@@ -31,7 +32,7 @@ public class DefaultXmvnCompatController implements XmvnCompatController {
     private final Registrar registrar;
 
     @Inject
-    public DefaultXmvnCompatController(Registrar registrar) {
+    public DefaultXmvnCompatController(@Named("Library")Registrar registrar) {
         this.registrar = registrar;
     }
 
@@ -43,11 +44,7 @@ public class DefaultXmvnCompatController implements XmvnCompatController {
     @Override
     public void configureXmvnCompatFunctions(JCommander jCommander, String[] args, CliArgumentsContainer arguments, Logger logger) {
 
-        if(arguments.hasHelp() || args.length < 1) {
-            jCommander.usage();
-        }
-
-            if(arguments.hasXmvnRegister()) {
+            if(arguments.hasXmvnRegister() && !arguments.hasBomInstallation()) {
                 if(arguments.hasSearchingDirectory()) {
                     try {
                         registrar.registerArtifacts(
@@ -55,7 +52,6 @@ public class DefaultXmvnCompatController implements XmvnCompatController {
                                 arguments.getXmvnRegister(),
                                 arguments.getArtifactName()
                         );
-                        logger.info("Artifacts registered successfully");
                     }catch (Exception e) {
                         logger.error("Error: {}", e.getMessage());
                         System.exit(1);

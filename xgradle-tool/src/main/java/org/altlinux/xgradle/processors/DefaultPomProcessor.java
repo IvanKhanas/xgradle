@@ -24,11 +24,11 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Optional;
 
-public class DefaultPomProcessor implements PomProcessor {
-    private final PomParser pomParser;
+public class DefaultPomProcessor implements PomProcessor<HashMap<String, Path>> {
+    private final PomParser<HashMap<String, Path>> pomParser;
 
     @Inject
-    public DefaultPomProcessor(@Named("Library") PomParser pomParser) {
+    public DefaultPomProcessor(@Named("Library") PomParser<HashMap<String, Path>> pomParser) {
         this.pomParser = pomParser;
     }
 

@@ -20,9 +20,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Optional;
 
-public interface PomProcessor {
+public interface PomProcessor<R> {
 
-    PomProcessor process();
+    PomProcessor<R> process();
 
-    HashMap<String, Path> pomsFromDirectory(String searchingDir, Optional<String> artifactName);
+    R pomsFromDirectory(String searchingDir, Optional<String> artifactName);
 }

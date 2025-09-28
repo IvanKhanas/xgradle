@@ -21,6 +21,7 @@ import com.google.inject.Injector;
 import org.altlinux.xgradle.api.controllers.XmvnCompatController;
 import org.altlinux.xgradle.cli.CliArgumentsContainer;
 import org.altlinux.xgradle.cli.CustomXgradleFormatter;
+import org.altlinux.xgradle.controllers.DefaultBomXmvnCompatController;
 import org.altlinux.xgradle.controllers.DefaultPluginsInstallationController;
 import org.altlinux.xgradle.controllers.DefaultXmvnCompatController;
 import org.altlinux.xgradle.di.XGradleToolModule;
@@ -47,12 +48,18 @@ public class Main {
                 throw new RuntimeException(ex);
             }
 
-            Injector injector = Guice.createInjector(new XGradleToolModule());
+            ToolConfig toolConfig = new ToolConfig();
+            toolConfig.setExcludedArtifacts(arguments.getExcludedArtifact());
+            toolConfig.setAllowSnapshots(arguments.hasAllowSnapshots());
+
+            Injector injector = Guice.createInjector(new XGradleToolModule(toolConfig));
             XmvnCompatController xmvnController = injector.getInstance(DefaultXmvnCompatController.class);
             DefaultPluginsInstallationController pluginsController = injector.getInstance(DefaultPluginsInstallationController.class);
+            DefaultBomXmvnCompatController bomController = injector.getInstance(DefaultBomXmvnCompatController.class);
 
             xmvnController.configure().configureXmvnCompatFunctions(jCommander, args, arguments, logger);
             pluginsController.configure().configurePluginArtifactsInstallation(jCommander, args, arguments, logger);
+            bomController.configure().configureXmvnCompatFunctions(jCommander, args, arguments, logger);
         } catch (Exception e) {
             logger.error("Fatal error occurred", e);
             e.printStackTrace();

@@ -28,12 +28,12 @@ import java.util.HashMap;
 import java.util.Optional;
 
 public class DefaultArtifactCollector implements ArtifactCollector {
-    private final PomProcessor libraryPomProcessor;
-    private final PomProcessor gradlePlugins;
+    private final PomProcessor<HashMap<String, Path>> libraryPomProcessor;
+    private final PomProcessor<HashMap<String, Path>> gradlePlugins;
 
     @Inject
-    public DefaultArtifactCollector(@Named("Library") PomProcessor libraryPomProcessor,
-    @Named("gradlePlugins") PomProcessor gradlePlugins
+    public DefaultArtifactCollector(@Named("Library") PomProcessor<HashMap<String, Path>> libraryPomProcessor,
+    @Named("gradlePlugins") PomProcessor<HashMap<String, Path>> gradlePlugins
     ) {
         this.libraryPomProcessor = libraryPomProcessor;
         this.gradlePlugins = gradlePlugins;

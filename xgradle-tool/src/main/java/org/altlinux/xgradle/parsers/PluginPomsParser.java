@@ -16,6 +16,7 @@
 package org.altlinux.xgradle.parsers;
 
 import com.google.inject.Inject;
+import org.altlinux.xgradle.ToolConfig;
 import org.altlinux.xgradle.api.containers.PomContainer;
 import org.altlinux.xgradle.api.parsers.PomParser;
 import org.apache.maven.model.Dependency;
@@ -25,6 +26,7 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.tools.Tool;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -32,14 +34,17 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class PluginPomsParser implements PomParser {
-    private static final Logger logger = LoggerFactory.getLogger("XGradleLogger");
+import static org.apache.maven.artifact.ArtifactUtils.isSnapshot;
 
+public class PluginPomsParser implements PomParser<HashMap<String, Path>> {
+    private static final Logger logger = LoggerFactory.getLogger("XGradleLogger");
     private final PomContainer pomContainer;
+    private final ToolConfig toolConfig;
 
     @Inject
-    public PluginPomsParser(PomContainer pomContainer) {
+    public PluginPomsParser(PomContainer pomContainer, ToolConfig toolConfig) {
         this.pomContainer = pomContainer;
+        this.toolConfig = toolConfig;
     }
 
     @Override
@@ -70,6 +75,11 @@ public class PluginPomsParser implements PomParser {
         for (Path pomPath : filteredPomPaths) {
             try {
                 Model model = readModel(pomPath);
+
+                if (model.getVersion().toLowerCase().contains("snapshot") && !toolConfig.isAllowSnapshots()) {
+                    logger.warn("Skipping snapshot POM: {}", pomPath);
+                    continue;
+                }
 
                 if ("pom".equals(model.getPackaging())) {
                     analyzePomDependencies(searchingDir, pomPath, model, result);

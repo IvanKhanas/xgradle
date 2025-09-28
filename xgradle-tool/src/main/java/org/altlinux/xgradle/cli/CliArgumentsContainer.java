@@ -71,10 +71,31 @@ public class CliArgumentsContainer {
     private String jarInstallationDirectory;
 
     @Parameter(
+            names = "--exclude-artifacts",
+            description = "Excludes the artifact from installation",
+            order = 7
+    )
+    private List<String> excludedArtifacts;
+
+    @Parameter(
+            names = "--allow-snapshots",
+            description = "Allows processing of snapshot artifacts",
+            order = 8
+    )
+    private boolean allowSnapshots;
+
+    @Parameter(
+    names = "--install-bom",
+    description = "Install BOM files",
+    order = 9
+    )
+    private boolean installBOM;
+
+    @Parameter(
             names = "--help",
             help = true,
             description = "Display help information",
-            order = 7
+            order = 9
     )
     private boolean help;
 
@@ -120,6 +141,22 @@ public class CliArgumentsContainer {
 
     public boolean hasInstallPluginParameter() {
         return installPlugin;
+    }
+
+    public boolean hasExcludedArtifacts() {
+        return excludedArtifacts != null && !excludedArtifacts.isEmpty();
+    }
+
+    public boolean hasBomInstallation(){
+        return installBOM;
+    }
+
+    public List<String> getExcludedArtifact() {
+        return excludedArtifacts;
+    }
+
+    public boolean hasAllowSnapshots() {
+        return allowSnapshots;
     }
 
     public boolean hasHelp(){

@@ -1,18 +1,18 @@
 #!/bin/bash
 
-# Проверяем, установлен ли xclip
-if ! command -v xclip &> /dev/null; then
-    echo "Ошибка: xclip не установлен. Установите его командой:"
-    echo "sudo apt-get install xclip"  # для Debian/Ubuntu
-    echo "или"
-    echo "sudo yum install xclip"      # для RedHat/CentOS
-    exit 1
-fi
+# Создаем временный файл для объединенного содержимого
+temp_file=$(mktemp) || exit 1
 
-# Находим все .java файлы и копируем их содержимое в буфер обмена
-find . -name "*.java" -exec cat {} + | xclip -selection clipboard
+# Находим все .java файлы и обрабатываем их
+while IFS= read -r -d '' file; do
+    echo "//=== $(basename "$file") ===" >> "$temp_file"
+    cat "$file" >> "$temp_file"
+    echo -e "\n" >> "$temp_file"
+done < <(find . -type f -name "*.java" -print0)
 
-# Подсчитываем количество скопированных файлов
-file_count=$(find . -name "*.java" | wc -l)
+# Копируем содержимое в буфер обмен
+xclip -selection clipboard < "$temp_file" && 
+echo "Содержимое .java файлов скопировано в буфер обмена"
 
-echo "Содержимое $file_count .java файлов скопировано в буфер обмена"
+# Удаляем временный файл
+rm -f "$temp_file"

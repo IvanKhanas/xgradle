@@ -17,6 +17,7 @@ package org.altlinux.xgradle.parsers;
 
 import com.google.inject.Inject;
 
+import org.altlinux.xgradle.ToolConfig;
 import org.altlinux.xgradle.api.containers.PomContainer;
 
 import org.altlinux.xgradle.api.parsers.PomParser;
@@ -33,19 +34,24 @@ import java.nio.file.Path;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
+import java.util.List;
 
-public class ConcurrentLibraryPomParser implements PomParser {
+public class ConcurrentLibraryPomParser implements PomParser<HashMap<String, Path>> {
     private static final Logger logger = LoggerFactory.getLogger(ConcurrentLibraryPomParser.class);
     private final PomContainer pomContainer;
+    private final ToolConfig toolConfig;
 
     @Inject
-    public ConcurrentLibraryPomParser(PomContainer pomContainer){
+    public ConcurrentLibraryPomParser(PomContainer pomContainer, ToolConfig toolConfig) {
         this.pomContainer = pomContainer;
+        this.toolConfig = toolConfig;
     }
 
     @Override
@@ -62,6 +68,7 @@ public class ConcurrentLibraryPomParser implements PomParser {
         } else {
             pomPaths = pomContainer.getAllPomPaths(searchingDir);
         }
+
         int threadCount = Runtime.getRuntime().availableProcessors();
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         ConcurrentHashMap<String, Path> artifactCoordinatesMap = new ConcurrentHashMap<>();
@@ -71,10 +78,8 @@ public class ConcurrentLibraryPomParser implements PomParser {
                     .map(pomPath -> CompletableFuture.runAsync(() -> {
                         try {
                             Path jarPath = getJarPathFromPom(pomPath);
-                            if(isSnapshotJar(jarPath)) {
-                                logger.info("Found snapshot jar at: \n{}\t SKIPPING :)", jarPath);
-                            }
-                            if(isJarExists(jarPath) && !isSnapshotJar(jarPath)) {
+
+                            if(jarPath!=null && isJarExists(jarPath)) {
                                 artifactCoordinatesMap.put(pomPath.toString(), jarPath);
                             }
                         } catch (Exception e) {
@@ -84,7 +89,8 @@ public class ConcurrentLibraryPomParser implements PomParser {
         } finally {
             executor.shutdown();
         }
-        return new HashMap<>(artifactCoordinatesMap);
+
+        return excludeArtifacts(toolConfig.getExcludedArtifacts(), artifactCoordinatesMap);
     }
 
     private Path getJarPathFromPom(Path pomPath) {
@@ -105,6 +111,13 @@ public class ConcurrentLibraryPomParser implements PomParser {
                 throw new RuntimeException("Could not determine artifactId or version for POM: " + pomPath);
             }
 
+            if(!toolConfig.isAllowSnapshots()) {
+                if (version.toLowerCase().contains("snapshot")) {
+                    logger.warn("Found snapshot POM: " + pomPath + "\tSKIPPING");
+                    return null;
+                }
+            }
+
             String jarFileName = artifactId + "-" + version + ".jar";
 
             return pomPath.getParent().resolve(jarFileName);
@@ -118,7 +131,26 @@ public class ConcurrentLibraryPomParser implements PomParser {
         return jarPath.toFile().exists();
     }
 
-    private boolean isSnapshotJar(Path jarPath) {
-        return jarPath.toFile().toString().toLowerCase().contains("-snapshot");
+    private HashMap<String, Path> excludeArtifacts(List<String> excludedArtifacts, ConcurrentHashMap<String, Path> artifactCoordinatesMap) {
+        if (!toolConfig.getExcludedArtifacts().isEmpty()) {
+        HashMap<String, Path> filteredMap = artifactCoordinatesMap.entrySet().stream()
+                .filter(entry -> {
+                    Path pomPath = Path.of(entry.getKey());
+                    String filename = pomPath.getFileName().toString();
+
+                    return excludedArtifacts.stream()
+                            .noneMatch(filename::startsWith);
+                })
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (existing, replacement) -> existing,
+                        HashMap::new
+                ));
+
+        return new HashMap<>(filteredMap);
+        } else {
+            return new HashMap<>(artifactCoordinatesMap);
+        }
     }
 }

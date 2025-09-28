@@ -17,7 +17,9 @@ package org.altlinux.xgradle.di;
 
 import com.google.inject.AbstractModule;
 
+import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
+import org.altlinux.xgradle.ToolConfig;
 import org.altlinux.xgradle.api.cli.CommandCreator;
 import org.altlinux.xgradle.api.cli.CommandExecutor;
 import org.altlinux.xgradle.api.cli.CommandLineParser;
@@ -38,16 +40,29 @@ import org.altlinux.xgradle.collectors.DefaultArtifactCollector;
 import org.altlinux.xgradle.collectors.DefaultPomCollector;
 import org.altlinux.xgradle.containers.DefaultArtifactContainer;
 import org.altlinux.xgradle.containers.DefaultPomContainer;
+import org.altlinux.xgradle.controllers.DefaultBomXmvnCompatController;
 import org.altlinux.xgradle.controllers.DefaultPluginsInstallationController;
 import org.altlinux.xgradle.controllers.DefaultXmvnCompatController;
 import org.altlinux.xgradle.installers.DefaultPluginArtifactsInstaller;
+import org.altlinux.xgradle.parsers.DefaultBomParser;
 import org.altlinux.xgradle.parsers.ConcurrentLibraryPomParser;
 import org.altlinux.xgradle.parsers.PluginPomsParser;
+import org.altlinux.xgradle.processors.DefaultBomProcessor;
 import org.altlinux.xgradle.processors.DefaultPomProcessor;
 import org.altlinux.xgradle.processors.PluginPomsProcessor;
+import org.altlinux.xgradle.registrars.DefaultXmvnBomCompatRegistrar;
 import org.altlinux.xgradle.registrars.XmvnCompatRegistrar;
 
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Set;
+
 public class XGradleToolModule extends AbstractModule {
+    private final ToolConfig toolConfig;
+
+    public XGradleToolModule(ToolConfig toolConfig) {
+        this.toolConfig = toolConfig;
+    }
 
     @Override
     protected void configure() {
@@ -56,21 +71,43 @@ public class XGradleToolModule extends AbstractModule {
 
         bind(ArtifactContainer.class).to(DefaultArtifactContainer.class);
         bind(PomContainer.class).to(DefaultPomContainer.class);
+        bind(new TypeLiteral<PomParser<HashMap<String, Path>>>() {})
+                .annotatedWith(Names.named("Library"))
+                .to(ConcurrentLibraryPomParser.class);
 
-        bind(PomParser.class).annotatedWith(Names.named("Library")).to(ConcurrentLibraryPomParser.class);
-        bind(PomParser.class).annotatedWith(Names.named("gradlePlugins")).to(PluginPomsParser.class);
+        bind(new TypeLiteral<PomParser<Set<Path>>>() {})
+                .annotatedWith(Names.named("Bom"))
+                .to(DefaultBomParser.class);
 
-        bind(PomProcessor.class).annotatedWith(Names.named("Library")).to(DefaultPomProcessor.class);
-        bind(PomProcessor.class).annotatedWith(Names.named("gradlePlugins")).to(PluginPomsProcessor.class);
+        bind(new TypeLiteral<PomParser<HashMap<String, Path>>>() {})
+                .annotatedWith(Names.named("gradlePlugins"))
+                .to(PluginPomsParser.class);
+
+        bind(new TypeLiteral<PomProcessor<HashMap<String, Path>>>() {})
+                .annotatedWith(Names.named("Library"))
+                .to(DefaultPomProcessor.class);
+
+        bind(new TypeLiteral<PomProcessor<Set<Path>>>() {})
+                .annotatedWith(Names.named("Bom"))
+                .to(DefaultBomProcessor.class);
+
+        bind(new TypeLiteral<PomProcessor<HashMap<String, Path>>>() {})
+                .annotatedWith(Names.named("gradlePlugins"))
+                .to(PluginPomsProcessor.class);
 
         bind(CommandLineParser.class).to(DefaultCommandLineParser.class);
         bind(CommandCreator.class).to(DefaultCommandCreator.class);
         bind(CommandExecutor.class).to(DefaultCommandExecutor.class);
 
-        bind(Registrar.class).to(XmvnCompatRegistrar.class);
-        bind(XmvnCompatController.class).to(DefaultXmvnCompatController.class);
+        bind(Registrar.class).annotatedWith(Names.named("Library")).to(XmvnCompatRegistrar.class);
+        bind(Registrar.class).annotatedWith(Names.named("Bom")).to(DefaultXmvnBomCompatRegistrar.class);
+
+        bind(XmvnCompatController.class).annotatedWith(Names.named("Library")).to(DefaultXmvnCompatController.class);
+        bind(XmvnCompatController.class).annotatedWith(Names.named("Bom")).to(DefaultBomXmvnCompatController.class);
 
         bind(ArtifactsInstaller.class).to(DefaultPluginArtifactsInstaller.class);
         bind(ArtifactsInstallationController.class).to(DefaultPluginsInstallationController.class);
+
+        bind(ToolConfig.class).toInstance(toolConfig);
     }
 }

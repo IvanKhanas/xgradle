@@ -22,6 +22,8 @@ import org.altlinux.xgradle.api.cli.CommandExecutor;
 import org.altlinux.xgradle.api.cli.CommandLineParser;
 import org.altlinux.xgradle.api.containers.ArtifactContainer;
 import org.altlinux.xgradle.api.registrars.Registrar;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -30,6 +32,7 @@ import java.util.Optional;
 import java.util.List;
 
 public class XmvnCompatRegistrar implements Registrar {
+    private static final Logger logger = LoggerFactory.getLogger("XgradleLogger");
     private final ArtifactContainer artifactContainer;
     private final CommandExecutor commandExecutor;
     private final CommandLineParser commandLineParser;
@@ -60,11 +63,10 @@ public class XmvnCompatRegistrar implements Registrar {
 
             commandParts.add(pomPath);
             commandParts.add(jarPath.toString());
-            System.out.println("\nRunning: " + String.join(" ", commandParts));
+            logger.info("\nRunning: " + String.join(" ", commandParts));
 
             ProcessBuilder processBuilder = new ProcessBuilder(commandParts);
             processBuilder.redirectErrorStream(true);
-
 
             try {
                 int exitCode = commandExecutor.execute(processBuilder);
@@ -76,6 +78,11 @@ public class XmvnCompatRegistrar implements Registrar {
             }
             commandParts.remove(pomPath);
             commandParts.remove(jarPath.toString());
+        }
+        if (artifacts.isEmpty()) {
+            logger.info("No artifacts registered");
+        }else {
+            logger.info("Artifacts registered successfully");
         }
     }
 }
