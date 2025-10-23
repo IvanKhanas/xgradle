@@ -54,7 +54,7 @@ import java.util.ArrayList;
  *   <li>Checking version resolution correctness</li>
  * </ol>
  *
- * <p>Test resources are located in {@code xgradle-core/test/resources/poms/} and include:
+ * <p>Test resources are located in {@code xgradle-core/src/test/resources/poms/} and include:
  * <ul>
  *   <li>Sample BOM files from real-world projects</li>
  *   <li>POM files with varying complexity and structure</li>
@@ -101,7 +101,7 @@ public class TestDependencyManagementBlockParser {
      */
     @Test
     public void parseJunitBom(@TempDir Path tempDir) {
-        preparePom("test/resources/poms/junit5/junit-bom.pom", tempDir);
+        preparePom("src/test/resources/poms/junit5/junit-bom.pom", tempDir);
 
         parsedDeps = pomParser.parseDependencyManagement(tempDir.resolve(Path.of("junit-bom.pom")), logger);
 
@@ -168,7 +168,7 @@ public class TestDependencyManagementBlockParser {
      */
     @Test
     public void parseSurefireBom(@TempDir Path tempDir) {
-        preparePom("test/resources/poms/maven-surefire/surefire.pom", tempDir);
+        preparePom("src/test/resources/poms/maven-surefire/surefire.pom", tempDir);
 
         parsedDeps = pomParser.parseDependencyManagement(tempDir.resolve(Path.of("surefire.pom")), logger);
 

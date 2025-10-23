@@ -17,25 +17,6 @@ plugins {
     `java-gradle-plugin`
 }
 
-sourceSets {
-    main {
-        java {
-            srcDirs("main/java")
-        }
-        resources {
-            srcDirs("main/resources")
-        }
-    }
-    test {
-        java {
-            srcDirs("test/java")
-        }
-        resources {
-            srcDirs("test/resources")
-        }
-    }
-}
-
 dependencies {
     compileOnly(gradleApi())
     implementation(libs.bundles.maven.tooling)
@@ -65,7 +46,7 @@ tasks.named<Copy>("processResources") {
 
 tasks.register<Copy>("copyInitScript") {
     dependsOn("processResources")
-    from("main/resources/${rootProject.name}-plugin.gradle")
+    from("src/main/resources/${rootProject.name}-plugin.gradle")
     into(layout.buildDirectory.dir("dist"))
 }
 
