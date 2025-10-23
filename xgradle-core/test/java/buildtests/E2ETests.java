@@ -49,7 +49,7 @@ public class E2ETests {
      */
     @BeforeEach
     public void preparePluginJar() {
-        pluginJar = new File("build/dist/xgradle.jar");
+        pluginJar = new File("build/dist/xgradle-core.jar");
         if (!pluginJar.exists()) {
             throw new IllegalStateException("Could not find plugin jar: " + pluginJar.getAbsolutePath());
         }
@@ -62,7 +62,7 @@ public class E2ETests {
      */
     @Test
     public void testBuildWithOnlyPlugins(@TempDir File tempDir) throws IOException {
-        runAndVerifyBuild("buildExamples/testBuildWithOnlyPlugins", tempDir);
+        runAndVerifyBuild("../buildExamples/testBuildWithOnlyPlugins", tempDir);
     }
 
     /**
@@ -72,7 +72,7 @@ public class E2ETests {
      */
     @Test
     public void testBuildWithOnlyDeps(@TempDir File tempDir) throws IOException {
-        runAndVerifyBuild("buildExamples/testBuildWithOnlyDeps", tempDir);
+        runAndVerifyBuild("../buildExamples/testBuildWithOnlyDeps", tempDir);
     }
 
     /**
@@ -83,7 +83,7 @@ public class E2ETests {
      */
     @Test
     public void testMixedBuild(@TempDir File tempDir) throws IOException {
-        runAndVerifyBuild("buildExamples/testMixedBuild", tempDir);
+        runAndVerifyBuild("../buildExamples/testMixedBuild", tempDir);
     }
 
     /**
@@ -95,7 +95,7 @@ public class E2ETests {
      */
     @Test
     public void multiModularTest(@TempDir File tempDir) throws IOException {
-        runAndVerifyBuild("buildExamples/multiModularTest", tempDir);
+        runAndVerifyBuild("../buildExamples/multiModularTest", tempDir);
     }
 
     /**
@@ -136,7 +136,7 @@ public class E2ETests {
                         "--offline"
                 )
                 .forwardOutput()
-                .build();
+                 .build();
 
         System.out.println(result.getOutput());
 

@@ -101,7 +101,7 @@ public class TestDependencyManagementBlockParser {
      */
     @Test
     public void parseJunitBom(@TempDir Path tempDir) {
-        preparePom("xgradle-core/test/resources/poms/junit5/junit-bom.pom", tempDir);
+        preparePom("test/resources/poms/junit5/junit-bom.pom", tempDir);
 
         parsedDeps = pomParser.parseDependencyManagement(tempDir.resolve(Path.of("junit-bom.pom")), logger);
 
@@ -168,7 +168,7 @@ public class TestDependencyManagementBlockParser {
      */
     @Test
     public void parseSurefireBom(@TempDir Path tempDir) {
-        preparePom("xgradle-core/test/resources/poms/maven-surefire/surefire.pom", tempDir);
+        preparePom("test/resources/poms/maven-surefire/surefire.pom", tempDir);
 
         parsedDeps = pomParser.parseDependencyManagement(tempDir.resolve(Path.of("surefire.pom")), logger);
 

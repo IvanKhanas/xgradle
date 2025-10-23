@@ -1,0 +1,216 @@
+/*
+ * Copyright 2025 BaseALT Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.altlinux.xgradle.installers;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
+import org.altlinux.xgradle.ProcessingType;
+import org.altlinux.xgradle.api.containers.ArtifactContainer;
+import org.altlinux.xgradle.api.installers.ArtifactsInstaller;
+
+import org.apache.maven.model.Model;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.List;
+
+/**
+ * Default implementation of ArtifactsInstaller for Gradle plugin artifacts.
+ * Handles installation of plugin POM and JAR files to target directories with proper naming.
+ *
+ * @author Ivan Khanas
+ */
+@Singleton
+public class DefaultPluginArtifactsInstaller implements ArtifactsInstaller {
+    private final Logger logger = LoggerFactory.getLogger("XGradleLogger");
+    private final ArtifactContainer artifactContainer;
+
+    /**
+     * Constructs a new DefaultPluginArtifactsInstaller with required dependencies.
+     *
+     * @param artifactContainer container for artifact management
+     */
+    @Inject
+    public DefaultPluginArtifactsInstaller(ArtifactContainer artifactContainer) {
+        this.artifactContainer = artifactContainer;
+    }
+
+    /**
+     * Installs plugin artifacts to the specified target directories.
+     * Copies POM and JAR files with standardized naming based on artifactId.
+     *
+     * @param searchingDirectory the directory to search for artifacts
+     * @param artifactName optional list of artifact names to filter by
+     * @param pomInstallationDirectory target directory for POM files
+     * @param jarInstallationDirectory target directory for JAR files
+     * @param processingType the type of processing (should be PLUGINS)
+     * @throws RuntimeException if target directories cannot be created
+     */
+    @Override
+    public void install(
+            String searchingDirectory,
+            Optional<List<String>> artifactName,
+            String pomInstallationDirectory,
+            String jarInstallationDirectory,
+            ProcessingType processingType
+    ) {
+        HashMap<String, Path> artifactsMap = artifactContainer.getArtifacts(searchingDirectory, artifactName, processingType);
+        Path targetPomDir = Paths.get(pomInstallationDirectory);
+        Path targetJarDir = Paths.get(jarInstallationDirectory);
+
+        try {
+            if (!Files.exists(targetPomDir) && Files.isWritable(targetPomDir.getParent())) {
+                Files.createDirectories(targetPomDir);
+                logger.info("Created target directory: {}", targetPomDir);
+            } else if (!Files.isWritable(targetPomDir)) {
+                logger.error("Wrong access rights for target directory: {}", targetPomDir);
+                return;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create target POM directory", e);
+        }
+
+        try {
+            if (!Files.exists(targetJarDir) && Files.isWritable(targetJarDir.getParent())) {
+                Files.createDirectories(targetJarDir);
+                logger.info("Created target directory: {}", targetJarDir);
+            } else if (!Files.isWritable(targetJarDir)) {
+                logger.error("Wrong access rights for target directory: {}", targetJarDir);
+                return;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create target POM directory", e);
+        }
+
+        Map<Path, Model> pomModels = new HashMap<>();
+
+        Set<Path> processedJars = new HashSet<>();
+
+        for (Map.Entry<String, Path> entry : artifactsMap.entrySet()) {
+            Path pomPath = Paths.get(entry.getKey());
+
+            try {
+                Model model = readPomModel(pomPath);
+                pomModels.put(pomPath, model);
+            } catch (IOException | XmlPullParserException e) {
+                logger.error("Failed to read POM file: {}", pomPath, e);
+            }
+        }
+
+        Map<Path, Path> mainPomForJar = new HashMap<>();
+
+        for (Map.Entry<String, Path> entry : artifactsMap.entrySet()) {
+            Path pomPath = Paths.get(entry.getKey());
+            Path jarPath = entry.getValue();
+            Model model = pomModels.get(pomPath);
+
+            if (model != null && !"pom".equals(model.getPackaging())) {
+                mainPomForJar.put(jarPath, pomPath);
+            }
+        }
+
+        for (Map.Entry<String, Path> entry : artifactsMap.entrySet()) {
+            Path pomPath = Paths.get(entry.getKey());
+            Model model = pomModels.get(pomPath);
+
+            if (model != null && model.getArtifactId() != null) {
+                String newPomName = model.getArtifactId() + ".pom";
+                Path targetPom = targetPomDir.resolve(newPomName);
+
+                try {
+                    Files.copy(pomPath, targetPom, StandardCopyOption.REPLACE_EXISTING);
+                    logger.info("Copied POM: {} -> {}", pomPath, targetPom);
+                } catch (IOException e) {
+                    logger.error("Failed to copy POM: {}", pomPath, e);
+                }
+            }
+        }
+
+        for (Map.Entry<String, Path> entry : artifactsMap.entrySet()) {
+            Path jarPath = entry.getValue();
+
+           if (processedJars.contains(jarPath)) {
+                continue;
+            }
+            processedJars.add(jarPath);
+
+            Path mainPomPath = mainPomForJar.get(jarPath);
+
+            if (mainPomPath != null) {
+                Model model = pomModels.get(mainPomPath);
+                if (model != null && model.getArtifactId() != null) {
+                    String newJarName = model.getArtifactId() + ".jar";
+                    Path targetJar = targetJarDir.resolve(newJarName);
+
+                    try {
+                        Files.copy(jarPath, targetJar, StandardCopyOption.REPLACE_EXISTING);
+                        logger.info("Copied JAR: {} -> {} (based on POM: {})", jarPath, targetJar, mainPomPath);
+                    } catch (IOException e) {
+                        logger.error("Failed to copy JAR: {}", jarPath, e);
+                    }
+                }
+            } else {
+
+                Path firstPomPath = Paths.get(entry.getKey());
+                Model model = pomModels.get(firstPomPath);
+
+                if (model != null && model.getArtifactId() != null) {
+                    String newJarName = model.getArtifactId() + ".jar";
+                    Path targetJar = targetJarDir.resolve(newJarName);
+
+                    try {
+                        Files.copy(jarPath, targetJar, StandardCopyOption.REPLACE_EXISTING);
+                        logger.warn("\nCopied JAR without main POM: {} -> {} (based on POM: {})",
+                                jarPath, targetJar, firstPomPath);
+                    } catch (IOException e) {
+                        logger.error("Failed to copy JAR: {}", jarPath, e);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Reads and parses a POM file into a Maven model.
+     *
+     * @param pomPath path to the POM file
+     * @return parsed Maven model
+     * @throws IOException if an I/O error occurs
+     * @throws XmlPullParserException if the POM file cannot be parsed
+     */
+    private Model readPomModel(Path pomPath) throws IOException, XmlPullParserException {
+        MavenXpp3Reader reader = new MavenXpp3Reader();
+        try (FileInputStream fis = new FileInputStream(pomPath.toFile())) {
+            return reader.read(fis);
+        }
+    }
+}

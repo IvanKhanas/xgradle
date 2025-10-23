@@ -1,0 +1,6 @@
+rootProject.name = "xgradle"
+include("xgradle-core")
+include("xgradle-tool")
+
+project(":xgradle-core").projectDir = file("xgradle-core")
+project(":xgradle-tool").projectDir = file("xgradle-tool")

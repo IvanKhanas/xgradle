@@ -1,0 +1,37 @@
+/*
+ * Copyright 2025 BaseALT Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.altlinux.xgradle.api.installers;
+
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * Interface for Javadoc artifacts installation operations.
+ * Defines contract for installing Javadoc artifacts to target directories.
+ *
+ * @author Ivan Khanas
+ */
+public interface JavadocInstaller {
+
+    /**
+     * Installs Javadoc artifacts to the specified target directory.
+     *
+     * @param searchingDir the directory to search for Javadoc artifacts
+     * @param artifactNames optional list of artifact names to filter by
+     * @param jarInstallationDir target directory for Javadoc JAR files
+     */
+    void installJavadoc(String searchingDir, Optional<List<String>> artifactNames, String jarInstallationDir);
+}
