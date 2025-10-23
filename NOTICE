@@ -22,3 +22,20 @@ This product bundles the following third-party components:
    - Apache Maven Model
 3. Codehaus Plexus (https://codehaus-plexus.github.io)
    - Plexus Utils
+4. JUnit team (https://junit.org)
+   - JUnit Jupiter
+   - JUnit BOM
+5. AssertJ (https://assertj.github.io/doc/)
+   - AssertJ Core
+6. Apache Guardian (https://github.com/apiguardian-team/apiguardian)
+   - Apiguardian API
+7. JCommander (http://jcommander.org)
+8. SLF4J (http://www.slf4j.org)
+   - SLF4J API
+   - SLF4J Simple
+   - Log4j-over-SLF4J
+9. Google Guice (https://github.com/google/guice)
+10. Google Guava (https://github.com/google/guava)
+11. Jakarta Inject (https://jakarta.ee/specifications/inject/)
+12. OW2 ASM (https://asm.ow2.io)
+13. AOP Alliance (http://aopalliance.sourceforge.net)
