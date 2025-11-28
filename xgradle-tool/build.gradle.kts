@@ -19,6 +19,7 @@ import java.util.Locale
 
 plugins {
     application
+    id("org.altlinux.xgradle-publishing-conventions")
 }
 
 dependencies {
@@ -38,8 +39,8 @@ val buildTime = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.getDefault()).
 fun createCommitIdProvider(): Provider<String> {
     return providers.systemProperty("gitCommitId")
         .orElse(providers.provider {
-        runGitCommand("rev-parse", "HEAD~0")
-    })
+            runGitCommand("rev-parse", "HEAD~0")
+        })
         .orElse("<Unknown>")
         .map {it.trim()}
         .filter { it.isNotBlank() }
@@ -100,8 +101,14 @@ tasks.named<Jar>("jar") {
     enabled = false
 }
 
+tasks.register<Jar>("sourcesJar") {
+    archiveBaseName.set(project.name)
+    archiveClassifier.set("sources")
+    from(sourceSets.main.get().allSource)
+}
+
 tasks.register<Jar>("javadocJar") {
-    archiveBaseName.set("xgradle")
+    archiveBaseName.set(project.name)
     archiveClassifier.set("javadoc")
     from(tasks.javadoc)
 }
@@ -144,77 +151,29 @@ tasks.matching { it.name in listOf("distZip", "distTar", "startScripts") }
         dependsOn(tasks.named("shadowJar"))
     }
 
-publishing {
-    publications {
-        create<MavenPublication>(project.name) {
-            artifactId = project.name
+xgradlePublishingConventions {
+    projectName.set("XGradle Tool")
+    projectDescription.set("${rootProject.name} support tool")
+    projectUrl.set("https://altlinux.space/ALTLinux/xgradle.git")
 
-            artifact(tasks.shadowJar) {
-                builtBy(tasks.shadowJar)
-            }
+    licenseName.set("The Apache License, Version 2.0")
+    licenseUrl.set("https://www.apache.org/licenses/LICENSE-2.0")
 
-            artifact(tasks.named("javadocJar").get())
+    enableCopyPublications.set(true)
 
-            pom {
-                name.set(project.name)
-                url.set("https://altlinux.space/ALTLinux/xgradle.git")
-                description.set("xgradle support tool")
+    withShadowJar()
+    withSourcesJar()
+    withJavadocJar()
 
-                licenses {
-                    license {
-                        name.set("The Apache License, Version 2.0")
-                        url.set("https://www.apache.org/licenses/LICENSE-2.0")
-                    }
-                }
-
-                developers {
-                    developer {
-                        id.set("xeno")
-                        name.set("Ivan Khanas")
-                        email.set("xeno@altlinux.org")
-                    }
-                }
-            }
-        }
-    }
-}
-
-tasks.register<Copy>("copyPublicationsToDist") {
-    dependsOn("shadowJar", "javadocJar", "publishToMavenLocal", "createShellScript")
-
-    val groupPath = project.group.toString().replace('.', '/')
-    val artifactId = project.name
-    val version = project.version.toString()
-    val mavenRepo = File(System.getProperty("user.home"), ".m2/repository")
-    val publicationDir = mavenRepo.resolve("$groupPath/$artifactId/$version")
-
-    from(publicationDir) {
-        include("$artifactId-$version.jar")
-        include("$artifactId-$version.pom")
-        include("$artifactId-$version-javadoc.jar")
-
-        rename { filename ->
-            when (filename) {
-                "$artifactId-$version.jar" -> "$artifactId.jar"
-                "$artifactId-$version.pom" -> "$artifactId.pom"
-                "$artifactId-$version-javadoc.jar" -> "$artifactId-javadoc.jar"
-                else -> filename
-            }
-        }
-    }
-    into(layout.buildDirectory.dir("dist"))
-
-    doLast {
-        logger.lifecycle("Renamed and copied all publications to ${layout.buildDirectory.dir("dist").get().asFile.absolutePath}")
-    }
+    developer("xeno", "Ivan Khanas", "xeno@altlinux.org")
 }
 
 tasks.named("publishToMavenLocal") {
-    dependsOn("shadowJar", "javadocJar")
+    dependsOn("createShellScript")
 }
 
 tasks.named("build") {
-    dependsOn("copyPublicationsToDist", "createShellScript")
+    dependsOn("createShellScript")
 }
 
 tasks.test {
