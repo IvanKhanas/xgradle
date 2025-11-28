@@ -16,7 +16,7 @@ RUN apt-get update && \
         apache-commons-io \
         apache-commons-cli \
         google-gson \
-        gradle-maven-publish-plugin \
+	shadow-gradle-plugin \
         git && \
     apt-get clean
 
@@ -30,6 +30,7 @@ ARG USER_NAME=$APP_NAME
 WORKDIR /app
 
 COPY --chown=$USER_NAME:$USER_NAME . .
+RUN chown -R $USER_NAME:$USER_NAME .
 
 USER $USER_NAME
 
@@ -47,7 +48,7 @@ RUN apt-get remove -y \
         apache-commons-io \
         apache-commons-cli \
         google-gson \
-        gradle-maven-publish-plugin && \
+	shadow-gradle-plugin && \
     rm -rf /home/$USER_NAME/.m2 \
     /home/$USER_NAME/.gradle
 
