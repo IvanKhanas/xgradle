@@ -26,7 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.altlinux.xgradle.impl.utils.Painter.green;
+import static org.altlinux.xgradle.impl.utils.ui.Painter.green;
 
 /**
  * Processes plugin dependency resolution with support for BOM (Bill of Materials) packages.

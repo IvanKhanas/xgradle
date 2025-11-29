@@ -15,9 +15,9 @@
  */
 package org.altlinux.xgradle.impl.plugin;
 
-import org.altlinux.xgradle.impl.core.PluginsDependenciesHandler;
-import org.altlinux.xgradle.impl.core.ProjectDependenciesHandler;
-import org.altlinux.xgradle.impl.utils.LogoPrinter;
+import org.altlinux.xgradle.impl.core.handlers.PluginsDependenciesHandler;
+import org.altlinux.xgradle.impl.core.handlers.ProjectDependenciesHandler;
+import org.altlinux.xgradle.impl.utils.ui.LogoPrinter;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.invocation.Gradle;

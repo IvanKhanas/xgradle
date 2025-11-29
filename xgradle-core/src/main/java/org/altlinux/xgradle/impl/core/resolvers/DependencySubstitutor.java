@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.altlinux.xgradle.impl.core;
+package org.altlinux.xgradle.impl.core.resolvers;
 
 import org.altlinux.xgradle.impl.model.MavenCoordinate;
 import org.gradle.api.artifacts.DependencySubstitutions;

@@ -15,7 +15,7 @@
  */
 package org.altlinux.xgradle.impl.core.managers;
 
-import org.altlinux.xgradle.impl.core.PluginsDependenciesHandler;
+import org.altlinux.xgradle.impl.core.handlers.PluginsDependenciesHandler;
 import org.altlinux.xgradle.impl.core.processors.PluginProcessor;
 import org.altlinux.xgradle.impl.extensions.SystemDepsExtension;
 import org.altlinux.xgradle.impl.services.PomFinder;

@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.altlinux.xgradle.impl.core;
+package org.altlinux.xgradle.impl.core.handlers;
 
+import org.altlinux.xgradle.impl.core.resolvers.DependencySubstitutor;
 import org.altlinux.xgradle.impl.core.collectors.ConfigurationInfoCollector;
 import org.altlinux.xgradle.impl.core.collectors.DefaultDependencyCollector;
 import org.altlinux.xgradle.impl.core.collectors.info.ConfigurationInfo;
@@ -28,7 +29,7 @@ import org.altlinux.xgradle.impl.services.DefaultPomParser;
 import org.altlinux.xgradle.impl.services.FileSystemArtifactVerifier;
 import org.altlinux.xgradle.impl.services.PomFinder;
 import org.altlinux.xgradle.impl.services.VersionScanner;
-import org.altlinux.xgradle.impl.utils.loggers.DependencyLogger;
+import org.altlinux.xgradle.impl.utils.logging.DependencyLogger;
 
 import org.gradle.api.Project;
 import org.gradle.api.invocation.Gradle;

@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.altlinux.xgradle.impl.utils.loggers;
+package org.altlinux.xgradle.impl.utils.logging;
 
 import org.altlinux.xgradle.impl.model.MavenCoordinate;
-import org.altlinux.xgradle.impl.utils.Painter;
+import org.altlinux.xgradle.impl.utils.ui.Painter;
 import org.gradle.api.logging.Logger;
 
 import java.util.Map;
 import java.util.Set;
-import static org.altlinux.xgradle.impl.utils.Painter.*;
+import static org.altlinux.xgradle.impl.utils.ui.Painter.*;
 
 /**
  * Provides structured logging for dependency resolution processes in Gradle builds.

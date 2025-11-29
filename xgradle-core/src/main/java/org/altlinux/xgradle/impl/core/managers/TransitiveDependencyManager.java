@@ -20,7 +20,7 @@ import org.altlinux.xgradle.impl.services.PomFinder;
 import org.gradle.api.logging.Logger;
 import java.util.*;
 
-import static org.altlinux.xgradle.impl.utils.Painter.green;
+import static org.altlinux.xgradle.impl.utils.ui.Painter.green;
 
 /**
  * Manages transitive dependency resolution in Gradle projects.
