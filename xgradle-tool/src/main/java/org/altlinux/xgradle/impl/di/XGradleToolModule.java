@@ -144,7 +144,6 @@ public class XGradleToolModule extends AbstractModule {
         bind(ArtifactsInstallationController.class).to(DefaultPluginsInstallationController.class);
 
         bind(JavadocInstaller.class).to(DefaultJavadocInstaller.class);
-        bind(XmvnCompatController.class).annotatedWith(Names.named("Javadoc")).to(DefaultJavadocXmvnCompatController.class);
 
         bind(PomService.class).to(PomProcessingService.class);
 
