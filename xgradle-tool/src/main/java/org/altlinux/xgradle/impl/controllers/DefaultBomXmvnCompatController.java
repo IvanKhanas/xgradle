@@ -60,10 +60,6 @@ public class DefaultBomXmvnCompatController implements XmvnCompatController {
     @Override
     public void configureXmvnCompatFunctions(JCommander jCommander, String[] args, CliArgumentsContainer arguments, Logger logger) {
 
-        if(args.length == 0 || arguments.hasHelp()) {
-            jCommander.usage();
-        }
-
         if (arguments.hasXmvnRegister()) {
             if (arguments.hasBomRegistration()) {
                 if (arguments.hasSearchingDirectory()) {
