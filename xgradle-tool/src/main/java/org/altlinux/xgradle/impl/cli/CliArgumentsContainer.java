@@ -312,7 +312,7 @@ public class CliArgumentsContainer {
      * @return true if parent removal is specified, false otherwise
      */
     public boolean hasRemoveParentPoms() {
-        return !removeParentPoms.isEmpty() && removeParentPoms!=null;
+        return removeParentPoms != null && !removeParentPoms.isEmpty();
     }
 
     /**
