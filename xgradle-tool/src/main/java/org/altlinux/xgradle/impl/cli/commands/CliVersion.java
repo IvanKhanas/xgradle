@@ -22,17 +22,11 @@ import java.util.Properties;
 
 /**
  * Command-line utility for displaying application version information.
- * Reads version details from application.properties file.
- * Formats and displays version information in a banner format.
+ *
+ * @author Ivan Khanas <xeno@altlinux.org>
  */
 public class CliVersion {
 
-    /**
-     * Prints application version information including version, commit hash, and build time.
-     * Displays information in a formatted banner.
-     *
-     * @throws FileNotFoundException if application.properties file is not found
-     */
     public final void printVersion() throws FileNotFoundException {
         Properties prop = new Properties();
         InputStream readBuildInfo = getClass().getResourceAsStream("/application.properties");

@@ -18,8 +18,8 @@ package org.altlinux.xgradle.impl.parsers;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.altlinux.xgradle.api.containers.PomContainer;
-import org.altlinux.xgradle.api.parsers.PomParser;
+import org.altlinux.xgradle.interfaces.containers.PomContainer;
+import org.altlinux.xgradle.interfaces.parsers.PomParser;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
@@ -27,7 +27,6 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -40,34 +39,22 @@ import java.util.List;
 
 /**
  * Concurrent parser for Javadoc JAR files.
- * Handles parsing of POM files to find corresponding Javadoc JAR files.
- * Uses concurrent processing for improved performance.
+ * Implements {@link PomParser<HashMap<String} and {@link Path>>}.
  *
- * @author Ivan Khanas
+ * @author Ivan Khanas <xeno@altlinux.org>
  */
 @Singleton
-public class ConcurrentJavadocParser implements PomParser<HashMap<String, Path>> {
-    private static final Logger logger = LoggerFactory.getLogger("XGradleLogger");
-    private final PomContainer pomContainer;
+final class ConcurrentJavadocParser implements PomParser<HashMap<String, Path>> {
 
-    /**
-     * Constructs a new ConcurrentJavadocParser with required dependencies.
-     *
-     * @param pomContainer container for POM file management
-     */
+    private final PomContainer pomContainer;
+    private final Logger logger;
+
     @Inject
-    public ConcurrentJavadocParser(PomContainer pomContainer) {
+    ConcurrentJavadocParser(PomContainer pomContainer, Logger logger) {
         this.pomContainer = pomContainer;
+        this.logger = logger;
     }
 
-    /**
-     * Retrieves Javadoc artifact mappings from the specified directory.
-     * For each POM file, finds the corresponding Javadoc JAR file.
-     *
-     * @param searchingDir the directory to search for POM files
-     * @param artifactNames optional list of artifact names to filter by
-     * @return map of POM file paths to corresponding Javadoc JAR file paths
-     */
     @Override
     public HashMap<String, Path> getArtifactCoords(String searchingDir, Optional<List<String>> artifactNames) {
         Collection<Path> pomPaths;
@@ -95,14 +82,6 @@ public class ConcurrentJavadocParser implements PomParser<HashMap<String, Path>>
         return javadocMap;
     }
 
-    /**
-     * Finds the corresponding Javadoc JAR file for a POM file.
-     *
-     * @param pomPath path to the POM file
-     * @return path to the corresponding Javadoc JAR file, or null if not found
-     * @throws IOException if an I/O error occurs during file reading
-     * @throws XmlPullParserException if the POM file cannot be parsed
-     */
     private Path findJavadocForPom(Path pomPath) throws IOException, XmlPullParserException {
         MavenXpp3Reader reader = new MavenXpp3Reader();
         try (FileInputStream fis = new FileInputStream(pomPath.toFile())) {

@@ -20,6 +20,7 @@ import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -35,18 +36,15 @@ import java.util.Objects;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Class for testing the build with a plugin on subprojects.
+ * End-to-end build tests for the Gradle plugin.
  *
  * @author Ivan Khanas
  */
+@DisplayName("End-to-end build tests")
 public class E2ETests {
 
     private File pluginJar;
 
-    /**
-     * Checks for the presence of the plugin jar file.
-     * @throws IllegalStateException plugin jar file not found
-     */
     @BeforeEach
     public void preparePluginJar() {
         pluginJar = new File("build/dist/xgradle-core.jar");
@@ -55,57 +53,30 @@ public class E2ETests {
         }
     }
 
-    /**
-     * Starts building a dummy project containing a dependency in the build file only on plugins.
-     * @param tempDir temporary build directory
-     * @throws IOException copying files error
-     */
     @Test
+    @DisplayName("Build with plugins only")
     public void testBuildWithOnlyPlugins(@TempDir File tempDir) throws IOException {
         runAndVerifyBuild("../buildExamples/testBuildWithOnlyPlugins", tempDir);
     }
 
-    /**
-     * Starts building a dummy project containing dependencies only in the dependencies{} block.
-     * @param tempDir temporary build directory
-     * @throws IOException copying files error
-     */
     @Test
+    @DisplayName("Build with dependencies only")
     public void testBuildWithOnlyDeps(@TempDir File tempDir) throws IOException {
         runAndVerifyBuild("../buildExamples/testBuildWithOnlyDeps", tempDir);
     }
 
-    /**
-     * Starts building a dummy project containing both plugins
-     * and dependencies in its build.gradle.
-     * @param tempDir temporary build directory
-     * @throws IOException copying files error
-     */
     @Test
+    @DisplayName("Build with plugins and dependencies")
     public void testMixedBuild(@TempDir File tempDir) throws IOException {
         runAndVerifyBuild("../buildExamples/testMixedBuild", tempDir);
     }
 
-    /**
-     * Starts building a project consisting of 2 modules (nesting level 2)
-     * in one module the dependency is only on plugins {},
-     * and in the other only on dependencies {}.
-     * @param tempDir temporary build directory
-     * @throws IOException copying files error
-     */
     @Test
+    @DisplayName("Multi-module build")
     public void multiModularTest(@TempDir File tempDir) throws IOException {
         runAndVerifyBuild("../buildExamples/multiModularTest", tempDir);
     }
 
-    /**
-     * Prepares a sandbox for testing.
-     * Starts building subprojects with gradle using the built plugin in offline mode.
-     * Receives and compares assembly output.
-     * @param projectPath path to test project
-     * @param tempDir temporary build directory
-     * @throws IOException file copying or writing errors
-     */
     private void runAndVerifyBuild(String projectPath, File tempDir) throws IOException {
         File gradleUserHome = new File(tempDir, "gradleUserHome");
         File pluginsDir = new File(gradleUserHome, "lib/plugins");
@@ -144,12 +115,6 @@ public class E2ETests {
                 .getOutcome());
     }
 
-    /**
-     * Loads the contents of a file and creates a String object with those contents.
-     * @param resourceName name of a target file
-     * @return Resource content as a string
-     * @throws IOException Resource not found or read error
-     */
     private String loadResource(String resourceName) throws IOException {
         try (InputStream is = getClass().getClassLoader().getResourceAsStream(resourceName)) {
             if (is == null) throw new IOException("Resource not found: " + resourceName);
@@ -157,13 +122,6 @@ public class E2ETests {
         }
     }
 
-    /**
-     * Recursively copies the contents of the test project
-     * to a temporary directory where the build will take place.
-     * @param sourceDir source directory
-     * @param targetDir temporary directory
-     * @throws IOException an error copying files or writing
-     */
      private void copyDirectory(Path sourceDir, Path targetDir) throws IOException {
         if (!Files.exists(targetDir)) Files.createDirectories(targetDir);
         Files.walk(sourceDir).forEach(source -> {

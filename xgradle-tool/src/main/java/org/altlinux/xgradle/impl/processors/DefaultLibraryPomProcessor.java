@@ -17,12 +17,12 @@ package org.altlinux.xgradle.impl.processors;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 
+import org.altlinux.xgradle.impl.bindingannotations.processingtypes.Library;
 import org.altlinux.xgradle.impl.config.ToolConfig;
-import org.altlinux.xgradle.api.parsers.PomParser;
-import org.altlinux.xgradle.api.processors.PomProcessor;
-import org.altlinux.xgradle.api.services.PomService;
+import org.altlinux.xgradle.interfaces.parsers.PomParser;
+import org.altlinux.xgradle.interfaces.processors.PomProcessor;
+import org.altlinux.xgradle.interfaces.services.PomService;
 
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -31,28 +31,20 @@ import java.util.List;
 
 /**
  * Default implementation of PomProcessor for library artifacts.
- * Handles processing of library POM files with artifact exclusion,
- * parent block removal, and snapshot filtering capabilities.
- * Supports both filtered and unfiltered artifact processing.
+ * Implements {@link PomProcessor<HashMap<String} and {@link Path>>}.
  *
- * @author Ivan Khanas
+ * @author Ivan Khanas <xeno@altlinux.org>
  */
 @Singleton
-public class DefaultLibraryPomProcessor implements PomProcessor<HashMap<String, Path>> {
+final class DefaultLibraryPomProcessor implements PomProcessor<HashMap<String, Path>> {
+
     private final PomParser<HashMap<String, Path>> pomParser;
     private final PomService pomService;
     private final ToolConfig toolConfig;
 
-    /**
-     * Constructs a new DefaultLibraryPomProcessor with required dependencies.
-     *
-     * @param pomParser the parser for library POM files
-     * @param pomService the service for POM processing operations
-     * @param toolConfig the configuration for the tool
-     */
     @Inject
-    public DefaultLibraryPomProcessor(
-            @Named("Library") PomParser<HashMap<String, Path>> pomParser,
+    DefaultLibraryPomProcessor(
+            @Library PomParser<HashMap<String, Path>> pomParser,
             PomService pomService,
             ToolConfig toolConfig
     ) {
@@ -61,14 +53,6 @@ public class DefaultLibraryPomProcessor implements PomProcessor<HashMap<String, 
         this.toolConfig = toolConfig;
     }
 
-    /**
-     * Processes library artifacts from the specified directory.
-     * Applies artifact exclusion, parent block removal, and snapshot filtering.
-     *
-     * @param searchingDir the directory to search for library artifacts
-     * @param artifactName optional list of artifact names to filter by
-     * @return map of POM file paths to corresponding JAR file paths
-     */
     @Override
     public HashMap<String, Path> pomsFromDirectory(String searchingDir, Optional<List<String>> artifactName) {
         HashMap<String, Path> artifacts = getArtifactsFromParser(searchingDir, artifactName);
@@ -83,14 +67,6 @@ public class DefaultLibraryPomProcessor implements PomProcessor<HashMap<String, 
         return artifacts;
     }
 
-    /**
-     * Retrieves artifacts from parser based on whether artifact names are specified.
-     * Delegates to appropriate parser method depending on the presence of artifact names.
-     *
-     * @param searchingDir the directory to search for artifacts
-     * @param artifactName optional list of artifact names to filter by
-     * @return map of POM file paths to corresponding JAR file paths
-     */
     private HashMap<String, Path> getArtifactsFromParser(String searchingDir, Optional<List<String>> artifactName) {
         if (artifactName.isPresent()) {
             return pomParser.getArtifactCoords(searchingDir, artifactName);

@@ -18,11 +18,12 @@ package org.altlinux.xgradle.impl.parsers;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.altlinux.xgradle.api.model.ArtifactCache;
-import org.altlinux.xgradle.api.containers.PomContainer;
-import org.altlinux.xgradle.api.parsers.PomParser;
-import org.altlinux.xgradle.impl.model.DefaultArtifactCoordinates;
-import org.altlinux.xgradle.impl.model.DefaultArtifactData;
+import org.altlinux.xgradle.interfaces.caches.ArtifactCache;
+import org.altlinux.xgradle.interfaces.containers.PomContainer;
+import org.altlinux.xgradle.interfaces.model.ArtifactCoordinates;
+import org.altlinux.xgradle.interfaces.model.ArtifactData;
+import org.altlinux.xgradle.interfaces.model.ArtifactFactory;
+import org.altlinux.xgradle.interfaces.parsers.PomParser;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
@@ -30,7 +31,6 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -45,40 +45,31 @@ import java.util.concurrent.Executors;
 
 /**
  * Parser for BOM (Bill of Materials) POM files with duplicate prevention.
- * Identifies BOM files by packaging type and dependency management section.
- * Prevents duplicate processing of artifacts with same coordinates.
+ * Implements {@link PomParser}.
  *
- * @author Ivan Khanas
+ * @author Ivan Khanas <xeno@altlinux.org>
  */
 @Singleton
-public class ConcurrentBomParser implements PomParser<Set<Path>> {
-    private static final Logger logger = LoggerFactory.getLogger("XGradleLogger");
+final class ConcurrentBomParser implements PomParser<Set<Path>> {
 
+    private final ArtifactFactory artifactFactory;
     private final PomContainer pomContainer;
     private final ArtifactCache artifactCache;
+    private final Logger logger;
 
-    /**
-     * Constructs a new DefaultBomParser with required dependencies.
-     *
-     * @param pomContainer container for POM file management
-     * @param artifactCache cache for tracking processed artifacts
-     */
     @Inject
-    public ConcurrentBomParser(PomContainer pomContainer, ArtifactCache artifactCache) {
+    ConcurrentBomParser(
+            PomContainer pomContainer,
+            ArtifactCache artifactCache,
+            ArtifactFactory artifactFactory,
+            Logger logger
+    ) {
         this.pomContainer = pomContainer;
         this.artifactCache = artifactCache;
+        this.artifactFactory = artifactFactory;
+        this.logger = logger;
     }
 
-    /**
-     * Retrieves BOM artifact coordinates from the specified directory.
-     * Filters POM files to only include those with packaging type "pom" and dependency management.
-     * Prevents duplicate processing of artifacts with same coordinates.
-     *
-     * @param searchingDir the directory to search for BOM files
-     * @param artifactNames optional list of artifact names to filter by
-     * @return set of BOM file paths that match the criteria
-     * @throws RuntimeException if an error occurs during POM file parsing
-     */
     @Override
     public Set<Path> getArtifactCoords(String searchingDir, Optional<List<String>> artifactNames) {
         Set<Path> pomPaths;
@@ -113,19 +104,13 @@ public class ConcurrentBomParser implements PomParser<Set<Path>> {
         return bomSet;
     }
 
-    /**
-     * Processes a single BOM file and adds it to the result set if not duplicate.
-     *
-     * @param pomPath path to the POM file
-     * @param bomSet set to store the results
-     */
     private void processBomFile(Path pomPath, Set<Path> bomSet) {
         if (!isBom(pomPath)) {
             return;
         }
 
         try {
-            DefaultArtifactData artifactData = extractArtifactData(pomPath);
+            ArtifactData artifactData = extractArtifactData(pomPath);
             if (artifactData == null) {
                 return;
             }
@@ -134,7 +119,7 @@ public class ConcurrentBomParser implements PomParser<Set<Path>> {
                 bomSet.add(pomPath);
                 logger.debug("Added BOM: {}", artifactData.getCoordinates());
             } else {
-                DefaultArtifactData existing = (DefaultArtifactData) artifactCache.get(artifactData.getCoordinates());
+                ArtifactData existing = artifactCache.get(artifactData.getCoordinates());
                 logger.warn("Skipping duplicate BOM: {} (already processed from: {})",
                         artifactData.getCoordinates(), existing.getPomPath());
             }
@@ -143,12 +128,6 @@ public class ConcurrentBomParser implements PomParser<Set<Path>> {
         }
     }
 
-    /**
-     * Checks if the POM file is a BOM (Bill of Materials).
-     *
-     * @param pomPath path to the POM file
-     * @return true if the file is a BOM, false otherwise
-     */
     private boolean isBom(Path pomPath) {
         MavenXpp3Reader reader = new MavenXpp3Reader();
 
@@ -162,13 +141,7 @@ public class ConcurrentBomParser implements PomParser<Set<Path>> {
         }
     }
 
-    /**
-     * Extracts artifact data from POM file.
-     *
-     * @param pomPath path to the POM file
-     * @return artifact data or null if extraction fails
-     */
-    private DefaultArtifactData extractArtifactData(Path pomPath) {
+    private ArtifactData extractArtifactData(Path pomPath) {
         MavenXpp3Reader reader = new MavenXpp3Reader();
 
         try (FileInputStream fis = new FileInputStream(pomPath.toFile())) {
@@ -186,12 +159,11 @@ public class ConcurrentBomParser implements PomParser<Set<Path>> {
             }
 
             if (groupId == null || artifactId == null || version == null) {
-                logger.warn("Incomplete coordinates in BOM POM: {}", pomPath);
-                return null;
+                logger.debug("Incomplete coordinates in BOM POM: {}", pomPath);
             }
 
-            DefaultArtifactCoordinates coordinates = new DefaultArtifactCoordinates(groupId, artifactId, version);
-            return new DefaultArtifactData(coordinates, model, pomPath, null);
+            ArtifactCoordinates coordinates = artifactFactory.coordinates(groupId, artifactId, version);
+            return artifactFactory.data(coordinates, model, pomPath, null);
 
         } catch (IOException | XmlPullParserException e) {
             logger.error("Error reading BOM POM file: {}", pomPath, e);

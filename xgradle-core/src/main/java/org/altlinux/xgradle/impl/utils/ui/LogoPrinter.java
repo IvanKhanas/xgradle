@@ -26,39 +26,16 @@ import java.util.List;
 /**
  * Class for printing logo when plugin is activated.
  *
- * @author Ivan Khanas
+ * @author Ivan Khanas <xeno@altlinux.org>
  */
 public class LogoPrinter {
 
     private static final String ART_FILE = "logo.txt";
 
-    /**
-     * Checks if the logo printing option is enabled when building the plugin.
-     *
-     * @return {@code true} if enabled and {@code false} otherwise
-     */
     public static boolean isLogoEnabled() {
         return !"true".equals(System.getProperty("disable.logo"));
     }
 
-    /**
-     * Prints the plugin logo centered in the terminal.
-     *
-     * <p>Execution flow:
-     * <ol>
-     *   <li>Loads ASCII art from resources</li>
-     *   <li>Determines terminal width</li>
-     *   <li>Calculates horizontal padding</li>
-     *   <li>Prints each line with appropriate padding</li>
-     * </ol>
-     *
-     * <p>Uses default width (80 columns) if terminal width detection fails.
-     *
-     * @throws RuntimeException if logo loading fails or unexpected error occurs
-     *
-     * @see #isLogoEnabled() For enablement check
-     * @see #loadArtFromResources() For logo loading implementation
-     */
     public static void printCenteredBanner() {
         try {
             List<String> artLines = loadArtFromResources();
@@ -82,14 +59,6 @@ public class LogoPrinter {
         }
     }
 
-    /**
-     * Loads ASCII art lines from the classpath resource.
-     * <p>
-     * @return list of strings representing each line of the logo
-     *
-     * @throws IOException if an I/O error occurs while reading the resource
-     * @throws AssertionError if the resource stream is null (resource not found)
-     */
     private static List<String> loadArtFromResources() throws IOException {
         List<String> lines = new ArrayList<>();
         try (InputStream is = LogoPrinter.class.getClassLoader().getResourceAsStream(ART_FILE)) {
@@ -105,14 +74,6 @@ public class LogoPrinter {
         return lines;
     }
 
-    /**
-     * Attempts to determine the current terminal width.
-     * <p>
-     * On Linux systems, executes the {@code tput cols} command to get the width.
-     * On other systems or if an error occurs, returns a default width of 80 columns.
-     *
-     * @return terminal width in characters, or 80 if it cannot be determined
-     */
     private static int getTerminalWidth() {
         try {
             if (System.getProperty("os.name").toLowerCase().contains("linux")) {

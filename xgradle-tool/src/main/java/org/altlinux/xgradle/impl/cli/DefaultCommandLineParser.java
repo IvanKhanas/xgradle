@@ -17,79 +17,95 @@ package org.altlinux.xgradle.impl.cli;
 
 import com.google.inject.Singleton;
 
-import org.altlinux.xgradle.api.cli.CommandLineParser;
+import org.altlinux.xgradle.interfaces.cli.CommandLineParser;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Default implementation of CommandLineParser.
- * Handles parsing of command strings with support for quoted arguments.
+ * Default implementation of {@link CommandLineParser}.
+ * Implements {@link CommandLineParser}.
  *
- * @author Ivan Khanas
+ * @author Ivan Khanas <xeno@altlinux.org>
  */
 @Singleton
-public class DefaultCommandLineParser implements CommandLineParser {
+final class DefaultCommandLineParser implements CommandLineParser {
 
-    /**
-     * Parses a command string into executable parts.
-     * Handles quoted arguments and whitespace separation.
-     *
-     * @param command the command string to parse
-     * @return list of command parts
-     */
     @Override
     public List<String> parseCommandLine(String command) {
+        if (command == null || command.isBlank()) {
+            return List.of();
+        }
+
+        String input = stripWrappingQuotes(command.trim());
+
         List<String> parts = new ArrayList<>();
-        StringBuilder builder = new StringBuilder();
+        StringBuilder token = new StringBuilder();
+
         boolean inQuotes = false;
         char quoteChar = 0;
+        boolean escaping = false;
 
-        for (int i = 0; i < command.length(); i++) {
-            char c = command.charAt(i);
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
 
-            if ((c == '"' || c == '\'') && !inQuotes) {
+            if (escaping) {
+                token.append(c);
+                escaping = false;
+                continue;
+            }
+
+            if (inQuotes && c == '\\') {
+                escaping = true;
+                continue;
+            }
+
+            if (!inQuotes && (c == '"' || c == '\'')) {
                 inQuotes = true;
                 quoteChar = c;
-            } else if (inQuotes && c == quoteChar) {
-                inQuotes = false;
-            } else if (Character.isWhitespace(c) && !inQuotes) {
-                if (builder.length() > 0) {
-                    parts.addAll(splitQuotedArg(builder.toString()));
-                    builder.setLength(0);
-                }
-            } else {
-                builder.append(c);
+                continue;
             }
+
+            if (inQuotes && c == quoteChar) {
+                inQuotes = false;
+                quoteChar = 0;
+                continue;
+            }
+
+            if (!inQuotes && Character.isWhitespace(c)) {
+                flush(parts, token);
+                continue;
+            }
+
+            token.append(c);
         }
 
-        if (builder.length() > 0) {
-            parts.addAll(splitQuotedArg(builder.toString()));
+        if (inQuotes) {
+            throw new IllegalArgumentException("Unclosed quote in command: " + command);
         }
 
+        flush(parts, token);
         return parts;
     }
 
-    /**
-     * Splits a quoted argument string into individual parts.
-     *
-     * @param arg the argument string to split
-     * @return list of split argument parts
-     */
-    private List<String> splitQuotedArg(String arg) {
-        List<String> result = new ArrayList<>();
-        String trimmed = arg.trim();
-
-        if ((trimmed.startsWith("\"") && trimmed.endsWith("\"")) ||
-                (trimmed.startsWith("'") && trimmed.endsWith("'"))) {
-            trimmed = trimmed.substring(1, trimmed.length() - 1);
+    private static void flush(List<String> parts, StringBuilder token) {
+        if (token.length() == 0) {
+            return;
         }
+        parts.add(token.toString());
+        token.setLength(0);
+    }
 
-        for (String s : trimmed.split("\\s+")) {
-            if (!s.isEmpty()) {
-                result.add(s);
-            }
+    private static String stripWrappingQuotes(String s) {
+        if (s.length() < 2) {
+            return s;
         }
-        return result;
+        char first = s.charAt(0);
+        char last = s.charAt(s.length() - 1);
+
+        if ((first == '"' && last == '"') || (first == '\'' && last == '\'')) {
+            return s.substring(1, s.length() - 1);
+        }
+        return s;
     }
 }

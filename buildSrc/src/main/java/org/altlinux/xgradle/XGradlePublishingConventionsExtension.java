@@ -17,41 +17,115 @@ package org.altlinux.xgradle;
 
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.ListProperty;
+/**
+  * Defines X gradle publishing conventions operations.
+
+ *
+ * @author Ivan Khanas <xeno@altlinux.org>
+ */
 
 public interface XGradlePublishingConventionsExtension {
+/**
+  * Returns project URL.
+
+ */
     Property<String> getProjectUrl();
+/**
+  * Returns project description.
+
+ */
     Property<String> getProjectDescription();
+/**
+  * Returns enable plugin marker.
+
+ */
     Property<Boolean> getEnablePluginMarker();
+/**
+  * Returns enable copy publications.
+
+ */
     Property<Boolean> getEnableCopyPublications();
+/**
+  * Returns project name.
+
+ */
 
     Property<String> getProjectName();
+/**
+  * Returns license name.
+
+ */
     Property<String> getLicenseName();
+/**
+  * Returns license URL.
+
+ */
     Property<String> getLicenseUrl();
+/**
+  * Returns developers.
+
+ */
     ListProperty<Developer> getDevelopers();
+/**
+  * Returns main artifact task name.
+
+ */
 
     Property<String> getMainArtifactTaskName();
+/**
+  * Returns javadoc JAR task name.
+
+ */
     Property<String> getJavadocJarTaskName();
+/**
+  * Returns sources JAR task name.
+
+ */
     Property<String> getSourcesJarTaskName();
+/**
+  * With shadow JAR.
+
+ */
 
     default void withShadowJar() {
         getMainArtifactTaskName().set("shadowJar");
     }
+/**
+  * With JAR.
+
+ */
 
     default void withJar() {
         getMainArtifactTaskName().set("jar");
     }
+/**
+  * With javadoc JAR.
+
+ */
 
     default void withJavadocJar() {
         getJavadocJarTaskName().set("javadocJar");
     }
+/**
+  * With sources JAR.
+
+ */
 
     default void withSourcesJar() {
         getSourcesJarTaskName().set("sourcesJar");
     }
+/**
+  * Developer the operation.
+
+ */
 
     default void developer(String id, String name, String email) {
         getDevelopers().add(new Developer(id, name, email));
     }
+/**
+  * Developer the operation.
+
+ */
 
     default void developer(String id, String name, String email, String url) {
         getDevelopers().add(new Developer(id, name, email, url));

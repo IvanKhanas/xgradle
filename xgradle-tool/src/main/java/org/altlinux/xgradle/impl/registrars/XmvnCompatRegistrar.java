@@ -20,80 +20,75 @@ import com.google.inject.Singleton;
 
 import org.altlinux.xgradle.impl.enums.ExitCode;
 import org.altlinux.xgradle.impl.enums.ProcessingType;
-import org.altlinux.xgradle.api.cli.CommandExecutor;
-import org.altlinux.xgradle.api.cli.CommandLineParser;
-import org.altlinux.xgradle.api.containers.ArtifactContainer;
-import org.altlinux.xgradle.api.registrars.Registrar;
+import org.altlinux.xgradle.interfaces.cli.CommandExecutor;
+import org.altlinux.xgradle.interfaces.cli.CommandLineParser;
+import org.altlinux.xgradle.interfaces.containers.ArtifactContainer;
+import org.altlinux.xgradle.interfaces.registrars.Registrar;
 
+import org.altlinux.xgradle.impl.exceptions.CommandExecutionException;
+import org.altlinux.xgradle.impl.exceptions.EmptyRegisterCommandException;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
 import java.util.List;
 
 /**
  * Registrar implementation for XMvn compatibility with library artifacts.
- * Handles registration of library artifacts using XMvn commands.
+ * Implements {@link Registrar}.
  *
- * @author Ivan Khanas
+ * @author Ivan Khanas <xeno@altlinux.org>
  */
 @Singleton
-public class XmvnCompatRegistrar implements Registrar {
-    private static final Logger logger = LoggerFactory.getLogger("XGradleLogger");
+final class XmvnCompatRegistrar implements Registrar {
+
     private final ArtifactContainer artifactContainer;
     private final CommandExecutor commandExecutor;
     private final CommandLineParser commandLineParser;
+    private final Logger logger;
 
-    /**
-     * Constructs a new XmvnCompatRegistrar with required dependencies.
-     *
-     * @param artifactContainer container for artifact management
-     * @param commandExecutor executor for command execution
-     * @param commandLineParser parser for command-line parsing
-     */
     @Inject
-    public XmvnCompatRegistrar(
+    XmvnCompatRegistrar(
             ArtifactContainer artifactContainer,
             CommandExecutor commandExecutor,
-            CommandLineParser commandLineParser
+            CommandLineParser commandLineParser,
+            Logger logger
     ) {
         this.artifactContainer = artifactContainer;
         this.commandExecutor = commandExecutor;
         this.commandLineParser = commandLineParser;
+        this.logger = logger;
     }
 
-    /**
-     * Registers artifacts from the specified directory using XMvn commands.
-     *
-     * @param searchingDir the directory to search for artifacts
-     * @param registerCommand the XMvn registration command to use
-     * @param artifactName optional list of artifact names to filter by
-     * @throws RuntimeException if command execution fails
-     */
     @Override
     public void registerArtifacts(String searchingDir, String registerCommand, Optional<List<String>> artifactName) {
         Map<String, Path> artifacts;
         if (artifactName.isPresent()) {
             artifacts = artifactContainer.getArtifacts(searchingDir, artifactName, ProcessingType.LIBRARY);
-        }else {
+        } else {
             artifacts = artifactContainer.getArtifacts(searchingDir, Optional.empty(), ProcessingType.LIBRARY);
         }
 
-        List<String> commandParts = commandLineParser.parseCommandLine(registerCommand);
+        List<String> baseCommand = commandLineParser.parseCommandLine(registerCommand);
 
-        for(Map.Entry<String, Path> entry : artifacts.entrySet()) {
+        if (baseCommand == null || baseCommand.isEmpty()) {
+            throw new EmptyRegisterCommandException(registerCommand);
+        }
+
+        for (Map.Entry<String, Path> entry : artifacts.entrySet()) {
             String pomPath = entry.getKey();
             Path jarPath = entry.getValue();
 
-            commandParts.add(pomPath);
-            commandParts.add(jarPath.toString());
-            logger.info("\nRegistering pair: " + String.join(" ", commandParts));
+            List<String> currentCommand = new ArrayList<>(baseCommand);
+            currentCommand.add(pomPath);
+            currentCommand.add(jarPath.toString());
 
-            ProcessBuilder processBuilder = new ProcessBuilder(commandParts);
-            processBuilder.redirectErrorStream(true);
+            logger.info("\nRegistering pair: " + String.join(" ", currentCommand));
+
+            ProcessBuilder processBuilder = new ProcessBuilder(currentCommand);
 
             try {
                 int exitCode = commandExecutor.execute(processBuilder);
@@ -101,14 +96,13 @@ public class XmvnCompatRegistrar implements Registrar {
                     throw new RuntimeException("Failed to register artifact, exit code: " + exitCode);
                 }
             } catch (IOException | InterruptedException e) {
-                throw new RuntimeException("Failed to execute command", e);
+                throw new CommandExecutionException(currentCommand, e);
             }
-            commandParts.remove(pomPath);
-            commandParts.remove(jarPath.toString());
         }
+
         if (artifacts.isEmpty()) {
             logger.info("No artifacts registered");
-        }else {
+        } else {
             logger.info("Artifacts registered successfully");
         }
     }

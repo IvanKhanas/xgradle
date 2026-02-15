@@ -13,6 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+apply(from = rootProject.file("version.gradle.kts"))
+
 plugins {
     `java-gradle-plugin`
     id("org.altlinux.xgradle-publishing-conventions")
@@ -21,13 +24,18 @@ plugins {
 dependencies {
     compileOnly(gradleApi())
     implementation(libs.bundles.maven.tooling)
+    implementation(libs.guice)
     runtimeOnly(libs.plexus.utils)
+    runtimeOnly(libs.bundles.guice.deps)
     testImplementation(gradleTestKit())
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.bundles.testing)
+    testRuntimeOnly(libs.bundles.testing.platform)
 
     shadow(libs.bundles.maven.tooling)
     shadow(libs.plexus.utils)
+    shadow(libs.guice)
+    shadow(libs.bundles.guice.deps)
 }
 
 gradlePlugin{

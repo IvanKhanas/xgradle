@@ -6,6 +6,7 @@ plexus-utils = "3.5.0"
 junit = "5.10.1"
 assertj-core = "3.25.1"
 apiguardian = "1.1.2"
+mockito = "5.20.0"
 jcommander = "3.0"
 slf4j = "1.7.36"
 guice = "5.1.0"
@@ -19,25 +20,34 @@ aopalliance = "1.0"
 maven-model = { module = "org.apache.maven:maven-model", version.ref = "maven-model" }
 maven-model-builder = { module = "org.apache.maven:maven-model-builder", version.ref = "maven-model-builder" }
 plexus-utils = { module = "org.codehaus.plexus:plexus-utils", version.ref = "plexus-utils" }
+
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit-platform-engine = { module = "org.junit.platform:junit-platform-engine" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj-core" }
 apiguardian-api = { module = "org.apiguardian:apiguardian-api", version.ref = "apiguardian" }
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito"}
+mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito"}
+
 jcommander = { module = "org.jcommander:jcommander", version.ref = "jcommander" }
+
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
+log4j-over-slf4j = { module = "org.slf4j:log4j-over-slf4j", version.ref = "slf4j" }
+
 guice = { module = "com.google.inject:guice", version.ref = "guice" }
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
 failureaccess = { module = "com.google.guava:failureaccess", version.ref = "failureaccess" }
 jakarta-inject-api = { module = "jakarta.inject:jakarta.inject-api", version.ref = "jakarta-inject" }
-log4j-over-slf4j = { module = "org.slf4j:log4j-over-slf4j", version.ref = "slf4j" }
 aopalliance = { module = "aopalliance:aopalliance", version.ref = "aopalliance" }
 asm = { module = "org.ow2.asm:asm", version.ref = "asm" }
 
 [bundles]
 maven-tooling = ["maven-model", "maven-model-builder"]
 guice-deps = ["jakarta-inject-api", "guava", "failureaccess", "aopalliance", "asm"]
-testing = ["junit-jupiter", "assertj-core", "apiguardian-api"]
+testing = ["junit-jupiter", "assertj-core", "apiguardian-api", "mockito-core", "mockito-junit-jupiter"]
+testing-platform = ["junit-platform-engine", "junit-platform-launcher"]
 logging = ["slf4j-api", "slf4j-simple", "log4j-over-slf4j"]
 
 [plugins]

@@ -26,17 +26,3 @@ services:
     working_dir: /app
     user: "1000:1000"
     command: ["gradle", "build", "-Dmaven.poms.dir=/usr/share/maven-poms", "-Djava.library.dir=/usr/share/java", "-Prelease"]
-
-  xgradle-test:
-    build:
-      context: .
-      target: integration-test
-      args:
-        - APP_NAME=xgradle
-        - USER_NAME=xgradle
-    container_name: xgradle-test
-    working_dir: /test
-    volumes:
-      - ./docker/patches:/test/patches
-    user: "1000:1000"
-    command: ["tail", "-f", "/dev/null"]

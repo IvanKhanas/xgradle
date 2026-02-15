@@ -9,74 +9,106 @@
 
 ### 🤔 What`s xgradle?
 
-**xgradle** is a plugin for the gradle build system that allows you to build
-java projects using system artifacts
+**xgradle** is an **offline-first toolkit** for Gradle builds.
 
-The plugin uses the pom files contained in your system for artifacts. Actually,
-as well as the artifacts themselves. The principle of the plugin is based on
-parsing pom files and further searching for the necessary artifacts according
-to the received metadata.
+Instead of relying on remote Maven repositories, xgradle lets you build Java/Gradle projects
+using **artifacts already present on the system** (JARs + POM metadata). It is designed to work
+in synergy with **XMvn** — Fedora’s tooling for **Apache Maven** that manages and uses a
+**system-wide artifact repository** to resolve Maven artifacts in **offline mode** and support
+distribution packaging workflows. xgradle brings the same “system artifacts first” approach to
+**Gradle**, complementing the Java ecosystem in Linux distributions and their package repositories.
+The project is split into standalone components that work together:
+
+XMvn: https://fedora-java.github.io/xmvn
+
+- **[xgradle-core](xgradle-core/README.md) (Gradle plugin / init script)** — configures Gradle to resolve:
+    - Project dependencies from local system artifact directories
+    - Gradle plugins from local directories via pluginManagement repositories
+
+- **[xgradle-tool](xgradle-tool/README.md) (standalone CLI)** — prepares and maintains the local artifact set used by Gradle:
+    - Registers local artifacts / BOMs for consistent versioning
+    - Installs/exports JARs, POMs and related metadata into target directories
+    - Optionally patches/redacts POM files to fit offline/system packaging needs
+
+The result: **reproducible builds in fully offline environments** (CI, air-gapped hosts, distro build farms).
 
 ---
-### 🌟 Key Features
+### 📦 External Dependencies
 
-• **System Dependency Resolution** - Uses artifacts from system directories
+**Gradle build plugin**
+- com.gradleup.shadow:shadow-gradle-plugin
 
-• **Auto-versioning** - Automatically determines dependency versions
+**Main (runtime / implementation)**
+- org.apache.maven:maven-model
+- org.apache.maven:maven-model-builder
+- org.codehaus.plexus:plexus-utils
+- org.jcommander:jcommander
+- org.slf4j:slf4j-api
+- org.slf4j:slf4j-simple
+- org.slf4j:log4j-over-slf4j
+- com.google.inject:guice
+- com.google.guava:guava
+- com.google.guava:failureaccess
+- jakarta.inject:jakarta.inject-api
+- aopalliance:aopalliance
+- org.ow2.asm:asm
 
-• **Plugin Management** - Supports system-installed Gradle plugins
-
-• **BOM Support** - Full Bill-of-Materials management
-
-• **Transitive Dependencies** - Automatic resolution of dependency chains
-
-• **Offline Capable** - Works without internet access
+**Tests**
+- org.junit:junit-bom
+- org.junit.jupiter:junit-jupiter
+- org.junit.platform:junit-platform-engine
+- org.junit.platform:junit-platform-launcher
+- org.assertj:assertj-core
+- org.apiguardian:apiguardian-api
+- org.mockito:mockito-core
+- org.mockito:mockito-junit-jupiter
+- com.google.code.gson:gson
+- commons-io:commons-io
+- commons-cli:commons-cli
 
 ---
-### 🛠 Configuration
+### 🛠 Standard Build Method
 
-Build the plugin based on your architecture
-
-Set these properties to directories with the corresponding files
-
-```-Djava.library.dir``` : Displays a directory with JAR files
-
-```-Dmaven.poms.dir``` : Displays a directory with POM files
-
-**Example**
+Build the project with Gradle:
 
 ```
 gradle build \
-  -Djava.library.dir=/path/to/your/jars \
-  -Dmaven.poms.dir=/path/to/your/poms \
-  #
+  -Djava.library.dir=/path/to/jars \
+  -Dmaven.poms.dir=/path/to/poms \
+  -Prelease
 ```
 
-The following properties affect the interface
+If Gradle is not installed on your system, use the Gradle Wrapper:
 
-```-Ddisable.logo=true``` : Disables ASCII startup banner
-
-```-Ddisable.ansi.color=true``` : Disables colored output
+```
+./gradlew build -Prelease
+```
 
 ---
 ### 📂 Standard Installation Method
 
-**1.Build the plugin**
+xgradle is typically installed into system directories used by Linux distributions
+(Gradle init scripts, Java JARs, Maven POM metadata).
+
+**1.Install the Gradle plugin (xgradle-core) and init script**
 ```
-gradle build \
-  -Djava.library.dir=/path/to/your/jars \
-  -Dmaven.poms.dir=/path/to/your/poms \
-  #
+install -Dm 644 xgradle-core/build/dist/xgradle-core.jar \
+  -t /path/to/gradle/xgradle
+
+install -Dm 644 xgradle-core/build/dist/xgradle-plugin.gradle \
+  -t /path/to/gradle/init.d
 ```
 
-**2.Move the plugin`s init script to the folder with the gradle init scripts**
+**2.Install the CLI tool (xgradle-tool)**
 ```
-mv build/xgradle-plugin.gradle /path/to/gradle/init.d
-```
+install -Dm 644 xgradle-tool/build/dist/xgradle-tool.jar \
+  -t /usr/share/xgradle
 
-**3.Move the plugin`s jar file to the gradle plugins directory**
-```
-mv build/libs/xgradle.jar /path/to/gradle/xgradle
+install -Dm 755 xgradle-tool/build/dist/xgradle-tool \
+  -t /usr/share/xgradle
+
+ln -s /usr/share/xgradle/xgradle-tool \
+  /usr/bin/xgradle-tool
 ```
 
 ---

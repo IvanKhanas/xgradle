@@ -15,8 +15,12 @@
  */
 package org.altlinux.xgradle.impl.plugin;
 
-import org.altlinux.xgradle.impl.core.handlers.PluginsDependenciesHandler;
-import org.altlinux.xgradle.impl.core.handlers.ProjectDependenciesHandler;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import org.altlinux.xgradle.interfaces.handlers.PluginsDependenciesHandler;
+import org.altlinux.xgradle.interfaces.handlers.ProjectDependenciesHandler;
+import org.altlinux.xgradle.impl.di.XGradlePluginModule;
+
 import org.altlinux.xgradle.impl.utils.ui.LogoPrinter;
 
 import org.gradle.api.Plugin;
@@ -25,55 +29,27 @@ import org.gradle.api.invocation.Gradle;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Class implements {@link Plugin} interface
- * <p>Core plugin implementation that applies to Gradle itself rather than individual projects.
+ * Class implements {@link Plugin} interface <p>Core plugin implementation that applies to Gradle itself rather than individual projects.
+ * Implements {@link Plugin}.
  *
- * <p>This plugin provides:
- * <ul>
- *   <li>Custom dependency resolution for other Gradle plugins</li>
- *   <li>Access to all phases of the Gradle build lifecycle</li>
- * </ul>
- *
- * <p>Lifecycle hooks:
- * <ol>
- *   <li>{@code beforeSettings}: Handles plugin dependencies resolution</li>
- *   <li>{@code projectsLoaded}: Adds custom repository configuration</li>
- *   <li>{@code projectsEvaluated}: Processes project dependencies after configuration</li>
- * </ol>
- *
- * @author Ivan Khanas
+ * @author Ivan Khanas <xeno@altlinux.org>
  */
-public class XGradlePlugin implements Plugin<Gradle> {
+public final class XGradlePlugin implements Plugin<Gradle> {
 
-    /**
-     * Applies the plugin to the Gradle instance.
-     *
-     * <p>Main operations:
-     * <ol>
-     *   <li>Prints the plugin logo if enabled</li>
-     *   <li>Initializes dependency handlers</li>
-     *   <li>Registers lifecycle hooks:
-     *     <ul>
-     *       <li>Before settings: Processes plugin dependencies</li>
-     *       <li>Projects loaded: Configures repositories</li>
-     *       <li>Projects evaluated: Processes project dependencies</li>
-     *     </ul>
-     *   </li>
-     * </ol>
-     *
-     * @param gradle the Gradle instance to which the plugin is applied
-     */
     @Override
     public void apply(@NotNull Gradle gradle) {
         if (LogoPrinter.isLogoEnabled()) {
             LogoPrinter.printCenteredBanner();
         }
 
-        PluginsDependenciesHandler pluginsHandler = new PluginsDependenciesHandler();
-        ProjectDependenciesHandler projectHandler = new ProjectDependenciesHandler();
+        Injector injector = Guice.createInjector(
+                new XGradlePluginModule()
+        );
 
-        gradle.beforeSettings(pluginsHandler::handle);
-        gradle.projectsLoaded(projectHandler::addRepository);
-        gradle.projectsEvaluated(projectHandler::handleAfterConfiguration);
+        PluginsDependenciesHandler plugins = injector.getInstance(PluginsDependenciesHandler.class);
+        ProjectDependenciesHandler dependencies = injector.getInstance(ProjectDependenciesHandler.class);
+
+        gradle.beforeSettings(plugins::handle);
+        gradle.projectsEvaluated(dependencies::handle);
     }
 }

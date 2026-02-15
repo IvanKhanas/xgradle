@@ -17,12 +17,12 @@ package org.altlinux.xgradle.impl.processors;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 
+import org.altlinux.xgradle.impl.bindingannotations.processingtypes.GradlePlugin;
 import org.altlinux.xgradle.impl.config.ToolConfig;
-import org.altlinux.xgradle.api.parsers.PomParser;
-import org.altlinux.xgradle.api.processors.PomProcessor;
-import org.altlinux.xgradle.api.services.PomService;
+import org.altlinux.xgradle.interfaces.parsers.PomParser;
+import org.altlinux.xgradle.interfaces.processors.PomProcessor;
+import org.altlinux.xgradle.interfaces.services.PomService;
 
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -31,28 +31,20 @@ import java.util.List;
 
 /**
  * Default implementation of PomProcessor for Gradle plugin artifacts.
- * Handles processing of Gradle plugin POM files with artifact exclusion
- * and snapshot filtering capabilities.
- * Specifically designed for Gradle plugin installation scenarios.
+ * Implements {@link PomProcessor<HashMap<String} and {@link Path>>}.
  *
- * @author Ivan Khanas
+ * @author Ivan Khanas <xeno@altlinux.org>
  */
 @Singleton
-public class DefaultPluginPomProcessor implements PomProcessor<HashMap<String, Path>> {
+final class DefaultPluginPomProcessor implements PomProcessor<HashMap<String, Path>> {
+
     private final PomParser<HashMap<String, Path>> pluginsParser;
     private final PomService pomService;
     private final ToolConfig toolConfig;
 
-    /**
-     * Constructs a new DefaultPluginPomProcessor with required dependencies.
-     *
-     * @param pluginsParser the parser for plugin POM files
-     * @param pomService the service for POM processing operations
-     * @param toolConfig the configuration for the tool
-     */
     @Inject
-    public DefaultPluginPomProcessor(
-            @Named("gradlePlugins") PomParser<HashMap<String, Path>> pluginsParser,
+    DefaultPluginPomProcessor(
+            @GradlePlugin PomParser<HashMap<String, Path>> pluginsParser,
             PomService pomService,
             ToolConfig toolConfig
     ) {
@@ -61,14 +53,6 @@ public class DefaultPluginPomProcessor implements PomProcessor<HashMap<String, P
         this.toolConfig = toolConfig;
     }
 
-    /**
-     * Processes plugin artifacts from the specified directory.
-     * Applies artifact exclusion and snapshot filtering for Gradle plugins.
-     *
-     * @param searchingDir the directory to search for plugin artifacts
-     * @param artifactNames optional list of artifact names to filter by
-     * @return map of POM file paths to corresponding JAR file paths
-     */
     @Override
     public HashMap<String, Path> pomsFromDirectory(String searchingDir, Optional<List<String>> artifactNames) {
         HashMap<String, Path> artifacts = pluginsParser.getArtifactCoords(searchingDir, artifactNames);

@@ -13,72 +13,55 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.altlinux.xgradle.impl.controllers;
 
+import com.beust.jcommander.JCommander;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 
-import com.beust.jcommander.JCommander;
-
-import org.altlinux.xgradle.impl.enums.ExitCode;
-import org.altlinux.xgradle.api.controllers.XmvnCompatController;
-import org.altlinux.xgradle.api.registrars.Registrar;
+import org.altlinux.xgradle.interfaces.controllers.XmvnCompatController;
+import org.altlinux.xgradle.interfaces.registrars.Registrar;
+import org.altlinux.xgradle.impl.bindingannotations.processingtypes.Bom;
 import org.altlinux.xgradle.impl.cli.CliArgumentsContainer;
 
 import org.slf4j.Logger;
 
+import static org.altlinux.xgradle.impl.cli.CliPreconditions.require;
+
 /**
  * Controller for managing XMvn compatibility functions for BOM artifacts.
- * Handles command-line configuration and execution of XMvn registration for BOM files.
+ * Implements {@link XmvnCompatController}.
  *
- * @author Ivan Khanas
+ * @author Ivan Khanas <xeno@altlinux.org>
  */
 @Singleton
-public class DefaultBomXmvnCompatController implements XmvnCompatController {
+final class DefaultBomXmvnCompatController implements XmvnCompatController {
+
     private final Registrar registrar;
 
-    /**
-     * Constructs a new DefaultBomXmvnCompatController with required dependencies.
-     *
-     * @param registrar registrar for BOM artifacts
-     */
     @Inject
-    public DefaultBomXmvnCompatController(@Named("Bom")Registrar registrar) {
+    DefaultBomXmvnCompatController(@Bom Registrar registrar) {
         this.registrar = registrar;
     }
 
-    /**
-     * Configures and executes XMvn compatibility functions for BOM artifacts.
-     * Validates parameters and executes registration if requirements are met.
-     *
-     * @param jCommander the command-line parser
-     * @param args command-line arguments
-     * @param arguments parsed command-line arguments container
-     * @param logger logger for error and information messages
-     */
     @Override
-    public void configureXmvnCompatFunctions(JCommander jCommander, String[] args, CliArgumentsContainer arguments, Logger logger) {
-
-        if (arguments.hasXmvnRegister()) {
-            if (arguments.hasBomRegistration()) {
-                if (arguments.hasSearchingDirectory()) {
-                    try {
-                        registrar.registerArtifacts(
-                                arguments.getSearchingDirectory(),
-                                arguments.getXmvnRegister(),
-                                arguments.getArtifactName()
-                        );
-                    }catch (Exception e) {
-                        logger.error("Error: {}", e.getMessage());
-                        ExitCode.ERROR.exit();
-                    }
-                }else {
-                    logger.error("No searching directory specified");
-                    jCommander.usage();
-                    ExitCode.ERROR.exit();
-                }
-            }
+    public void configureXmvnCompatFunctions(
+            JCommander jCommander,
+            String[] args,
+            CliArgumentsContainer arguments,
+            Logger logger
+    ) {
+        if (!arguments.hasXmvnRegister() || !arguments.hasBomRegistration()) {
+            return;
         }
+
+        require(arguments.hasSearchingDirectory(), "No searching directory specified");
+
+        registrar.registerArtifacts(
+                arguments.getSearchingDirectory(),
+                arguments.getXmvnRegister(),
+                arguments.getArtifactName()
+        );
     }
 }

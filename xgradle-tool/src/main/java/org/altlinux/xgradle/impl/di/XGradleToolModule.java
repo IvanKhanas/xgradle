@@ -16,138 +16,63 @@
 package org.altlinux.xgradle.impl.di;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.TypeLiteral;
-import com.google.inject.name.Names;
 
-import org.altlinux.xgradle.impl.config.ToolConfig;
-import org.altlinux.xgradle.api.cli.CommandExecutor;
-import org.altlinux.xgradle.api.cli.CommandLineParser;
-import org.altlinux.xgradle.api.controllers.ArtifactsInstallationController;
-import org.altlinux.xgradle.api.controllers.XmvnCompatController;
-import org.altlinux.xgradle.api.installers.ArtifactsInstaller;
-import org.altlinux.xgradle.api.installers.JavadocInstaller;
-import org.altlinux.xgradle.api.model.ArtifactCache;
-import org.altlinux.xgradle.api.parsers.PomParser;
-import org.altlinux.xgradle.api.services.PomService;
-import org.altlinux.xgradle.api.processors.PomProcessor;
-import org.altlinux.xgradle.api.collectors.ArtifactCollector;
-import org.altlinux.xgradle.api.collectors.PomCollector;
-import org.altlinux.xgradle.api.containers.ArtifactContainer;
-import org.altlinux.xgradle.api.containers.PomContainer;
-import org.altlinux.xgradle.api.redactors.ParentRedactor;
-import org.altlinux.xgradle.api.registrars.Registrar;
-import org.altlinux.xgradle.impl.cli.DefaultCommandExecutor;
-import org.altlinux.xgradle.impl.cli.DefaultCommandLineParser;
-import org.altlinux.xgradle.impl.collectors.DefaultArtifactCollector;
-import org.altlinux.xgradle.impl.collectors.DefaultPomCollector;
-import org.altlinux.xgradle.impl.containers.DefaultArtifactContainer;
-import org.altlinux.xgradle.impl.containers.DefaultPomContainer;
-import org.altlinux.xgradle.impl.controllers.DefaultBomXmvnCompatController;
-import org.altlinux.xgradle.impl.controllers.DefaultJavadocXmvnCompatController;
-import org.altlinux.xgradle.impl.controllers.DefaultPluginsInstallationController;
-import org.altlinux.xgradle.impl.controllers.DefaultXmvnCompatController;
-import org.altlinux.xgradle.impl.installers.DefaultJavadocInstaller;
-import org.altlinux.xgradle.impl.installers.DefaultPluginArtifactsInstaller;
-import org.altlinux.xgradle.impl.model.DefaultArtifactCache;
-import org.altlinux.xgradle.impl.parsers.ConcurrentBomParser;
-import org.altlinux.xgradle.impl.parsers.ConcurrentJavadocParser;
-import org.altlinux.xgradle.impl.parsers.ConcurrentLibraryPomParser;
-import org.altlinux.xgradle.impl.parsers.DefaultPluginPomParser;
-import org.altlinux.xgradle.impl.processors.DefaultBomProcessor;
-import org.altlinux.xgradle.impl.processors.DefaultJavadocProcessor;
-import org.altlinux.xgradle.impl.processors.DefaultLibraryPomProcessor;
-import org.altlinux.xgradle.impl.processors.DefaultPluginPomProcessor;
-import org.altlinux.xgradle.impl.redactors.DefaultParentRemover;
-import org.altlinux.xgradle.impl.registrars.XmvnBomCompatRegistrar;
-import org.altlinux.xgradle.impl.registrars.XmvnCompatRegistrar;
-import org.altlinux.xgradle.impl.services.PomProcessingService;
 
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Set;
+import org.altlinux.xgradle.impl.application.ApplicationModule;
+import org.altlinux.xgradle.impl.caches.CachesModule;
+import org.altlinux.xgradle.impl.cli.CliModule;
+import org.altlinux.xgradle.impl.collectors.CollectorsModule;
+import org.altlinux.xgradle.impl.config.ConfigModule;
+
+import org.altlinux.xgradle.impl.containers.ContainersModule;
+
+import org.altlinux.xgradle.impl.controllers.*;
+
+import org.altlinux.xgradle.impl.installers.InstallersModule;
+import org.altlinux.xgradle.impl.model.ModelModule;
+import org.altlinux.xgradle.impl.parsers.*;
+import org.altlinux.xgradle.impl.processors.*;
+import org.altlinux.xgradle.impl.redactors.RedactorsModule;
+import org.altlinux.xgradle.impl.registrars.RegistrarsModule;
+
+import org.altlinux.xgradle.impl.services.ServicesModule;
 
 /**
  * Google Guice dependency injection module for XGradle tool.
- * Configures bindings for all interfaces and their implementations.
  *
- * @author Ivan Khanas
+ * @author Ivan Khanas <xeno@altlinux.org>
  */
-public class XGradleToolModule extends AbstractModule {
-    private final ToolConfig toolConfig;
+public final class XGradleToolModule extends AbstractModule {
 
-    /**
-     * Constructs a new XGradleToolModule with the specified configuration.
-     *
-     * @param toolConfig configuration for the tool
-     */
-    public XGradleToolModule(ToolConfig toolConfig) {
-        this.toolConfig = toolConfig;
-    }
-
-    /**
-     * Configures the dependency injection bindings.
-     * Binds interfaces to their implementations with appropriate naming.
-     */
     @Override
     protected void configure() {
-        bind(ArtifactCollector.class).to(DefaultArtifactCollector.class);
-        bind(PomCollector.class).to(DefaultPomCollector.class);
 
-        bind(ArtifactContainer.class).to(DefaultArtifactContainer.class);
-        bind(PomContainer.class).to(DefaultPomContainer.class);
+        install(new ModelModule());
 
-        bind(new TypeLiteral<PomParser<HashMap<String, Path>>>() {})
-                .annotatedWith(Names.named("Library"))
-                .to(ConcurrentLibraryPomParser.class);
+        install(new CollectorsModule());
 
-        bind(new TypeLiteral<PomParser<Set<Path>>>() {})
-                .annotatedWith(Names.named("Bom"))
-                .to(ConcurrentBomParser.class);
+        install(new ContainersModule());
 
-        bind(new TypeLiteral<PomParser<HashMap<String, Path>>>() {})
-                .annotatedWith(Names.named("gradlePlugins"))
-                .to(DefaultPluginPomParser.class);
+        install(new ParsersModule());
 
-        bind(new TypeLiteral<PomParser<HashMap<String, Path>>>() {})
-                .annotatedWith(Names.named("Javadoc"))
-                .to(ConcurrentJavadocParser.class);
+        install(new ProcessorsModule());
 
-        bind(new TypeLiteral<PomProcessor<HashMap<String, Path>>>() {})
-                .annotatedWith(Names.named("Library"))
-                .to(DefaultLibraryPomProcessor.class);
+        install(new CliModule());
 
-        bind(new TypeLiteral<PomProcessor<Set<Path>>>() {})
-                .annotatedWith(Names.named("Bom"))
-                .to(DefaultBomProcessor.class);
+        install(new RegistrarsModule());
 
-        bind(new TypeLiteral<PomProcessor<HashMap<String, Path>>>() {})
-                .annotatedWith(Names.named("gradlePlugins"))
-                .to(DefaultPluginPomProcessor.class);
+        install(new ControllersModule());
 
-        bind(new TypeLiteral<PomProcessor<HashMap<String, Path>>>() {})
-                .annotatedWith(Names.named("Javadoc"))
-                .to(DefaultJavadocProcessor.class);
+        install(new RedactorsModule());
 
-        bind(CommandLineParser.class).to(DefaultCommandLineParser.class);
-        bind(CommandExecutor.class).to(DefaultCommandExecutor.class);
+        install(new InstallersModule());
 
-        bind(Registrar.class).annotatedWith(Names.named("Library")).to(XmvnCompatRegistrar.class);
-        bind(Registrar.class).annotatedWith(Names.named("Bom")).to(XmvnBomCompatRegistrar.class);
+        install(new ServicesModule());
 
-        bind(XmvnCompatController.class).annotatedWith(Names.named("Library")).to(DefaultXmvnCompatController.class);
-        bind(XmvnCompatController.class).annotatedWith(Names.named("Bom")).to(DefaultBomXmvnCompatController.class);
-        bind(XmvnCompatController.class).annotatedWith(Names.named("Javadoc")).to(DefaultJavadocXmvnCompatController.class);
+        install(new CachesModule());
 
-        bind(ParentRedactor.class).annotatedWith(Names.named("Remove")).to(DefaultParentRemover.class);
+        install(new ConfigModule());
 
-        bind(ArtifactsInstaller.class).to(DefaultPluginArtifactsInstaller.class);
-        bind(ArtifactsInstallationController.class).to(DefaultPluginsInstallationController.class);
-
-        bind(JavadocInstaller.class).to(DefaultJavadocInstaller.class);
-
-        bind(PomService.class).to(PomProcessingService.class);
-
-        bind(ArtifactCache.class).to(DefaultArtifactCache.class);
-        bind(ToolConfig.class).toInstance(toolConfig);
+        install(new ApplicationModule());
     }
 }

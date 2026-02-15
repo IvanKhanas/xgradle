@@ -17,7 +17,7 @@ package org.altlinux.xgradle.impl.cli;
 
 import com.google.inject.Singleton;
 
-import org.altlinux.xgradle.api.cli.CommandExecutor;
+import org.altlinux.xgradle.interfaces.cli.CommandExecutor;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -25,24 +25,16 @@ import java.io.InputStreamReader;
 
 /**
  * Default implementation of CommandExecutor.
- * Handles execution of system commands with output streaming.
+ * Implements {@link CommandExecutor}.
  *
- * @author Ivan Khanas
+ * @author Ivan Khanas <xeno@altlinux.org>
  */
 @Singleton
-public class DefaultCommandExecutor implements CommandExecutor {
+final class DefaultCommandExecutor implements CommandExecutor {
 
-    /**
-     * Executes the specified process builder and returns the exit code.
-     * Streams command output to system out.
-     *
-     * @param processBuilder the process builder to execute
-     * @return the exit code of the executed process
-     * @throws IOException if an I/O error occurs
-     * @throws InterruptedException if the process is interrupted
-     */
     @Override
     public int execute(ProcessBuilder processBuilder) throws IOException, InterruptedException {
+        processBuilder.redirectErrorStream(true);
         Process process = processBuilder.start();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
             reader.lines().forEach(System.out::println);

@@ -15,8 +15,6 @@
  */
 package org.altlinux.xgradle.impl.cli;
 
-import com.google.inject.Singleton;
-
 import com.beust.jcommander.IUsageFormatter;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterDescription;
@@ -26,39 +24,22 @@ import java.util.List;
 
 /**
  * Custom usage formatter for JCommander command-line parsing.
- * Provides formatted help output with usage examples and parameter descriptions.
+ * Implements {@link IUsageFormatter}.
  *
- * @author Ivan Khanas
+ * @author Ivan Khanas <xeno@altlinux.org>
  */
-@Singleton
-public class CustomXgradleFormatter implements IUsageFormatter {
+public final class CustomXgradleFormatter implements IUsageFormatter {
     private final JCommander commander;
 
-    /**
-     * Constructs a new CustomXgradleFormatter with the specified JCommander instance.
-     *
-     * @param commander the JCommander instance to format usage for
-     */
     public CustomXgradleFormatter(JCommander commander) {
         this.commander = commander;
     }
 
-    /**
-     * Generates usage information and appends it to the specified StringBuilder.
-     *
-     * @param out the StringBuilder to append usage information to
-     */
     @Override
     public void usage(StringBuilder out) {
         usage(out, "");
     }
 
-    /**
-     * Generates usage information with indentation and appends it to the specified StringBuilder.
-     *
-     * @param out the StringBuilder to append usage information to
-     * @param indent the indentation string to use
-     */
     @Override
     public void usage(StringBuilder out, String indent) {
         out.append("Usage examples: \n\n")
@@ -78,8 +59,18 @@ public class CustomXgradleFormatter implements IUsageFormatter {
                         "--searching-directory=<directory path> " +
                         "--pom-installation-dir=</path/to/poms/installation/location> " +
                         "--jar-installation-dir=</path/to/jars/installation/location>\n\n")
+                .append("-------------------------------\n\n")
+                .append("Dependency redaction (.pom files): \n")
+                .append("You can add -r or --recursive to process all .pom files under --searching-directory recursively.\n\n")
+                .append("Remove dependency: \n")
+                .append("xgradle-tool --searching-directory=</path/to/file.pom|/path/to/dir> --remove-dependency=<groupId:artifactId[:version[:scope]]>\n\n")
+                .append("Add dependency: \n")
+                .append("xgradle-tool --searching-directory=</path/to/file.pom|/path/to/dir> --add-dependency=<groupId:artifactId[:version[:scope]]>\n\n")
+                .append("Change dependency: \n")
+                .append("xgradle-tool --searching-directory=</path/to/file.pom|/path/to/dir> --change-dependency <sourceCoords> <targetCoords>\n\n")
                 .append("Usage: ").append(commander.getProgramName()).append(" [options]\n\n")
                 .append("Options:\n");
+
         List<ParameterDescription> parameters = commander.getParameters();
         parameters.sort(Comparator.comparingInt(p -> p.getParameter().order()));
 
@@ -91,43 +82,20 @@ public class CustomXgradleFormatter implements IUsageFormatter {
         }
     }
 
-    /**
-     * Generates usage information for a specific command.
-     *
-     * @param commandName the name of the command
-     */
+
     @Override
     public void usage(String commandName) {}
 
-    /**
-     * Generates usage information for a specific command and appends it to the specified StringBuilder.
-     *
-     * @param commandName the name of the command
-     * @param out the StringBuilder to append usage information to
-     */
     @Override
     public void usage(String commandName, StringBuilder out) {
         usage(out);
     }
 
-    /**
-     * Generates usage information for a specific command with indentation and appends it to the specified StringBuilder.
-     *
-     * @param commandName the name of the command
-     * @param out the StringBuilder to append usage information to
-     * @param indent the indentation string to use
-     */
     @Override
     public void usage(String commandName, StringBuilder out, String indent) {
         usage(out, indent);
     }
 
-    /**
-     * Gets the description for a specific command.
-     *
-     * @param commandName the name of the command
-     * @return the command description
-     */
     @Override
     public String getCommandDescription(String commandName) {
         return "";

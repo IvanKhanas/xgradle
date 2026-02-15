@@ -17,9 +17,8 @@ package org.altlinux.xgradle.impl.enums;
 
 /**
  * Enumeration of processing types supported by the XGradle tool.
- * Defines the different types of artifact processing.
  *
- * @author Ivan Khanas
+ * @author Ivan Khanas <xeno@altlinux.org>
  */
 public enum ProcessingType {
     /** Library artifact processing */

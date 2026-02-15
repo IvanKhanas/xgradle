@@ -29,8 +29,10 @@ dependencies {
     implementation(libs.plexus.utils)
     implementation(libs.guice)
     runtimeOnly(libs.bundles.guice.deps)
+
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.bundles.testing)
+    testRuntimeOnly(libs.bundles.testing.platform)
 
     shadow(libs.bundles.maven.tooling)
     shadow(libs.bundles.logging)
@@ -74,22 +76,13 @@ private fun runGitCommand(vararg args: String): String? {
     }
 }
 
-tasks.processResources {
-    filesMatching("application.properties") {
-        expand(
-            "projectVersion" to project.version,
-            "gitCommitHash" to gitCommitId.get(),
-            "projectBuildTime" to buildTime
-        )
-    }
-}
+apply(from = rootProject.file("version.gradle.kts"))
 
 application {
     mainClass.set("${project.group}.impl.Main")
 }
 
 tasks.shadowJar {
-    dependsOn(tasks.processResources)
 
     configurations = listOf(project.configurations.shadow.get())
 
@@ -188,4 +181,9 @@ tasks.named("build") {
 
 tasks.test {
     useJUnitPlatform()
+
+    testLogging {
+        events("passed", "skipped", "failed")
+        showStackTraces = true
+    }
 }

@@ -18,6 +18,7 @@ package org.altlinux.xgradle.impl.cli;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.Parameters;
+import com.google.inject.Singleton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,11 +26,11 @@ import java.util.Optional;
 
 /**
  * Container for command-line arguments using JCommander annotations.
- * Defines and manages all supported command-line parameters.
  *
- * @author IvanKhanas
+ * @author Ivan Khanas <xeno@altlinux.org>
  */
 @Parameters(separators = "=")
+@Singleton
 public class CliArgumentsContainer {
 
     @Parameter(
@@ -131,6 +132,34 @@ public class CliArgumentsContainer {
     )
     private boolean help;
 
+    @Parameter(
+            names = {"-r", "--recursive"},
+            description = "Recursively process all .pom files under --searching-directory",
+            order = 15
+    )
+    private boolean recursive;
+
+    @Parameter(
+            names = "--add-dependency",
+            description = "Add dependency: groupId:artifactId[:version[:scope]]",
+            order = 16
+    )
+    private List<String> addDependencies;
+
+    @Parameter(
+            names = "--remove-dependency",
+            description = "Remove dependency: groupId:artifactId[:version[:scope]]",
+            order = 17
+    )
+    private List<String> removeDependencies;
+
+    @Parameter(
+            names = "--change-dependency",
+            description = "Change dependency: pass exactly two values (source then target), each is groupId:artifactId[:version[:scope]]",
+            order = 18
+    )
+    private List<String> changeDependencies;
+
     public void validateMutuallyExclusive() {
         List<String> conflictingParams = new ArrayList<>();
 
@@ -142,16 +171,50 @@ public class CliArgumentsContainer {
             conflictingParams.add("--install-gradle-plugin and --register-bom");
         }
 
-        if(hasJavadocRegistration() && hasInstallPluginParameter()) {
+        if (hasJavadocRegistration() && hasInstallPluginParameter()) {
             conflictingParams.add("--register-javadoc and --install-gradle-plugin");
         }
 
-        if(hasJavadocRegistration() && hasBomRegistration()) {
+        if (hasJavadocRegistration() && hasBomRegistration()) {
             conflictingParams.add("--register-javadoc and --register-bom");
         }
 
-        if(hasJavadocRegistration() && hasXmvnRegister()) {
+        if (hasJavadocRegistration() && hasXmvnRegister()) {
             conflictingParams.add("--register-javadoc and --xmvn-register");
+        }
+
+        int depOps = (hasAddDependencies() ? 1 : 0)
+                + (hasRemoveDependencies() ? 1 : 0)
+                + (hasChangeDependencies() ? 1 : 0);
+
+        if (depOps > 1) {
+            conflictingParams.add("--add-dependency, --remove-dependency and --change-dependency");
+        }
+
+        if (hasChangeDependencies() && getChangeDependencies().size() != 2) {
+            throw new ParameterException("--change-dependency requires exactly 2 values: <source> <target>");
+        }
+
+        if (hasPomRedaction()) {
+            if (!hasSearchingDirectory()) {
+                throw new ParameterException("No searching directory specified");
+            }
+
+            if (hasXmvnRegister()) {
+                conflictingParams.add("--pom-redaction and --xmvn-register");
+            }
+
+            if (hasInstallPluginParameter()) {
+                conflictingParams.add("--pom-redaction and --install-gradle-plugin");
+            }
+
+            if (hasBomRegistration()) {
+                conflictingParams.add("--pom-redaction and --register-bom");
+            }
+
+            if (hasJavadocRegistration()) {
+                conflictingParams.add("--pom-redaction and --register-javadoc");
+            }
         }
 
         if (!conflictingParams.isEmpty()) {
@@ -162,190 +225,121 @@ public class CliArgumentsContainer {
         }
     }
 
-    /**
-     * Checks if XMvn register command is specified.
-     *
-     * @return true if XMvn register command is specified, false otherwise
-     */
     public boolean hasXmvnRegister() {
         return xmvnRegister != null && !xmvnRegister.isEmpty();
     }
 
-    /**
-     * Gets the XMvn register command.
-     *
-     * @return the XMvn register command string
-     */
     public String getXmvnRegister() {
         return xmvnRegister;
     }
 
-    /**
-     * Gets the searching directory path.
-     *
-     * @return the searching directory path
-     */
     public String getSearchingDirectory() {
         return searchingDirectory;
     }
 
-    /**
-     * Checks if searching directory is specified.
-     *
-     * @return true if searching directory is specified, false otherwise
-     */
     public boolean hasSearchingDirectory() {
         return searchingDirectory != null && !searchingDirectory.isEmpty();
     }
 
-    /**
-     * Gets the optional list of artifact names.
-     *
-     * @return optional containing list of artifact names, or empty if not specified
-     */
     public Optional<List<String>> getArtifactName() {
         return Optional.ofNullable(artifactNames);
     }
 
-    /**
-     * Checks if artifact names are specified.
-     *
-     * @return true if artifact names are specified, false otherwise
-     */
     public boolean hasArtifactName() {
         return artifactNames != null && !artifactNames.isEmpty();
     }
 
-    /**
-     * Checks if POM installation directory is specified.
-     *
-     * @return true if POM installation directory is specified, false otherwise
-     */
     public boolean hasPomInstallationDirectory() {
         return pomInstallationDirectory != null && !pomInstallationDirectory.isEmpty();
     }
 
-    /**
-     * Gets the POM installation directory path.
-     *
-     * @return the POM installation directory path
-     */
     public String getPomInstallationDirectory() {
         return pomInstallationDirectory;
     }
 
-    /**
-     * Checks if JAR installation directory is specified.
-     *
-     * @return true if JAR installation directory is specified, false otherwise
-     */
     public boolean hasJarInstallationDirectory() {
         return jarInstallationDirectory != null && !jarInstallationDirectory.isEmpty();
     }
 
-    /**
-     * Gets the JAR installation directory path.
-     *
-     * @return the JAR installation directory path
-     */
     public String getJarInstallationDirectory() {
         return jarInstallationDirectory;
     }
 
-    /**
-     * Checks if install plugin parameter is specified.
-     *
-     * @return true if install plugin parameter is specified, false otherwise
-     */
     public boolean hasInstallPluginParameter() {
         return installPlugin;
     }
 
-    /**
-     * Checks if BOM installation is specified.
-     *
-     * @return true if BOM installation is specified, false otherwise
-     */
     public boolean hasBomRegistration(){
         return registerBom;
     }
 
-    /**
-     * Gets the list of excluded artifacts.
-     *
-     * @return list of excluded artifact patterns
-     */
     public List<String> getExcludedArtifact() {
         return excludedArtifacts;
     }
 
-    /**
-     * Checks if snapshot artifacts are allowed.
-     *
-     * @return true if snapshot artifacts are allowed, false otherwise
-     */
     public boolean hasAllowSnapshots() {
         return allowSnapshots;
     }
 
-    /**
-     * Checks if help is requested.
-     *
-     * @return true if help is requested, false otherwise
-     */
     public boolean hasHelp(){
         return help;
     }
 
-    /**
-     * Gets the list of POM files for which to remove parent blocks.
-     *
-     * @return list of POM patterns for parent removal
-     */
     public List<String> getRemoveParentPoms(){
         return removeParentPoms;
     }
 
-    /**
-     * Checks if parent removal is specified.
-     *
-     * @return true if parent removal is specified, false otherwise
-     */
     public boolean hasRemoveParentPoms() {
         return removeParentPoms != null && !removeParentPoms.isEmpty();
     }
 
-    /**
-     * Checks if Javadoc registration is specified.
-     *
-     * @return true if Javadoc registration is specified, false otherwise
-     */
     public boolean hasJavadocRegistration() {
         return registerJavadoc;
     }
 
-    /**
-     * Checks if install prefix is specified.
-     * @return true if install prefix is specified and not empty
-     */
     public boolean hasInstallPrefix() {
         return installPrefix != null && !installPrefix.isEmpty();
     }
 
-    /**
-     * Gets the install prefix value.
-     * @return install prefix string or null if not specified
-     */
     public String getInstallPrefix() {
         return installPrefix;
     }
 
-    /**
-     * Checks if version information is requested.
-     *
-     * @return true if version information is requested, false otherwise
-     */
     public boolean hasVersion() {
         return version;
     }
+
+
+    public boolean isRecursive() {
+        return recursive;
+    }
+
+    public boolean hasAddDependencies() {
+        return addDependencies != null && !addDependencies.isEmpty();
+    }
+
+    public List<String> getAddDependencies() {
+        return addDependencies;
+    }
+
+    public boolean hasRemoveDependencies() {
+        return removeDependencies != null && !removeDependencies.isEmpty();
+    }
+
+    public List<String> getRemoveDependencies() {
+        return removeDependencies;
+    }
+
+    public boolean hasChangeDependencies() {
+        return changeDependencies != null && !changeDependencies.isEmpty();
+    }
+
+    public List<String> getChangeDependencies() {
+        return changeDependencies;
+    }
+
+    public boolean hasPomRedaction() {
+        return hasAddDependencies() || hasRemoveDependencies() || hasChangeDependencies();
+    }
+
 }

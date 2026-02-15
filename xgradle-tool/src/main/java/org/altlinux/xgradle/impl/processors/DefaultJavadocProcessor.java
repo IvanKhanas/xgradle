@@ -17,13 +17,14 @@ package org.altlinux.xgradle.impl.processors;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 
+import org.altlinux.xgradle.interfaces.model.ArtifactCoordinates;
+import org.altlinux.xgradle.interfaces.model.ArtifactFactory;
+import org.altlinux.xgradle.impl.bindingannotations.processingtypes.Javadoc;
 import org.altlinux.xgradle.impl.config.ToolConfig;
-import org.altlinux.xgradle.api.parsers.PomParser;
-import org.altlinux.xgradle.api.processors.PomProcessor;
-import org.altlinux.xgradle.api.services.PomService;
-import org.altlinux.xgradle.impl.model.DefaultArtifactCoordinates;
+import org.altlinux.xgradle.interfaces.parsers.PomParser;
+import org.altlinux.xgradle.interfaces.processors.PomProcessor;
+import org.altlinux.xgradle.interfaces.services.PomService;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
@@ -31,7 +32,6 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -44,44 +44,34 @@ import java.util.List;
 
 /**
  * Processor for Javadoc artifacts with duplicate filtering.
- * Handles processing of Javadoc JAR files and filters duplicates based on groupId:artifactId.
- * Prevents multiple Javadoc artifacts for the same library.
+ * Implements {@link PomProcessor<HashMap<String} and {@link Path>>}.
  *
- * @author Ivan Khanas
+ * @author Ivan Khanas <xeno@altlinux.org>
  */
 @Singleton
-public class DefaultJavadocProcessor implements PomProcessor<HashMap<String, Path>> {
-    private static final Logger logger = LoggerFactory.getLogger("XGradleLogger");
+final class DefaultJavadocProcessor implements PomProcessor<HashMap<String, Path>> {
+
+    private final ArtifactFactory artifactFactory;
     private final PomParser<HashMap<String, Path>> javadocParser;
     private final PomService pomService;
     private final ToolConfig toolConfig;
+    private final Logger logger;
 
-    /**
-     * Constructs a new DefaultJavadocProcessor with required dependencies.
-     *
-     * @param javadocParser parser for Javadoc artifacts
-     * @param pomService service for POM processing operations
-     * @param toolConfig configuration for the tool
-     */
     @Inject
-    public DefaultJavadocProcessor(
-            @Named("Javadoc") PomParser<HashMap<String, Path>> javadocParser,
+    DefaultJavadocProcessor(
+            ArtifactFactory artifactFactory,
+            @Javadoc PomParser<HashMap<String, Path>> javadocParser,
             PomService pomService,
-            ToolConfig toolConfig
+            ToolConfig toolConfig,
+            Logger logger
     ) {
+        this.artifactFactory =artifactFactory;
         this.javadocParser = javadocParser;
         this.pomService = pomService;
         this.toolConfig = toolConfig;
+        this.logger = logger;
     }
 
-    /**
-     * Processes Javadoc artifacts from the specified directory.
-     * Applies duplicate filtering, artifact exclusion, and snapshot filtering.
-     *
-     * @param searchingDir the directory to search for Javadoc artifacts
-     * @param artifactName optional list of artifact names to filter by
-     * @return map of POM file paths to corresponding Javadoc JAR file paths
-     */
     @Override
     public HashMap<String, Path> pomsFromDirectory(String searchingDir, Optional<List<String>> artifactName) {
         HashMap<String, Path> artifacts = javadocParser.getArtifactCoords(searchingDir, artifactName);
@@ -96,13 +86,6 @@ public class DefaultJavadocProcessor implements PomProcessor<HashMap<String, Pat
         return artifacts;
     }
 
-    /**
-     * Filters duplicate artifacts based on groupId:artifactId coordinates.
-     * Ensures only one Javadoc artifact per unique library coordinates.
-     *
-     * @param artifacts map of artifact paths to filter
-     * @return filtered map with unique artifacts by coordinates
-     */
     private HashMap<String, Path> filterDuplicateArtifacts(HashMap<String, Path> artifacts) {
         HashMap<String, Path> filteredArtifacts = new HashMap<>();
         Set<String> processedCoordinates = new HashSet<>();
@@ -112,7 +95,7 @@ public class DefaultJavadocProcessor implements PomProcessor<HashMap<String, Pat
             Path javadocPath = entry.getValue();
 
             try {
-                DefaultArtifactCoordinates coordinates = extractCoordinatesFromPom(pomPath);
+                ArtifactCoordinates coordinates = extractCoordinatesFromPom(pomPath);
                 if (coordinates != null) {
                     String coordKey = coordinates.getGroupId() + ":" + coordinates.getArtifactId();
 
@@ -139,16 +122,7 @@ public class DefaultJavadocProcessor implements PomProcessor<HashMap<String, Pat
         return filteredArtifacts;
     }
 
-    /**
-     * Extracts artifact coordinates from POM file.
-     * Reads groupId, artifactId, and version from POM model.
-     *
-     * @param pomPath path to the POM file
-     * @return artifact coordinates or null if extraction fails
-     * @throws IOException if an I/O error occurs during file reading
-     * @throws XmlPullParserException if the POM file cannot be parsed
-     */
-    private DefaultArtifactCoordinates extractCoordinatesFromPom(Path pomPath) throws IOException, XmlPullParserException {
+    private ArtifactCoordinates extractCoordinatesFromPom(Path pomPath) throws IOException, XmlPullParserException {
         MavenXpp3Reader reader = new MavenXpp3Reader();
         try (FileInputStream fis = new FileInputStream(pomPath.toFile())) {
             Model model = reader.read(fis);
@@ -169,7 +143,7 @@ public class DefaultJavadocProcessor implements PomProcessor<HashMap<String, Pat
                 return null;
             }
 
-            return new DefaultArtifactCoordinates(groupId, artifactId, version != null ? version : "unknown");
+            return artifactFactory.coordinates(groupId, artifactId, version != null ? version : "unknown");
         }
     }
 }

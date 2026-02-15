@@ -19,8 +19,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.altlinux.xgradle.impl.enums.ProcessingType;
-import org.altlinux.xgradle.api.containers.ArtifactContainer;
-import org.altlinux.xgradle.api.installers.ArtifactsInstaller;
+import org.altlinux.xgradle.interfaces.containers.ArtifactContainer;
+import org.altlinux.xgradle.interfaces.installers.ArtifactsInstaller;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
@@ -28,7 +28,6 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -45,36 +44,25 @@ import java.util.List;
 
 /**
  * Default implementation of ArtifactsInstaller for Gradle plugin artifacts.
- * Handles installation of plugin POM and JAR files to target directories with proper naming.
+ * Implements {@link ArtifactsInstaller}.
  *
- * @author Ivan Khanas
+ * @author Ivan Khanas <xeno@altlinux.org>
  */
 @Singleton
-public class DefaultPluginArtifactsInstaller implements ArtifactsInstaller {
-    private final Logger logger = LoggerFactory.getLogger("XGradleLogger");
-    private final ArtifactContainer artifactContainer;
+final class DefaultPluginArtifactsInstaller implements ArtifactsInstaller {
 
-    /**
-     * Constructs a new DefaultPluginArtifactsInstaller with required dependencies.
-     *
-     * @param artifactContainer container for artifact management
-     */
+    private final ArtifactContainer artifactContainer;
+    private final Logger logger;
+
     @Inject
-    public DefaultPluginArtifactsInstaller(ArtifactContainer artifactContainer) {
+    DefaultPluginArtifactsInstaller(
+            ArtifactContainer artifactContainer,
+            Logger logger
+    ) {
         this.artifactContainer = artifactContainer;
+        this.logger = logger;
     }
 
-    /**
-     * Installs plugin artifacts to the specified target directories.
-     * Copies POM and JAR files with standardized naming based on artifactId.
-     *
-     * @param searchingDirectory the directory to search for artifacts
-     * @param artifactName optional list of artifact names to filter by
-     * @param pomInstallationDirectory target directory for POM files
-     * @param jarInstallationDirectory target directory for JAR files
-     * @param processingType the type of processing (should be PLUGINS)
-     * @throws RuntimeException if target directories cannot be created
-     */
     @Override
     public void install(
             String searchingDirectory,
@@ -199,14 +187,6 @@ public class DefaultPluginArtifactsInstaller implements ArtifactsInstaller {
         }
     }
 
-    /**
-     * Reads and parses a POM file into a Maven model.
-     *
-     * @param pomPath path to the POM file
-     * @return parsed Maven model
-     * @throws IOException if an I/O error occurs
-     * @throws XmlPullParserException if the POM file cannot be parsed
-     */
     private Model readPomModel(Path pomPath) throws IOException, XmlPullParserException {
         MavenXpp3Reader reader = new MavenXpp3Reader();
         try (FileInputStream fis = new FileInputStream(pomPath.toFile())) {

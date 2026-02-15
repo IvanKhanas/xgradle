@@ -15,13 +15,19 @@
  */
 package integrationtests.parsertests;
 
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import org.altlinux.xgradle.interfaces.parsers.PomParser;
+import org.altlinux.xgradle.impl.caches.CachesModule;
+import org.altlinux.xgradle.impl.collectors.CollectorsModule;
+import org.altlinux.xgradle.impl.indexing.IndexingModule;
+import org.altlinux.xgradle.impl.maven.MavenModule;
 import org.altlinux.xgradle.impl.model.MavenCoordinate;
-import org.altlinux.xgradle.impl.services.DefaultPomParser;
-
-import org.gradle.api.logging.Logger;
-import org.gradle.api.logging.Logging;
+import org.altlinux.xgradle.impl.parsers.ParsersModule;
+import org.altlinux.xgradle.impl.utils.logging.LoggingModule;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,80 +36,37 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Integration tests for verifying the parsing of dependency management sections in Maven POM files.
- * <p>
- * This test class focuses on validating the functionality of the {@link DefaultPomParser#parseDependencyManagement(Path, Logger)}
- * method. It ensures that the parser correctly extracts and processes dependency information from the
- * {@code <dependencyManagement>} section of POM files, including:
- * <ul>
- *   <li>Identification of all managed dependencies</li>
- *   <li>Correct groupId, artifactId, and version resolution</li>
- *   <li>Proper handling of BOM (Bill of Materials) files</li>
- *   <li>Accurate version assignment for managed dependencies</li>
- * </ul>
- *
- * <p>Test scenarios include:
- * <ol>
- *   <li>Parsing simple BOM files</li>
- *   <li>Parsing complex BOM files with multiple dependencies</li>
- *   <li>Verifying the count of extracted dependencies</li>
- *   <li>Validating coordinate accuracy (groupId, artifactId)</li>
- *   <li>Checking version resolution correctness</li>
- * </ol>
- *
- * <p>Test resources are located in {@code xgradle-core/src/test/resources/poms/} and include:
- * <ul>
- *   <li>Sample BOM files from real-world projects</li>
- *   <li>POM files with varying complexity and structure</li>
- * </ul>
- *
- * @see DefaultPomParser
- * @see DefaultPomParser#parseDependencyManagement(Path, Logger)
+ * Integration tests for {@link PomParser#parseDependencyManagement(Path)}.
  *
  * @author Ivan Khanas
  */
+@DisplayName("Parse dependencyManagement from POM files")
 public class TestDependencyManagementBlockParser {
-    private DefaultPomParser pomParser;
-    private ArrayList<MavenCoordinate> parsedDeps;
+    private PomParser pomParser;
+    private List<MavenCoordinate> parsedDeps;
 
-    Logger logger;
-
-    /**
-     * Initializes test environment before each test method execution.
-     * <p>
-     * Creates a fresh instance of {@link DefaultPomParser} and configures a logger
-     * specifically for the test class. This ensures test isolation and consistent
-     * initial conditions for all test cases.
-     */
     @BeforeEach
     public void prepareParser() {
-        pomParser = new DefaultPomParser();
-        logger = Logging.getLogger(this.getClass());
+        Injector injector = Guice.createInjector(
+                new LoggingModule(),
+                new CachesModule(),
+                new CollectorsModule(),
+                new IndexingModule(),
+                new MavenModule(),
+                new ParsersModule()
+        );
+        pomParser = injector.getInstance(PomParser.class);
     }
 
-    /**
-     * Tests parsing of the JUnit Platform BOM file.
-     * <p>
-     * Verifies that the parser correctly handles a typical Bill of Materials (BOM)
-     * file from the JUnit project. The test checks:
-     * <ul>
-     *   <li>All expected dependencies are present (JUnit Jupiter, Platform, Vintage)</li>
-     *   <li>Dependencies are ordered as in the original POM</li>
-     *   <li>GroupId and artifactId match expected values</li>
-     *   <li>Version numbers are resolved correctly</li>
-     *   <li>Total dependency count matches expectations</li>
-     * </ul>
-     *
-     * @param tempDir temporary directory provided by JUnit for test file operations
-     */
     @Test
+    @DisplayName("Parses JUnit BOM dependency management")
     public void parseJunitBom(@TempDir Path tempDir) {
         preparePom("src/test/resources/poms/junit5/junit-bom.pom", tempDir);
 
-        parsedDeps = pomParser.parseDependencyManagement(tempDir.resolve(Path.of("junit-bom.pom")), logger);
+        parsedDeps = pomParser.parseDependencyManagement(tempDir.resolve(Path.of("junit-bom.pom")));
 
         assertFalse(parsedDeps.isEmpty());
 
@@ -152,25 +115,12 @@ public class TestDependencyManagementBlockParser {
         assertEquals(18, parsedDeps.size());
     }
 
-    /**
-     * Tests parsing of the Maven Surefire BOM file.
-     * <p>
-     * Validates parser behavior with a more complex BOM file containing diverse
-     * dependencies. The test verifies:
-     * <ul>
-     *   <li>Handling of dependencies from various sources (Apache Commons, Maven, etc.)</li>
-     *   <li>Correct resolution of version numbers for 31 distinct dependencies</li>
-     *   <li>Proper identification of test-scoped dependencies</li>
-     *   <li>Accurate processing of plugin-related artifacts</li>
-     * </ul>
-     *
-     * @param tempDir temporary directory provided by JUnit for test file operations
-     */
     @Test
+    @DisplayName("Parses Maven Surefire BOM dependency management")
     public void parseSurefireBom(@TempDir Path tempDir) {
         preparePom("src/test/resources/poms/maven-surefire/surefire.pom", tempDir);
 
-        parsedDeps = pomParser.parseDependencyManagement(tempDir.resolve(Path.of("surefire.pom")), logger);
+        parsedDeps = pomParser.parseDependencyManagement(tempDir.resolve(Path.of("surefire.pom")));
 
         assertFalse(parsedDeps.isEmpty());
         assertEquals(31, parsedDeps.size());
@@ -240,30 +190,11 @@ public class TestDependencyManagementBlockParser {
         assertTrue(checkDependencyVersion(parsedDeps, "plexus-xml", "3.0.0"));
     }
 
-    /**
-     * Verifies the version of a specific dependency in the parsed results.
-     *
-     * @param parsedDeps list of parsed Maven coordinates
-     * @param artifactId artifact ID to search for
-     * @param version expected version string
-     *
-     * @return true if the dependency has the expected version, false otherwise
-     */
-    private boolean checkDependencyVersion(ArrayList<MavenCoordinate> parsedDeps, String artifactId, String version) {
+    private boolean checkDependencyVersion(List<MavenCoordinate> parsedDeps, String artifactId, String version) {
         return findDependency(parsedDeps, artifactId).getVersion().equals(version);
     }
 
-    /**
-     * Validates the presence and position of a specific dependency in the parsed results.
-     *
-     * @param parsedDeps list of parsed Maven coordinates
-     * @param groupId expected group ID
-     * @param artifactId expected artifact ID
-     * @param depNumber expected position in the list (0-based index)
-     *
-     * @return true if the dependency is found at the specified position with matching coordinates
-     */
-    private boolean isDependencyContainedAndQueried(ArrayList<MavenCoordinate> parsedDeps,
+    private boolean isDependencyContainedAndQueried(List<MavenCoordinate> parsedDeps,
                                           String groupId,
                                           String artifactId,
                                           Integer depNumber) {
@@ -271,31 +202,13 @@ public class TestDependencyManagementBlockParser {
                 parsedDeps.get(depNumber).getArtifactId().equals(artifactId);
     }
 
-    /**
-     * Locates a dependency by artifact ID in the parsed results.
-     *
-     * @param parsedDeps list of parsed Maven coordinates
-     * @param artifactId artifact ID to search for
-     *
-     * @return the first matching {@link MavenCoordinate}, or null if not found
-     */
-    private MavenCoordinate findDependency(ArrayList<MavenCoordinate> parsedDeps, String artifactId) {
+    private MavenCoordinate findDependency(List<MavenCoordinate> parsedDeps, String artifactId) {
         return parsedDeps.stream()
                 .filter(dep -> dep.getArtifactId().equals(artifactId))
                 .findFirst()
                 .orElse(null);
     }
 
-    /**
-     * Copies a POM file from test resources to the temporary test directory.
-     * <p>
-     * This helper method ensures test isolation by working with copies of resource files
-     * in JUnit-managed temporary directories.
-     *
-     * @param sourcePom path to the source POM file in test resources
-     * @param targetDir temporary directory for test execution
-     * @throws RuntimeException if file copying fails
-     */
     private void preparePom(String sourcePom, Path targetDir) {
         try {
             Path pathToPom = Path.of(sourcePom);

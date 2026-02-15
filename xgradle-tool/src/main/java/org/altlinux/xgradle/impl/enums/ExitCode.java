@@ -17,8 +17,8 @@ package org.altlinux.xgradle.impl.enums;
 
 /**
  * Application exit codes enumeration.
- * Defines standard exit codes for successful and error termination.
- * Provides utility methods for exiting with specific codes.
+ *
+ * @author Ivan Khanas <xeno@altlinux.org>
  */
 public enum ExitCode {
     SUCCESS(0),
@@ -30,18 +30,10 @@ public enum ExitCode {
         this.exitCode = exitCode;
     }
 
-    /**
-     * Terminates the application with the specified exit code.
-     */
     public void exit() {
         System.exit(this.exitCode);
     }
 
-    /**
-     * Gets the exit code value.
-     *
-     * @return the exit code integer value
-     */
     public int getExitCode() {
         return exitCode;
     }

@@ -15,7 +15,7 @@
  */
 package org.altlinux.xgradle.impl.collectors;
 
-import org.altlinux.xgradle.api.collectors.PomCollector;
+import org.altlinux.xgradle.interfaces.collectors.PomCollector;
 
 import com.google.inject.Singleton;
 
@@ -23,26 +23,20 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.stream.Stream;
 
 /**
  * Default implementation of PomCollector for collecting POM files from directories.
- * Provides functionality to collect all POM files or selected POM files based on artifact names.
+ * Implements {@link PomCollector}.
  *
- * @author Ivan Khanas
+ * @author Ivan Khanas <xeno@altlinux.org>
  */
 @Singleton
-public class DefaultPomCollector implements PomCollector {
+final class DefaultPomCollector implements PomCollector {
 
-    /**
-     * Collects all POM files from the specified directory and its subdirectories.
-     *
-     * @param searchingDir the directory to search for POM files
-     * @return set of all found POM file paths
-     * @throws RuntimeException if an I/O error occurs during file walking
-     */
     @Override
     public Set<Path> collectAll(String searchingDir) {
         Set<Path> result = new HashSet<>();
@@ -56,16 +50,11 @@ public class DefaultPomCollector implements PomCollector {
         return result;
     }
 
-    /**
-     * Collects selected POM files from the specified directory based on artifact names.
-     *
-     * @param searchingDir the directory to search for POM files
-     * @param artifactNames list of artifact names to filter by
-     * @return set of filtered POM file paths
-     * @throws RuntimeException if an I/O error occurs during file walking
-     */
     @Override
     public Set<Path> collectSelected(String searchingDir, List<String> artifactNames) {
+
+        Objects.requireNonNull(artifactNames, "artifactNames can not be null");
+
         Set<Path> result = new HashSet<>();
         try (Stream<Path> paths = Files.walk(Path.of(searchingDir), Integer.MAX_VALUE)) {
             paths.filter(Files::isRegularFile)

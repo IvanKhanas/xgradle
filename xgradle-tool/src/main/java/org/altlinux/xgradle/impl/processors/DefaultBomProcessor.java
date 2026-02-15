@@ -17,12 +17,12 @@ package org.altlinux.xgradle.impl.processors;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 
+import org.altlinux.xgradle.impl.bindingannotations.processingtypes.Bom;
 import org.altlinux.xgradle.impl.config.ToolConfig;
-import org.altlinux.xgradle.api.parsers.PomParser;
-import org.altlinux.xgradle.api.processors.PomProcessor;
-import org.altlinux.xgradle.api.services.PomService;
+import org.altlinux.xgradle.interfaces.parsers.PomParser;
+import org.altlinux.xgradle.interfaces.processors.PomProcessor;
+import org.altlinux.xgradle.interfaces.services.PomService;
 
 import java.nio.file.Path;
 import java.util.Optional;
@@ -31,27 +31,20 @@ import java.util.List;
 
 /**
  * Default implementation of PomProcessor for BOM (Bill of Materials) artifacts.
- * Processes BOM POM files with packaging type "pom" and dependency management sections.
- * Provides artifact exclusion, parent block removal, and snapshot filtering for BOM files.
+ * Implements {@link PomProcessor}.
  *
- * @author Ivan Khanas
+ * @author Ivan Khanas <xeno@altlinux.org>
  */
 @Singleton
-public class DefaultBomProcessor implements PomProcessor<Set<Path>> {
+final class DefaultBomProcessor implements PomProcessor<Set<Path>> {
+
     private final PomParser<Set<Path>> pomParser;
     private final PomService pomService;
     private final ToolConfig toolConfig;
 
-    /**
-     * Constructs a new DefaultBomProcessor with required dependencies.
-     *
-     * @param pomParser the parser for BOM POM files
-     * @param pomService the service for POM processing operations
-     * @param toolConfig the configuration for the tool
-     */
     @Inject
-    public DefaultBomProcessor(
-            @Named("Bom") PomParser<Set<Path>> pomParser,
+    DefaultBomProcessor(
+            @Bom PomParser<Set<Path>> pomParser,
             PomService pomService,
             ToolConfig toolConfig
     ) {
@@ -60,14 +53,6 @@ public class DefaultBomProcessor implements PomProcessor<Set<Path>> {
         this.toolConfig = toolConfig;
     }
 
-    /**
-     * Processes BOM artifacts from the specified directory.
-     * Applies artifact exclusion, parent block removal, and snapshot filtering.
-     *
-     * @param searchingDir the directory to search for BOM files
-     * @param artifactNames optional list of artifact names to filter by
-     * @return set of BOM file paths that match the criteria
-     */
     @Override
     public Set<Path> pomsFromDirectory(String searchingDir, Optional<List<String>> artifactNames) {
         Set<Path> artifacts = getArtifactsFromParser(searchingDir, artifactNames);
@@ -82,14 +67,6 @@ public class DefaultBomProcessor implements PomProcessor<Set<Path>> {
         return artifacts;
     }
 
-    /**
-     * Retrieves artifacts from parser based on whether artifact names are specified.
-     * Delegates to appropriate parser method depending on the presence of artifact names.
-     *
-     * @param searchingDir the directory to search for artifacts
-     * @param artifactNames optional list of artifact names to filter by
-     * @return set of artifact paths
-     */
     private Set<Path> getArtifactsFromParser(String searchingDir, Optional<List<String>> artifactNames) {
         if (artifactNames.isPresent()) {
             return pomParser.getArtifactCoords(searchingDir, artifactNames);

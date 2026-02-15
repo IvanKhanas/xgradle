@@ -20,8 +20,8 @@ import com.google.inject.Singleton;
 
 import org.altlinux.xgradle.impl.enums.ProcessingType;
 import org.altlinux.xgradle.impl.config.ToolConfig;
-import org.altlinux.xgradle.api.collectors.ArtifactCollector;
-import org.altlinux.xgradle.api.installers.JavadocInstaller;
+import org.altlinux.xgradle.interfaces.collectors.ArtifactCollector;
+import org.altlinux.xgradle.interfaces.installers.JavadocInstaller;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
@@ -29,7 +29,6 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -46,37 +45,28 @@ import java.util.HashSet;
 
 /**
  * Default implementation of JavadocInstaller for installing Javadoc artifacts.
- * Handles copying and renaming of Javadoc JAR files based on artifact metadata.
+ * Implements {@link JavadocInstaller}.
  *
- * @author Ivan Khanas
+ * @author Ivan Khanas <xeno@altlinux.org>
  */
 @Singleton
-public class DefaultJavadocInstaller implements JavadocInstaller {
-    private static final Logger logger = LoggerFactory.getLogger("XGradleLogger");
+final class DefaultJavadocInstaller implements JavadocInstaller {
+
     private final ArtifactCollector artifactCollector;
     private final ToolConfig toolConfig;
+    private final Logger logger;
 
-    /**
-     * Constructs a new DefaultJavadocInstaller with required dependencies.
-     *
-     * @param artifactCollector collector for retrieving Javadoc artifacts
-     * @param toolConfig configuration for the tool
-     */
     @Inject
-    public DefaultJavadocInstaller(ArtifactCollector artifactCollector, ToolConfig toolConfig) {
+    DefaultJavadocInstaller(
+            ArtifactCollector artifactCollector,
+            ToolConfig toolConfig,
+            Logger logger
+    ) {
         this.artifactCollector = artifactCollector;
         this.toolConfig = toolConfig;
+        this.logger = logger;
     }
 
-    /**
-     * Installs Javadoc artifacts to the specified target directory.
-     * Copies Javadoc JAR files with standardized naming based on artifactId.
-     * Creates or updates .mfiles-javadoc file in current directory with target paths.
-     *
-     * @param searchingDir the directory to search for Javadoc artifacts
-     * @param artifactNames optional list of artifact names to filter by
-     * @param jarInstallationDir target directory for Javadoc JAR files
-     */
     @Override
     public void installJavadoc(String searchingDir, Optional<List<String>> artifactNames, String jarInstallationDir) {
         HashMap<String, Path> javadocMap = artifactCollector.collect(searchingDir, artifactNames, ProcessingType.JAVADOC);
@@ -132,12 +122,6 @@ public class DefaultJavadocInstaller implements JavadocInstaller {
         logger.debug("Successfully installed {} Javadoc artifacts to {}", copiedCount, targetDir);
     }
 
-    /**
-     * Prepares the path for writing to .mfiles-javadoc by stripping the install prefix if specified.
-     *
-     * @param originalPath the original installation path
-     * @return the prepared path with prefix stripped if applicable
-     */
     private String preparePathForMfiles(String originalPath) {
         if (toolConfig.getInstallPrefix() != null && !toolConfig.getInstallPrefix().isEmpty()) {
             String installPrefix = toolConfig.getInstallPrefix();
@@ -156,14 +140,6 @@ public class DefaultJavadocInstaller implements JavadocInstaller {
         return originalPath;
     }
 
-    /**
-     * Updates .mfiles-javadoc file in current directory.
-     * If file doesn't exist, creates it with the target path.
-     * If file exists and path is not present, appends the path on a new line.
-     * If file exists and path is already present, does nothing.
-     *
-     * @param targetPath the target path to add to .mfiles-javadoc file
-     */
     private void updateMfilesJavadocFile(String targetPath) {
         try {
             Path currentDir = Paths.get(".").toAbsolutePath();
@@ -201,12 +177,6 @@ public class DefaultJavadocInstaller implements JavadocInstaller {
         }
     }
 
-    /**
-     * Extracts artifactId from POM file.
-     *
-     * @param pomPath path to the POM file
-     * @return artifactId or null if extraction fails
-     */
     private String extractArtifactIdFromPom(Path pomPath) {
         MavenXpp3Reader reader = new MavenXpp3Reader();
         try (FileInputStream fis = new FileInputStream(pomPath.toFile())) {
