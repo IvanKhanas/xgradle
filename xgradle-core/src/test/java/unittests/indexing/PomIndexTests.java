@@ -44,6 +44,9 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * @author Ivan Khanas xeno@altlinux.org
+ */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("PomIndex contract")
 class PomIndexTests {

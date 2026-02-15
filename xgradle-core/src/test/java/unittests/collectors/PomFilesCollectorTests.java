@@ -43,6 +43,9 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 
+/**
+ * @author Ivan Khanas xeno@altlinux.org
+ */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("PomFilesCollector contract")
 class PomFilesCollectorTests {

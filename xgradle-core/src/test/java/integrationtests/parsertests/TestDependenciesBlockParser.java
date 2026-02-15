@@ -43,7 +43,7 @@ import java.util.List;
 /**
  * Integration tests for {@link PomParser#parseDependencies(Path)}.
  *
- * @author Ivan Khanas
+ * @author Ivan Khanas xeno@altlinux.org
  */
 @DisplayName("Parse dependencies from POM files")
 public class TestDependenciesBlockParser {

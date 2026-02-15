@@ -41,7 +41,7 @@ import java.util.List;
 /**
  * Integration tests for {@link PomParser#parseDependencyManagement(Path)}.
  *
- * @author Ivan Khanas
+ * @author Ivan Khanas xeno@altlinux.org
  */
 @DisplayName("Parse dependencyManagement from POM files")
 public class TestDependencyManagementBlockParser {

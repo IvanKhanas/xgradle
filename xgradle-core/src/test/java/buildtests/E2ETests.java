@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * End-to-end build tests for the Gradle plugin.
  *
- * @author Ivan Khanas
+ * @author Ivan Khanas xeno@altlinux.org
  */
 @DisplayName("End-to-end build tests")
 public class E2ETests {

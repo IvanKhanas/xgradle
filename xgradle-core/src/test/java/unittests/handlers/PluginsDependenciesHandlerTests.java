@@ -13,65 +13,58 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package unittests.indexing;
+package unittests.handlers;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.util.Modules;
-
-import org.altlinux.xgradle.interfaces.indexing.PomIndex;
-import org.altlinux.xgradle.interfaces.indexing.PomIndexBuilder;
-import org.altlinux.xgradle.impl.indexing.IndexingModule;
-
-import org.junit.jupiter.api.BeforeEach;
+import org.altlinux.xgradle.impl.handlers.HandlersModule;
+import org.altlinux.xgradle.interfaces.handlers.PluginsDependenciesHandler;
+import org.altlinux.xgradle.interfaces.handlers.ProjectDependenciesHandler;
+import org.altlinux.xgradle.interfaces.managers.PluginManager;
+import org.gradle.api.initialization.Settings;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.nio.file.Path;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Ivan Khanas xeno@altlinux.org
  */
 @ExtendWith(MockitoExtension.class)
-@DisplayName("PomIndexBuilder contract")
-class PomIndexBuilderTests {
+@DisplayName("PluginsDependenciesHandler contract")
+class PluginsDependenciesHandlerTests {
 
     @Mock
-    private PomIndex pomIndex;
+    private PluginManager pluginManager;
 
-    private PomIndexBuilder pomIndexBuilder;
+    @Mock
+    private ProjectDependenciesHandler projectHandler;
 
-    @BeforeEach
-    void setUp() {
+    @Mock
+    private Settings settings;
+
+    @Test
+    @DisplayName("Delegates to PluginManager.configure")
+    void delegatesToPluginManager() {
         Injector injector = Guice.createInjector(
-                Modules.override(new IndexingModule()).with(new AbstractModule() {
+                Modules.override(new HandlersModule()).with(new AbstractModule() {
                     @Override
                     protected void configure() {
-                        bind(PomIndex.class).toInstance(pomIndex);
+                        bind(PluginManager.class).toInstance(pluginManager);
+                        bind(ProjectDependenciesHandler.class).toInstance(projectHandler);
                     }
                 })
         );
 
-        pomIndexBuilder = injector.getInstance(PomIndexBuilder.class);
-    }
+        PluginsDependenciesHandler handler = injector.getInstance(PluginsDependenciesHandler.class);
+        handler.handle(settings);
 
-    @Test
-    @DisplayName("Delegates build to PomIndex and returns same instance")
-    void delegatesBuildToPomIndex() {
-        List<Path> poms = List.of(Path.of("/repo/a.pom"));
-
-        PomIndex result = pomIndexBuilder.build(poms);
-
-        verify(pomIndex).build(poms);
-        assertSame(pomIndex, result);
+        verify(pluginManager).configure(settings);
+        verifyNoMoreInteractions(pluginManager);
     }
 }
