@@ -21,9 +21,6 @@ jobs:
           apt-get install -y \
             glibc-pthread \
             git \
-            ca-certificates \
-            curl \
-            unzip
           if [ "${{ matrix.java }}" = "11" ]; then
             apt-get install -y java-11-openjdk-devel
           else
@@ -53,13 +50,14 @@ jobs:
           apt-get install -y \
             glibc-pthread \
             git \
-            gradle
+            google-gson \
+            maven-lib \
+            shadow-gradle-plugin
           if [ "${{ matrix.java }}" = "11" ]; then
             apt-get install -y java-11-openjdk-devel
           else
             apt-get install -y java-17-openjdk-devel
           fi
-          apt-get install -y google-gson maven-lib shadow-gradle-plugin
 
       - uses: actions/checkout@v4
 
