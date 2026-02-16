@@ -84,7 +84,7 @@ final class DefaultPluginPomParser implements PomParser<HashMap<String, Path>> {
                     return artifactNameValues.stream()
                             .anyMatch(fileName::startsWith);
                 })
-                .toList();
+                .collect(Collectors.toList());
 
         if (filteredPomPaths.isEmpty()) {
             return result;

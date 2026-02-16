@@ -94,7 +94,8 @@ public final class MavenCoordinate {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof MavenCoordinate that)) return false;
+        if (!(o instanceof MavenCoordinate)) return false;
+        MavenCoordinate that = (MavenCoordinate) o;
         return Objects.equals(groupId, that.groupId)
                 && Objects.equals(artifactId, that.artifactId);
     }
