@@ -15,6 +15,8 @@
  */
 package org.altlinux.xgradle.impl.utils.ui;
 
+import org.altlinux.xgradle.impl.utils.config.XGradleConfig;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,7 +35,7 @@ public class LogoPrinter {
     private static final String ART_FILE = "logo.txt";
 
     public static boolean isLogoEnabled() {
-        return !"true".equals(System.getProperty("disable.logo"));
+        return !"true".equals(XGradleConfig.getProperty("disable.logo"));
     }
 
     public static void printCenteredBanner() {

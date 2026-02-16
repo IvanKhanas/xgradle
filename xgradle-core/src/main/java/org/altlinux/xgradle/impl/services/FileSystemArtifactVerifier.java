@@ -21,11 +21,13 @@ import org.altlinux.xgradle.interfaces.services.ArtifactVerifier;
 import org.altlinux.xgradle.impl.enums.MavenPackaging;
 import org.altlinux.xgradle.impl.extensions.SystemDepsExtension;
 import org.altlinux.xgradle.impl.model.MavenCoordinate;
+import org.altlinux.xgradle.impl.utils.config.XGradleConfig;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.stream.Stream;
 
 /**
  * Implementation of {@link ArtifactVerifier} that checks for the physical presence of artifact files in the local filesystem.
@@ -35,6 +37,9 @@ import java.nio.file.Paths;
  */
 @Singleton
 class FileSystemArtifactVerifier implements ArtifactVerifier {
+
+    private static final String SCAN_DEPTH_KEY = "xgradle.scan.depth";
+    private static final int DEFAULT_SCAN_DEPTH = 3;
 
     @Override
     public boolean verifyArtifactExists(MavenCoordinate coord) {
@@ -61,7 +66,8 @@ class FileSystemArtifactVerifier implements ArtifactVerifier {
     }
 
     private boolean checkRecursively(Path baseDir, String artifactId, String version) {
-        try (var pathStream = Files.walk(baseDir, 3)) {
+        int scanDepth = XGradleConfig.getIntProperty(SCAN_DEPTH_KEY, DEFAULT_SCAN_DEPTH);
+        try (Stream<Path> pathStream = Files.walk(baseDir, scanDepth)) {
             return pathStream
                     .filter(Files::isRegularFile)
                     .anyMatch(path -> {

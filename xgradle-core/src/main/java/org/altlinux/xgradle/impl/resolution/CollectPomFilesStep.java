@@ -19,6 +19,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
+import org.altlinux.xgradle.impl.utils.config.XGradleConfig;
 import org.altlinux.xgradle.interfaces.collectors.PomFilesCollector;
 import org.altlinux.xgradle.interfaces.resolution.ResolutionStep;
 
@@ -50,7 +51,8 @@ final class CollectPomFilesStep implements ResolutionStep {
     public void execute(ResolutionContext context) {
         PomFilesCollector collector = collectorProvider.get();
 
-        Path rootDir = Path.of(System.getProperty("maven.poms.dir", ""));
+        String pomsDir = XGradleConfig.getProperty("maven.poms.dir", "");
+        Path rootDir = Path.of(pomsDir);
         List<Path> collected = collector.collect(rootDir);
 
         context.getPomFiles().clear();

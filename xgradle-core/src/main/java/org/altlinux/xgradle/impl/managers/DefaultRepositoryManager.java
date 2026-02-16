@@ -16,6 +16,7 @@
 package org.altlinux.xgradle.impl.managers;
 
 import com.google.inject.Inject;
+import org.altlinux.xgradle.impl.utils.config.XGradleConfig;
 import org.altlinux.xgradle.interfaces.managers.RepositoryManager;
 
 import org.gradle.api.GradleException;
@@ -37,6 +38,9 @@ import java.util.UUID;
  * @author Ivan Khanas <xeno@altlinux.org>
  */
 final class DefaultRepositoryManager implements RepositoryManager {
+
+    private static final String SCAN_DEPTH_KEY = "xgradle.scan.depth";
+    private static final int DEFAULT_SCAN_DEPTH = 3;
 
     private final Logger logger;
 
@@ -66,8 +70,9 @@ final class DefaultRepositoryManager implements RepositoryManager {
 
     private List<File> scanDirectories(File baseDir) {
         List<File> allDirs = new ArrayList<>(List.of(baseDir));
+        int scanDepth = XGradleConfig.getIntProperty(SCAN_DEPTH_KEY, DEFAULT_SCAN_DEPTH);
         try {
-            Files.walk(baseDir.toPath(), 3)
+            Files.walk(baseDir.toPath(), scanDepth)
                     .filter(Files::isDirectory)
                     .filter(path -> !path.equals(baseDir.toPath()))
                     .forEach(path -> allDirs.add(path.toFile()));

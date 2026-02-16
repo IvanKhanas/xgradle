@@ -26,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 /**
  * Collector for POM Files.
  * Implements {@link PomFilesCollector}.
@@ -54,7 +55,7 @@ final class DefaultPomFilesCollector implements PomFilesCollector {
             return pomPaths;
         }
 
-        try (var stream = Files.walk(rootDirectory, MAX_SEARCH_DEPTH)) {
+        try (Stream<Path> stream = Files.walk(rootDirectory, MAX_SEARCH_DEPTH)) {
             stream.filter(Files::isRegularFile)
                     .filter(p -> {
                         String s = p.toString();

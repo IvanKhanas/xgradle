@@ -15,6 +15,8 @@
  */
 package org.altlinux.xgradle.impl.extensions;
 
+import org.altlinux.xgradle.impl.utils.config.XGradleConfig;
+
 /**
  * Provides access to system-level dependency paths for the plugin.
  *
@@ -23,10 +25,10 @@ package org.altlinux.xgradle.impl.extensions;
 public class SystemDepsExtension {
 
     public static String getJarsPath() {
-        return System.getProperty("java.library.dir");
+        return XGradleConfig.getProperty("java.library.dir");
     }
 
     public static String getPomsPath() {
-        return System.getProperty("maven.poms.dir");
+        return XGradleConfig.getProperty("maven.poms.dir");
     }
 }

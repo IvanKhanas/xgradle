@@ -20,6 +20,7 @@ import com.google.inject.Injector;
 import org.altlinux.xgradle.interfaces.handlers.PluginsDependenciesHandler;
 import org.altlinux.xgradle.interfaces.handlers.ProjectDependenciesHandler;
 import org.altlinux.xgradle.impl.di.XGradlePluginModule;
+import org.altlinux.xgradle.impl.utils.config.XGradleConfig;
 
 import org.altlinux.xgradle.impl.utils.ui.LogoPrinter;
 
@@ -27,6 +28,8 @@ import org.gradle.api.Plugin;
 import org.gradle.api.invocation.Gradle;
 
 import org.jetbrains.annotations.NotNull;
+
+import java.io.File;
 
 /**
  * Class implements {@link Plugin} interface <p>Core plugin implementation that applies to Gradle itself rather than individual projects.
@@ -38,7 +41,8 @@ public final class XGradlePlugin implements Plugin<Gradle> {
 
     @Override
     public void apply(@NotNull Gradle gradle) {
-        if (LogoPrinter.isLogoEnabled()) {
+        XGradleConfig.initSystemProperties();
+        if (LogoPrinter.isLogoEnabled() && !isBuildSrcBuild(gradle)) {
             LogoPrinter.printCenteredBanner();
         }
 
@@ -51,5 +55,10 @@ public final class XGradlePlugin implements Plugin<Gradle> {
 
         gradle.beforeSettings(plugins::handle);
         gradle.projectsEvaluated(dependencies::handle);
+    }
+
+    private boolean isBuildSrcBuild(Gradle gradle) {
+        File projectDir = gradle.getStartParameter().getProjectDir();
+        return projectDir != null && "buildSrc".equals(projectDir.getName());
     }
 }

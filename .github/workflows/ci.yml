@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    name: Build (JDK ${{ matrix.java }})
+    runs-on: ubuntu-latest
+    container:
+      image: registry.altlinux.org/sisyphus/alt:latest
+    strategy:
+      matrix:
+        java: [17]
+
+    steps:
+      - name: Install build dependencies
+        run: |
+          apt-get update
+          apt-get install -y \
+            glibc-pthread \
+            git \
+            ca-certificates \
+            curl \
+            unzip
+          if [ "${{ matrix.java }}" = "11" ]; then
+            apt-get install -y java-11-openjdk-devel
+          else
+            apt-get install -y java-17-openjdk-devel
+          fi
+
+      - uses: actions/checkout@v4
+
+      - name: Publish to Maven Local (JDK 17)
+        run: |
+          ./gradlew publishToMavenLocal
+
+  tests:
+    name: Tests (JDK ${{ matrix.java }})
+    runs-on: ubuntu-latest
+    container:
+      image: registry.altlinux.org/sisyphus/alt:latest
+    needs: build
+    strategy:
+      matrix:
+        java: [11, 17]
+
+    steps:
+      - name: Install build dependencies
+        run: |
+          apt-get update
+          apt-get install -y \
+            glibc-pthread \
+            git \
+            gradle
+          if [ "${{ matrix.java }}" = "11" ]; then
+            apt-get install -y java-11-openjdk-devel
+          else
+            apt-get install -y java-17-openjdk-devel
+          fi
+          apt-get install -y google-gson maven-lib shadow-gradle-plugin
+
+      - uses: actions/checkout@v4
+
+      - name: Check (JDK 11)
+        if: matrix.java == 11
+        run: |
+          ./gradlew check \
+            -Djava.library.dir="/usr/share/java" \
+            -Dmaven.poms.dir="/usr/share/maven-poms" \
+            -Djava11
+
+      - name: Check (JDK 17)
+        if: matrix.java != 11
+        run: |
+          ./gradlew check \
+            -Djava.library.dir="/usr/share/java" \
+            -Dmaven.poms.dir="/usr/share/maven-poms"

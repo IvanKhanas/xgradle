@@ -15,6 +15,8 @@
  */
 package org.altlinux.xgradle.impl.utils.logging;
 
+import org.altlinux.xgradle.impl.utils.config.XGradleConfig;
+
 /**
  * Class for coloring plugin logs.
  *
@@ -30,7 +32,7 @@ public class LogPainter {
     public static final String YELLOW = "\u001B[33m";
 
     private static boolean isColorEnabled() {
-        return "true".equals(System.getProperty("enable.ansi.color"));
+        return "true".equals(XGradleConfig.getProperty("enable.ansi.color"));
     }
 
     public static String green(String text) {

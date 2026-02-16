@@ -36,7 +36,9 @@ set** (prepared by packaging) rather than downloading from the network.
 
 ## Configuration
 
-xgradle-core is configured via **system properties**:
+xgradle-core is configured via **system properties** or the user config file
+`~/.xgradle/xgradle.config` (Java properties format). System properties set with
+`-D` take precedence.
 
 | Property | Meaning |
 |---|---|
@@ -44,6 +46,17 @@ xgradle-core is configured via **system properties**:
 | `maven.poms.dir` | Directory containing **system Maven POM metadata**. |
 | `disable.logo=true` | Disable ASCII banner printing. |
 | `enable.ansi.color=true` | Enable ANSI colors in xgradle logs. |
+| `xgradle.scan.depth` | Max directory scan depth for system artifacts (default `3`). |
+
+Example config file (`~/.xgradle/xgradle.config`):
+
+```
+java.library.dir=/usr/share/java
+maven.poms.dir=/usr/share/maven-poms
+disable.logo=true
+enable.ansi.color=true
+xgradle.scan.depth=3
+```
 
 ## Usage Example:
 
