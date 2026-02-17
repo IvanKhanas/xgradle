@@ -89,10 +89,9 @@ public final class XGradleConfig {
                 System.setProperty(key, value);
             } else if (REQUIRED_KEYS.contains(key)) {
                 throw new InvalidUserDataException(
-                    """
-                    The required XGradle property '%s' was not specified.
-                    Define it via -D%s=/path/to/jars during the launch gradle or in the ~/.xgradle/xgradle.config.
-                    """.formatted(key, key)
+                        "The required XGradle property '" + key + "' was not specified.\n" +
+                                "Define it via -D" + key + "=/path/to/jars during the launch gradle or " +
+                                "using ~/.xgradle/xgradle.config."
                 );
             }
         }
