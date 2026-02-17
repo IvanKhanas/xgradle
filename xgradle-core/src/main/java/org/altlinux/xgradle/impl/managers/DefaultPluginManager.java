@@ -51,7 +51,7 @@ final class DefaultPluginManager  implements PluginManager {
     public void configure(Settings settings) {
         File baseDir = new File(SystemDepsExtension.getJarsPath());
 
-        if (baseDir.exists() & baseDir.isDirectory()) {
+        if (baseDir.exists() && baseDir.isDirectory()) {
             repositoryManager.configurePluginsRepository(settings, baseDir);
             pluginProcessor.process(settings);
         }else {
