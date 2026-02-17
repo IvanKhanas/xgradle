@@ -15,6 +15,8 @@
  */
 package org.altlinux.xgradle.impl.utils.config;
 
+import org.gradle.api.InvalidUserDataException;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,6 +27,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("XGradleConfig contract")
 class XGradleConfigTests {
@@ -84,8 +89,52 @@ class XGradleConfigTests {
         writeConfig("maven.poms.dir=/tmp/poms");
         System.clearProperty("maven.poms.dir");
 
-        XGradleConfig.initSystemProperties();
+        assertDoesNotThrow(XGradleConfig::initSystemProperties);
         assertEquals("/tmp/poms", System.getProperty("maven.poms.dir"));
+    }
+
+    @Test
+    @DisplayName("initSystemProperties fails when required system property maven.poms.dir is missing")
+    void initSystemPropertiesFailsForMissingRequiredPropertyPomsDir() {
+        System.clearProperty("maven.poms.dir");
+
+        InvalidUserDataException ex = assertThrows(
+                InvalidUserDataException.class,
+                XGradleConfig::initSystemProperties
+        );
+        assertTrue(ex.getMessage().contains("maven.poms.dir"));
+    }
+
+    @Test
+    @DisplayName("initSystemProperties fails when required system property java.library.dir is missing")
+    void initSystemPropertiesFailsForMissingRequiredPropertyLibraryDir() {
+        System.clearProperty("java.library.dir");
+
+        InvalidUserDataException ex = assertThrows(
+                InvalidUserDataException.class,
+                XGradleConfig::initSystemProperties
+        );
+        assertTrue(ex.getMessage().contains("java.library.dir"));
+    }
+
+    @Test
+    @DisplayName("initSystemProperties does not fails when required system properties are defined")
+    void initSystemPropertiesDoesNotFailsForSystemDefinedRequiredProperties() {
+        assertDoesNotThrow(XGradleConfig::initSystemProperties);
+    }
+
+    @Test
+    @DisplayName("initSystemProperties does not fails when required config properties are defined")
+    void initSystemPropertiesDoesNotFailsForConfigDefinedRequiredProperties() throws Exception {
+        writeConfig("""
+                java.library.dir=/tmp/jars
+                maven.poms.dir=/tmp/poms
+                """);
+
+        System.clearProperty("java.library.dir");
+        System.clearProperty("maven.poms.dir");
+
+        assertDoesNotThrow(XGradleConfig::initSystemProperties);
     }
 
     @Test

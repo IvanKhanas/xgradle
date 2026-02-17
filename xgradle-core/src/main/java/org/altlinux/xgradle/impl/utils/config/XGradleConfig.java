@@ -15,6 +15,8 @@
  */
 package org.altlinux.xgradle.impl.utils.config;
 
+import org.gradle.api.InvalidUserDataException;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -44,6 +46,10 @@ public final class XGradleConfig {
             "disable.logo",
             "enable.ansi.color",
             "xgradle.scan.depth"
+    );
+    private static final Set<String> REQUIRED_KEYS = Set.of(
+            "java.library.dir",
+            "maven.poms.dir"
     );
 
     public static String getProperty(String key) {
@@ -81,6 +87,13 @@ public final class XGradleConfig {
             String value = getConfigValue(key);
             if (value != null) {
                 System.setProperty(key, value);
+            } else if (REQUIRED_KEYS.contains(key)) {
+                throw new InvalidUserDataException(
+                    """
+                    The required XGradle property '%s' was not specified.
+                    Define it via -D%s=/path/to/jars during the launch gradle or in the ~/.xgradle/xgradle.config.
+                    """.formatted(key, key)
+                );
             }
         }
     }
