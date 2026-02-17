@@ -91,9 +91,15 @@ final class DefaultTransitiveDependencyManager implements TransitiveDependencyMa
                 if (MavenScope.TEST.equals(dep.getScope())) continue;
 
                 if (parentConfigs != null && !parentConfigs.isEmpty()) {
+                    Set<String> standardConfigs = filterStandardConfigurations(parentConfigs);
+                    if (standardConfigs.isEmpty()) {
+                        skippedDependencies.add(depKey);
+                        continue;
+                    }
+
                     dependencyConfigNames
                             .computeIfAbsent(depKey, k -> new HashSet<>())
-                            .addAll(parentConfigs);
+                            .addAll(standardConfigs);
                 }
 
                 MavenCoordinate resolvedDep = systemArtifacts.get(depKey);
@@ -122,5 +128,41 @@ final class DefaultTransitiveDependencyManager implements TransitiveDependencyMa
             }
         }
         return skippedDependencies;
+    }
+
+    private Set<String> filterStandardConfigurations(Set<String> configNames) {
+        if (configNames == null || configNames.isEmpty()) {
+            return Collections.emptySet();
+        }
+        Set<String> filtered = new HashSet<>();
+        for (String name : configNames) {
+            if (isStandardConfigurationName(name)) {
+                filtered.add(name);
+            }
+        }
+        return filtered;
+    }
+
+    private boolean isStandardConfigurationName(String name) {
+        if (name == null) {
+            return false;
+        }
+        String n = name.trim().toLowerCase(Locale.ROOT);
+        switch (n) {
+            case "api":
+            case "implementation":
+            case "compileonly":
+            case "compileonlyapi":
+            case "runtimeonly":
+            case "runtime":
+            case "annotationprocessor":
+            case "testimplementation":
+            case "testcompileonly":
+            case "testruntimeonly":
+            case "testannotationprocessor":
+                return true;
+            default:
+                return false;
+        }
     }
 }

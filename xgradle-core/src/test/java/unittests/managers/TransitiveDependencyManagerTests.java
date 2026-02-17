@@ -142,4 +142,56 @@ class TransitiveDependencyManagerTests {
         verify(scopeManager, atLeastOnce()).updateScope(eq(scopes), eq("t:test"), eq(MavenScope.TEST));
         verify(scopeManager, atLeastOnce()).updateScope(eq(scopes), eq("m:missing"), eq(MavenScope.COMPILE));
     }
+
+    @Test
+    @DisplayName("Skips transitives that originate only from custom configurations")
+    void skipsTransitivelyFromCustomConfigurations() {
+        Injector injector = Guice.createInjector(
+                Modules.override(new ManagersModule()).with(new AbstractModule() {
+                    @Override
+                    protected void configure() {
+                        bind(PomFinder.class).toInstance(pomFinder);
+                        bind(PomParser.class).toInstance(pomParser);
+                        bind(PluginManager.class).toInstance(pluginManager);
+                        bind(RepositoryManager.class).toInstance(repositoryManager);
+                        bind(ScopeManager.class).toInstance(scopeManager);
+                        bind(Logger.class).toInstance(logger);
+                    }
+                })
+        );
+
+        TransitiveDependencyManager manager = injector.getInstance(TransitiveDependencyManager.class);
+
+        MavenCoordinate root = MavenCoordinate.builder()
+                .groupId("g")
+                .artifactId("a")
+                .version("1")
+                .pomPath(Path.of("root.pom"))
+                .build();
+
+        MavenCoordinate dep = MavenCoordinate.builder()
+                .groupId("d")
+                .artifactId("dep")
+                .version("1")
+                .scope(MavenScope.COMPILE)
+                .pomPath(Path.of("dep.pom"))
+                .build();
+
+        when(pomParser.parseDependencies(root.getPomPath()))
+                .thenReturn(List.of(dep));
+
+        Map<String, MavenCoordinate> systemArtifacts = new HashMap<>();
+        systemArtifacts.put("g:a", root);
+
+        Map<String, MavenScope> scopes = new HashMap<>();
+        Map<String, Set<String>> configNames = new HashMap<>();
+        configNames.put("g:a", Set.of("customConfig"));
+
+        Set<String> skipped = manager.configure(systemArtifacts, scopes, configNames);
+
+        assertTrue(skipped.contains("d:dep"));
+        assertFalse(systemArtifacts.containsKey("d:dep"));
+        assertNull(configNames.get("d:dep"));
+        verify(pomFinder, never()).findPomForArtifact("d", "dep");
+    }
 }
