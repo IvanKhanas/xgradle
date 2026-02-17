@@ -126,10 +126,8 @@ class XGradleConfigTests {
     @Test
     @DisplayName("initSystemProperties does not fails when required config properties are defined")
     void initSystemPropertiesDoesNotFailsForConfigDefinedRequiredProperties() throws Exception {
-        writeConfig("""
-                java.library.dir=/tmp/jars
-                maven.poms.dir=/tmp/poms
-                """);
+        writeConfig("java.library.dir=/tmp/jars\n" +
+                "maven.poms.dir=/tmp/poms ");
 
         System.clearProperty("java.library.dir");
         System.clearProperty("maven.poms.dir");
