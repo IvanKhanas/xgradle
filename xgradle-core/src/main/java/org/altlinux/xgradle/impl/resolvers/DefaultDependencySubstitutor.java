@@ -21,7 +21,7 @@ import org.altlinux.xgradle.impl.model.MavenCoordinate;
 import org.gradle.api.artifacts.DependencySubstitutions;
 import org.gradle.api.artifacts.component.ModuleComponentSelector;
 import org.gradle.api.invocation.Gradle;
-import org.gradle.util.internal.VersionNumber;
+import org.apache.maven.artifact.versioning.ComparableVersion;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -123,7 +123,7 @@ public final class DefaultDependencySubstitutor implements DependencySubstitutor
         if (versions != null && !versions.isEmpty()) {
             return versions.stream()
                     .filter(Objects::nonNull)
-                    .max(Comparator.comparing(VersionNumber::parse))
+                    .max(Comparator.comparing(version -> new ComparableVersion(version)))
                     .orElse(requestedVersion);
         }
         return requestedVersion != null ? requestedVersion : "(unspecified)";

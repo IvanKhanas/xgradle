@@ -17,7 +17,7 @@ package org.altlinux.xgradle.impl.maven;
 
 import com.google.inject.Singleton;
 import org.altlinux.xgradle.interfaces.maven.PomFilenameMatcher;
-import org.gradle.util.internal.VersionNumber;
+import org.apache.maven.artifact.versioning.ComparableVersion;
 
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -99,11 +99,7 @@ final class MavenPomFilenameMatcher implements PomFilenameMatcher {
             return false;
         }
 
-        try {
-            VersionNumber version = VersionNumber.parse(str);
-            return !VersionNumber.UNKNOWN.equals(version);
-        } catch (Exception e) {
-            return false;
-        }
+        new ComparableVersion(str);
+        return true;
     }
 }
