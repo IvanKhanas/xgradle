@@ -77,7 +77,13 @@
             <property name="severity" value="error"/>
         </module>
 
-        <module name="WhitespaceAround"/>
+        <module name="WhitespaceAround">
+            <property name="allowEmptyConstructors" value="true"/>
+            <property name="allowEmptyMethods" value="true"/>
+            <property name="allowEmptyTypes" value="true"/>
+            <property name="allowEmptyLoops" value="false"/>
+            <property name="allowEmptyLambdas" value="true"/>
+        </module>
 
         <module name="MissingOverride"/>
 

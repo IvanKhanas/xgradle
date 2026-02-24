@@ -55,8 +55,14 @@ final class DefaultJavadocXmvnCompatController implements XmvnCompatController {
             return;
         }
 
-        require(arguments.hasSearchingDirectory(), "No searching directory specified for Javadoc installation");
-        require(arguments.hasJarInstallationDirectory(), "No JAR installation directory specified for Javadoc installation");
+        require(
+                arguments.hasSearchingDirectory(),
+                "No searching directory specified for Javadoc installation"
+        );
+        require(
+                arguments.hasJarInstallationDirectory(),
+                "No JAR installation directory specified for Javadoc installation"
+        );
 
         javadocInstaller.installJavadoc(
                 arguments.getSearchingDirectory(),

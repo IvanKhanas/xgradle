@@ -23,7 +23,6 @@ import org.gradle.testfixtures.ProjectBuilder;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.when;
 
 /**
  * @author Ivan Khanas xeno@altlinux.org

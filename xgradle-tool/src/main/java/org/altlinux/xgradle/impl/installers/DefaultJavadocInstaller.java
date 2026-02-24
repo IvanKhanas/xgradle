@@ -69,7 +69,11 @@ final class DefaultJavadocInstaller implements JavadocInstaller {
 
     @Override
     public void installJavadoc(String searchingDir, Optional<List<String>> artifactNames, String jarInstallationDir) {
-        HashMap<String, Path> javadocMap = artifactCollector.collect(searchingDir, artifactNames, ProcessingType.JAVADOC);
+        HashMap<String, Path> javadocMap = artifactCollector.collect(
+                searchingDir,
+                artifactNames,
+                ProcessingType.JAVADOC
+        );
 
         logger.debug("Total Javadoc artifacts after collection and filtering: {}", javadocMap.size());
 

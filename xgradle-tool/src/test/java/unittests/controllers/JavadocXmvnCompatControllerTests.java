@@ -88,8 +88,10 @@ class JavadocXmvnCompatControllerTests {
                             protected void configure() {
                                 bind(JavadocInstaller.class).toInstance(javadocInstaller);
 
-                                bind(XmvnCompatController.class).annotatedWith(Library.class).toInstance(libraryXmvnController);
-                                bind(XmvnCompatController.class).annotatedWith(Bom.class).toInstance(bomXmvnController);
+                                bind(XmvnCompatController.class).annotatedWith(Library.class)
+                                        .toInstance(libraryXmvnController);
+                                bind(XmvnCompatController.class).annotatedWith(Bom.class)
+                                        .toInstance(bomXmvnController);
 
                                 bind(ArtifactsInstallationController.class).toInstance(pluginsController);
                                 bind(PomRedactionController.class).toInstance(pomRedactionController);
@@ -123,8 +125,15 @@ class JavadocXmvnCompatControllerTests {
         when(args.hasJavadocRegistration()).thenReturn(true);
         when(args.hasSearchingDirectory()).thenReturn(false);
 
-        assertThrows(CliUsageException.class,
-                () -> controller.configureXmvnCompatFunctions(jCommander, new String[]{"--register-javadoc"}, args, logger));
+        assertThrows(
+                CliUsageException.class,
+                () -> controller.configureXmvnCompatFunctions(
+                        jCommander,
+                        new String[]{"--register-javadoc"},
+                        args,
+                        logger
+                )
+        );
 
         verifyNoInteractions(javadocInstaller);
         verifyNoInteractions(jCommander);
@@ -137,8 +146,14 @@ class JavadocXmvnCompatControllerTests {
         when(args.hasSearchingDirectory()).thenReturn(true);
         when(args.hasJarInstallationDirectory()).thenReturn(false);
 
-        assertThrows(CliUsageException.class,
-                () -> controller.configureXmvnCompatFunctions(jCommander, new String[]{"--register-javadoc"}, args, logger));
+        assertThrows(
+                CliUsageException.class,
+                () -> controller.configureXmvnCompatFunctions(
+                        jCommander, new String[]{"--register-javadoc"},
+                        args,
+                        logger
+                )
+        );
 
         verifyNoInteractions(javadocInstaller);
         verifyNoInteractions(jCommander);

@@ -31,7 +31,8 @@ import org.jetbrains.annotations.NotNull;
 
 
 /**
- * Class implements {@link Plugin} interface <p>Core plugin implementation that applies to Gradle itself rather than individual projects.
+ * Class implements {@link Plugin} interface.
+ * <p>Core plugin implementation that applies to Gradle itself rather than individual projects.
  * Implements {@link Plugin}.
  *
  * @author Ivan Khanas <xeno@altlinux.org>

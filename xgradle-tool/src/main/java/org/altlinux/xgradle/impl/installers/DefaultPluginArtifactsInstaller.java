@@ -76,7 +76,11 @@ final class DefaultPluginArtifactsInstaller implements ArtifactsInstaller {
             String jarInstallationDirectory,
             ProcessingType processingType
     ) {
-        HashMap<String, Path> artifactsMap = artifactContainer.getArtifacts(searchingDirectory, artifactName, processingType);
+        HashMap<String, Path> artifactsMap = artifactContainer.getArtifacts(
+                searchingDirectory,
+                artifactName,
+                processingType
+        );
         Path targetPomDir = Paths.get(pomInstallationDirectory);
         Path targetJarDir = Paths.get(jarInstallationDirectory);
 

@@ -55,7 +55,11 @@ final class DefaultArtifactCollector implements ArtifactCollector {
     }
 
     @Override
-    public HashMap<String,Path> collect(String searchingDir, Optional<List<String>> artifactName, ProcessingType processingType) {
+    public HashMap<String,Path> collect(
+            String searchingDir,
+            Optional<List<String>> artifactName,
+            ProcessingType processingType
+    ) {
 
         Objects.requireNonNull(processingType, "Processing type can not be null!");
 

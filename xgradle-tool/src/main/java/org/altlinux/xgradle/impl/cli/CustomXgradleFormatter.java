@@ -44,11 +44,15 @@ public final class CustomXgradleFormatter implements IUsageFormatter {
     public void usage(StringBuilder out, String indent) {
         out.append("Usage examples: \n\n")
                 .append("Registration: \n")
-                .append("xgradle-tool --xmvn-register=\"<registration command>\" --searching-directory=<directory path> " +
-                        "| (optional) --artifacts=<artifactName> | (optional) --exclude-artifacts=<artifactName>\n\n")
+                .append("xgradle-tool --xmvn-register=\"<registration command>\" " +
+                        "--searching-directory=<directory path> " +
+                        "| (optional) --artifacts=<artifactName> " +
+                        "| (optional) --exclude-artifacts=<artifactName>\n\n")
                 .append("BOM registration: \n")
-                .append("xgradle-tool --xmvn-register=\"<registration command>\" --register-bom --searching-directory=<directory path> " +
-                        "| (optional) --artifacts=<artifactName> | (optional) --exclude-artifacts=<artifactName>\n\n")
+                .append("xgradle-tool --xmvn-register=\"<registration command>\" " +
+                        "--register-bom --searching-directory=<directory path> " +
+                        "| (optional) --artifacts=<artifactName> " +
+                        "| (optional) --exclude-artifacts=<artifactName>\n\n")
                 .append("Javadoc registration: \n")
                 .append("xgradle-tool --register-javadoc --searching-directory=<directory path> " +
                         "--jar-installation-dir=<directory path> " +
@@ -61,13 +65,17 @@ public final class CustomXgradleFormatter implements IUsageFormatter {
                         "--jar-installation-dir=</path/to/jars/installation/location>\n\n")
                 .append("-------------------------------\n\n")
                 .append("Dependency redaction (.pom files): \n")
-                .append("You can add -r or --recursive to process all .pom files under --searching-directory recursively.\n\n")
+                .append("You can add -r or --recursive to process all .pom files under " +
+                        "--searching-directory recursively.\n\n")
                 .append("Remove dependency: \n")
-                .append("xgradle-tool --searching-directory=</path/to/file.pom|/path/to/dir> --remove-dependency=<groupId:artifactId[:version[:scope]]>\n\n")
+                .append("xgradle-tool --searching-directory=</path/to/file.pom|/path/to/dir> " +
+                        "--remove-dependency=<groupId:artifactId[:version[:scope]]>\n\n")
                 .append("Add dependency: \n")
-                .append("xgradle-tool --searching-directory=</path/to/file.pom|/path/to/dir> --add-dependency=<groupId:artifactId[:version[:scope]]>\n\n")
+                .append("xgradle-tool --searching-directory=</path/to/file.pom|/path/to/dir> " +
+                        "--add-dependency=<groupId:artifactId[:version[:scope]]>\n\n")
                 .append("Change dependency: \n")
-                .append("xgradle-tool --searching-directory=</path/to/file.pom|/path/to/dir> --change-dependency <sourceCoords> <targetCoords>\n\n")
+                .append("xgradle-tool --searching-directory=</path/to/file.pom|/path/to/dir> " +
+                        "--change-dependency <sourceCoords> <targetCoords>\n\n")
                 .append("Usage: ").append(commander.getProgramName()).append(" [options]\n\n")
                 .append("Options:\n");
 
@@ -81,7 +89,6 @@ public final class CustomXgradleFormatter implements IUsageFormatter {
                     .append("\n\n");
         }
     }
-
 
     @Override
     public void usage(String commandName) {}

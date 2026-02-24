@@ -68,14 +68,26 @@ class ArtifactCollectorTests {
                         .with(new AbstractModule() {
                             @Override
                             protected void configure() {
-                                bind(Key.get(new TypeLiteral<PomProcessor<HashMap<String, Path>>>() {}, Library.class))
-                                        .toInstance(libraryProcessor);
+                                bind(
+                                        Key.get(
+                                                new TypeLiteral<PomProcessor<HashMap<String, Path>>>() {},
+                                                Library.class
+                                        )
+                                ).toInstance(libraryProcessor);
 
-                                bind(Key.get(new TypeLiteral<PomProcessor<HashMap<String, Path>>>() {}, GradlePlugin.class))
-                                        .toInstance(pluginProcessor);
+                                bind(
+                                        Key.get(
+                                                new TypeLiteral<PomProcessor<HashMap<String, Path>>>() {},
+                                                GradlePlugin.class
+                                        )
+                                ).toInstance(pluginProcessor);
 
-                                bind(Key.get(new TypeLiteral<PomProcessor<HashMap<String, Path>>>() {}, Javadoc.class))
-                                        .toInstance(javadocProcessor);
+                                bind(
+                                        Key.get(
+                                                new TypeLiteral<PomProcessor<HashMap<String, Path>>>() {},
+                                                Javadoc.class
+                                        )
+                                ).toInstance(javadocProcessor);
                             }
                         })
         );

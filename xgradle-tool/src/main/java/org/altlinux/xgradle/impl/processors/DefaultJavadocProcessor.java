@@ -65,7 +65,7 @@ final class DefaultJavadocProcessor implements PomProcessor<HashMap<String, Path
             ToolConfig toolConfig,
             Logger logger
     ) {
-        this.artifactFactory =artifactFactory;
+        this.artifactFactory = artifactFactory;
         this.javadocParser = javadocParser;
         this.pomService = pomService;
         this.toolConfig = toolConfig;

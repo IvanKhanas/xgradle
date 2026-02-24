@@ -136,7 +136,10 @@ class RepositoryManagerTests {
         Project project = ProjectBuilder.builder().build();
         RepositoryHandler repos = project.getRepositories();
 
-        assertThrows(GradleException.class, () -> manager.configureDependenciesRepository(repos, List.of(file.toFile())));
+        assertThrows(
+                GradleException.class,
+                () -> manager.configureDependenciesRepository(repos, List.of(file.toFile()))
+        );
     }
 
     @Test

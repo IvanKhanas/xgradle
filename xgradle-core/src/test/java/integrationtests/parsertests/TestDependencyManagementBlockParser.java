@@ -73,7 +73,9 @@ public class TestDependencyManagementBlockParser {
         assertTrue(isDependencyContainedAndQueried(parsedDeps, "org.junit.jupiter", "junit-jupiter", 0));
         assertTrue(isDependencyContainedAndQueried(parsedDeps, "org.junit.jupiter", "junit-jupiter-api", 1));
         assertTrue(isDependencyContainedAndQueried(parsedDeps, "org.junit.jupiter", "junit-jupiter-engine", 2));
-        assertTrue(isDependencyContainedAndQueried(parsedDeps, "org.junit.jupiter","junit-jupiter-migrationsupport" ,3));
+        assertTrue(
+                isDependencyContainedAndQueried(parsedDeps, "org.junit.jupiter", "junit-jupiter-migrationsupport", 3)
+        );
         assertTrue(isDependencyContainedAndQueried(parsedDeps, "org.junit.jupiter", "junit-jupiter-params",4));
 
         assertTrue(isDependencyContainedAndQueried(parsedDeps, "org.junit.platform","junit-platform-commons",5));
@@ -85,8 +87,12 @@ public class TestDependencyManagementBlockParser {
         assertTrue(isDependencyContainedAndQueried(parsedDeps, "org.junit.platform", "junit-platform-runner", 11));
         assertTrue(isDependencyContainedAndQueried(parsedDeps, "org.junit.platform", "junit-platform-suite", 12));
         assertTrue(isDependencyContainedAndQueried(parsedDeps, "org.junit.platform", "junit-platform-suite-api", 13));
-        assertTrue(isDependencyContainedAndQueried(parsedDeps, "org.junit.platform", "junit-platform-suite-commons", 14));
-        assertTrue(isDependencyContainedAndQueried(parsedDeps, "org.junit.platform", "junit-platform-suite-engine", 15));
+        assertTrue(
+                isDependencyContainedAndQueried(parsedDeps, "org.junit.platform", "junit-platform-suite-commons", 14)
+        );
+        assertTrue(
+                isDependencyContainedAndQueried(parsedDeps, "org.junit.platform", "junit-platform-suite-engine", 15)
+        );
         assertTrue(isDependencyContainedAndQueried(parsedDeps, "org.junit.platform", "junit-platform-testkit", 16));
 
         assertTrue(isDependencyContainedAndQueried(parsedDeps, "org.junit.vintage", "junit-vintage-engine", 17));
@@ -136,9 +142,19 @@ public class TestDependencyManagementBlockParser {
         assertTrue(isDependencyContainedAndQueried(parsedDeps, "org.apache.maven", "maven-compat", 8));
         assertTrue(isDependencyContainedAndQueried(parsedDeps, "org.apache.maven", "maven-settings", 9));
         assertTrue(isDependencyContainedAndQueried(parsedDeps, "org.apache.maven.shared", "maven-shared-utils", 10));
-        assertTrue(isDependencyContainedAndQueried(parsedDeps, "org.apache.maven.reporting", "maven-reporting-impl", 11));
-        assertTrue(isDependencyContainedAndQueried(parsedDeps, "org.apache.maven.shared", "maven-common-artifact-filters", 12));
-        assertTrue(isDependencyContainedAndQueried(parsedDeps, "org.apache.maven.plugin-testing", "maven-plugin-testing-harness", 13));
+        assertTrue(
+                isDependencyContainedAndQueried(parsedDeps, "org.apache.maven.reporting", "maven-reporting-impl", 11)
+        );
+        assertTrue(
+                isDependencyContainedAndQueried(
+                        parsedDeps, "org.apache.maven.shared", "maven-common-artifact-filters", 12
+                )
+        );
+        assertTrue(
+                isDependencyContainedAndQueried(
+                        parsedDeps, "org.apache.maven.plugin-testing", "maven-plugin-testing-harness", 13
+                )
+        );
         assertTrue(isDependencyContainedAndQueried(parsedDeps, "org.xmlunit", "xmlunit-core", 14));
         assertTrue(isDependencyContainedAndQueried(parsedDeps, "net.sourceforge.htmlunit", "htmlunit", 15));
         assertTrue(isDependencyContainedAndQueried(parsedDeps, "org.fusesource.jansi", "jansi", 16));

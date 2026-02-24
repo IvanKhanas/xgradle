@@ -117,9 +117,15 @@ public final class PomXmlBuilder {
 
         if (parent != null) {
             sb.append("  <parent>\n");
-            if (parent.groupId != null) sb.append("    <groupId>").append(parent.groupId).append("</groupId>\n");
-            if (parent.artifactId != null) sb.append("    <artifactId>").append(parent.artifactId).append("</artifactId>\n");
-            if (parent.version != null) sb.append("    <version>").append(parent.version).append("</version>\n");
+            if (parent.groupId != null) sb.append("    <groupId>")
+                    .append(parent.groupId)
+                    .append("</groupId>\n");
+            if (parent.artifactId != null) sb.append("    <artifactId>")
+                    .append(parent.artifactId)
+                    .append("</artifactId>\n");
+            if (parent.version != null) sb.append("    <version>")
+                    .append(parent.version)
+                    .append("</version>\n");
             sb.append("  </parent>\n");
         }
 

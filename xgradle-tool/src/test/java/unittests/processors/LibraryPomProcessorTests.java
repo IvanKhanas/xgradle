@@ -76,15 +76,15 @@ class LibraryPomProcessorTests {
                         .with(new AbstractModule() {
                             @Override
                             protected void configure() {
-                                bind(Key.get(new TypeLiteral<PomParser<HashMap<String, Path>>>() {}, Library.class))
-                                        .toInstance(libraryParser);
+                                bind(Key.get(new TypeLiteral<PomParser<HashMap<String, Path>>>() {},
+                                        Library.class)).toInstance(libraryParser);
 
-                                bind(Key.get(new TypeLiteral<PomParser<HashMap<String, Path>>>() {}, GradlePlugin.class))
-                                        .toInstance(gradlePluginParserDummy);
-                                bind(Key.get(new TypeLiteral<PomParser<HashMap<String, Path>>>() {}, Javadoc.class))
-                                        .toInstance(javadocParserDummy);
-                                bind(Key.get(new TypeLiteral<PomParser<Set<Path>>>() {}, Bom.class))
-                                        .toInstance(bomParserDummy);
+                                bind(Key.get(new TypeLiteral<PomParser<HashMap<String, Path>>>() {},
+                                        GradlePlugin.class)).toInstance(gradlePluginParserDummy);
+                                bind(Key.get(new TypeLiteral<PomParser<HashMap<String, Path>>>() {},
+                                        Javadoc.class)).toInstance(javadocParserDummy);
+                                bind(Key.get(new TypeLiteral<PomParser<Set<Path>>>() {},
+                                        Bom.class)).toInstance(bomParserDummy);
 
                                 bind(PomService.class).toInstance(pomService);
                                 bind(ToolConfig.class).toInstance(toolConfig);
@@ -105,7 +105,8 @@ class LibraryPomProcessorTests {
     }
 
     @Test
-    @DisplayName("Delegates to parser; applies excludeArtifacts -> removeParentBlocks -> excludeSnapshots (when allowSnapshots=false)")
+    @DisplayName("Delegates to parser; applies excludeArtifacts -> removeParentBlocks " +
+            "-> excludeSnapshots (when allowSnapshots=false)")
     void processesWithNamesAndFiltersInOrder() {
         Optional<List<String>> names = Optional.of(List.of("a", "b"));
 

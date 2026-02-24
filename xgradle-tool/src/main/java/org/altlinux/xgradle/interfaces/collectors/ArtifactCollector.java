@@ -39,5 +39,9 @@ public interface ArtifactCollector {
      * @param processingType the type of processing (LIBRARY or PLUGINS)
      * @return map of artifact coordinates to file paths
      */
-    HashMap<String, Path> collect(String searchingDirectory, Optional<List<String>> artifactName, ProcessingType processingType);
+    HashMap<String, Path> collect(
+            String searchingDirectory,
+            Optional<List<String>> artifactName,
+            ProcessingType processingType
+    );
 }

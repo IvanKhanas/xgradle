@@ -29,7 +29,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Expands dependency set using transitive traversal and ensures that all discovered coordinates are resolved against system libraries via VersionScanner.
+ * Expands dependency set using transitive traversal and ensures that all discovered coordinates
+ * are resolved against system libraries via VersionScanner.
  * Implements {@link ResolutionStep}.
  *
  * @author Ivan Khanas <xeno@altlinux.org>

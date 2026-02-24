@@ -22,7 +22,7 @@ import org.gradle.api.initialization.Settings;
  * Manager for plugin repositories and plugin resolution pipeline.
  * @author Ivan Khanas <xeno@altlinux.org>
  */
-public interface PluginManager extends Manager<Settings>{
+public interface PluginManager extends Manager<Settings> {
 
     /**
      * Configures plugin repositories and resolution for the given settings.

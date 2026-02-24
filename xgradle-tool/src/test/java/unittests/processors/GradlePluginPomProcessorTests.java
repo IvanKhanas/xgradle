@@ -89,8 +89,9 @@ class GradlePluginPomProcessorTests {
                         .with(new AbstractModule() {
                             @Override
                             protected void configure() {
-                                bind(Key.get(new TypeLiteral<PomParser<HashMap<String, Path>>>() {}, GradlePlugin.class))
-                                        .toInstance(pluginParser);
+                                bind(Key.get(
+                                        new TypeLiteral<PomParser<HashMap<String, Path>>>() {}, GradlePlugin.class
+                                )).toInstance(pluginParser);
 
                                 bind(Key.get(new TypeLiteral<PomParser<HashMap<String, Path>>>() {}, Library.class))
                                         .toInstance(libraryParserDummy);

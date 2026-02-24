@@ -28,7 +28,8 @@ import org.altlinux.xgradle.impl.model.MavenCoordinate;
 import java.util.*;
 
 /**
- * Scans system artifacts to resolve Maven coordinates for project dependencies, including Gradle plugins and dependencies.
+ * Scans system artifacts to resolve Maven coordinates for project dependencies,
+ * including Gradle plugins and dependencies.
  * Implements {@link VersionScanner}.
  *
  * @author Ivan Khanas <xeno@altlinux.org>

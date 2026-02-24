@@ -88,8 +88,13 @@ class BomXmvnCompatControllerTests {
                             protected void configure() {
                                 bind(Registrar.class).annotatedWith(Bom.class).toInstance(registrar);
 
-                                bind(XmvnCompatController.class).annotatedWith(Library.class).toInstance(libraryXmvnController);
-                                bind(XmvnCompatController.class).annotatedWith(Javadoc.class).toInstance(javadocXmvnController);
+                                bind(XmvnCompatController.class)
+                                        .annotatedWith(Library.class)
+                                        .toInstance(libraryXmvnController);
+
+                                bind(XmvnCompatController.class)
+                                        .annotatedWith(Javadoc.class)
+                                        .toInstance(javadocXmvnController);
 
                                 bind(ArtifactsInstallationController.class).toInstance(pluginsController);
                                 bind(PomRedactionController.class).toInstance(pomRedactionController);
@@ -137,7 +142,13 @@ class BomXmvnCompatControllerTests {
         when(args.hasSearchingDirectory()).thenReturn(false);
 
         assertThrows(CliUsageException.class,
-                () -> controller.configureXmvnCompatFunctions(jCommander, new String[]{"--register-bom"}, args, logger));
+                () -> controller.configureXmvnCompatFunctions(
+                        jCommander,
+                        new String[]{"--register-bom"},
+                        args,
+                        logger
+                )
+        );
 
         verifyNoInteractions(registrar);
         verifyNoInteractions(jCommander);

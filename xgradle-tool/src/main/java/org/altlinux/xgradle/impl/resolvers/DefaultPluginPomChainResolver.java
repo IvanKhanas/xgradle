@@ -162,7 +162,8 @@ public final class DefaultPluginPomChainResolver implements PluginPomChainResolv
         if (dependency == null) {
             return null;
         }
-        return pomByCoords.get(coordinatesKey(dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion()));
+        return pomByCoords.get(
+                coordinatesKey(dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion()));
     }
 
     private String coordinatesKey(Model model) {

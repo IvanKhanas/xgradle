@@ -37,7 +37,7 @@ public interface PluginProcessor extends Processor<Settings> {
      * @param settings Gradle settings instance
      */
     @Deprecated
-    default void configurePluginResolution(Settings settings){
+    default void configurePluginResolution(Settings settings) {
         process(settings);
     }
 }

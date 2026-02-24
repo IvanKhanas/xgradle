@@ -119,7 +119,13 @@ class ApplicationTests {
         assertEquals(ExitCode.SUCCESS, code);
         verify(jCommander).usage();
 
-        verifyNoInteractions(libraryXmvnController, bomXmvnController, javadocXmvnController, pluginsController, pomRedactionController);
+        verifyNoInteractions(
+                libraryXmvnController,
+                bomXmvnController,
+                javadocXmvnController,
+                pluginsController,
+                pomRedactionController
+        );
     }
 
     @Test
@@ -132,7 +138,13 @@ class ApplicationTests {
         assertEquals(ExitCode.SUCCESS, code);
         verify(jCommander).usage();
 
-        verifyNoInteractions(libraryXmvnController, bomXmvnController, javadocXmvnController, pluginsController, pomRedactionController);
+        verifyNoInteractions(
+                libraryXmvnController,
+                bomXmvnController,
+                javadocXmvnController,
+                pluginsController,
+                pomRedactionController
+        );
     }
 
     @Test
@@ -146,7 +158,13 @@ class ApplicationTests {
         verify(logger).error("bad args");
         verify(jCommander).usage();
 
-        verifyNoInteractions(libraryXmvnController, bomXmvnController, javadocXmvnController, pluginsController, pomRedactionController);
+        verifyNoInteractions(
+                libraryXmvnController,
+                bomXmvnController,
+                javadocXmvnController,
+                pluginsController,
+                pomRedactionController
+        );
     }
 
     @Test
@@ -160,7 +178,13 @@ class ApplicationTests {
         verify(logger).error("bad args");
         verify(jCommander).usage();
 
-        verifyNoInteractions(libraryXmvnController, bomXmvnController, javadocXmvnController, pluginsController, pomRedactionController);
+        verifyNoInteractions(
+                libraryXmvnController,
+                bomXmvnController,
+                javadocXmvnController,
+                pluginsController,
+                pomRedactionController
+        );
     }
 
     @Test
@@ -201,10 +225,30 @@ class ApplicationTests {
 
         assertEquals(ExitCode.SUCCESS, code);
 
-        verify(libraryXmvnController).configureXmvnCompatFunctions(same(jCommander), same(args), same(cliArgs), same(logger));
-        verify(pluginsController).configurePluginArtifactsInstallation(same(jCommander), same(args), same(cliArgs), same(logger));
-        verify(bomXmvnController).configureXmvnCompatFunctions(same(jCommander), same(args), same(cliArgs), same(logger));
-        verify(javadocXmvnController).configureXmvnCompatFunctions(same(jCommander), same(args), same(cliArgs), same(logger));
+        verify(libraryXmvnController).configureXmvnCompatFunctions(
+                same(jCommander),
+                same(args),
+                same(cliArgs),
+                same(logger)
+        );
+        verify(pluginsController).configurePluginArtifactsInstallation(
+                same(jCommander),
+                same(args),
+                same(cliArgs),
+                same(logger)
+        );
+        verify(bomXmvnController).configureXmvnCompatFunctions(
+                same(jCommander),
+                same(args),
+                same(cliArgs),
+                same(logger)
+        );
+        verify(javadocXmvnController).configureXmvnCompatFunctions(
+                same(jCommander),
+                same(args),
+                same(cliArgs),
+                same(logger)
+        );
 
         verifyNoInteractions(pomRedactionController);
     }

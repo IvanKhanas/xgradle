@@ -143,7 +143,8 @@ class PomContainerTests {
     }
 
     /**
-     * Verifies current behavior: PomContainer does not validate null searchingDir and passes it through to the collector.
+     * Verifies current behavior:
+     * PomContainer does not validate null searchingDir and passes it through to the collector.
      */
     @Test
     @DisplayName("Null searchingDir is passed through (current behavior)")

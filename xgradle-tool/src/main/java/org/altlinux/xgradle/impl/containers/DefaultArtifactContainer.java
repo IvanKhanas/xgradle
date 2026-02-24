@@ -45,7 +45,11 @@ final class DefaultArtifactContainer implements ArtifactContainer {
     }
 
     @Override
-    public HashMap<String, Path> getArtifacts(String searchingDirectory, Optional<List<String>> artifactNames, ProcessingType processingType) {
+    public HashMap<String, Path> getArtifacts(
+            String searchingDirectory,
+            Optional<List<String>> artifactNames,
+            ProcessingType processingType
+    ) {
         if (artifactNames.isPresent()) {
             return artifactCollector.collect(searchingDirectory, artifactNames, processingType);
         } else {
@@ -54,7 +58,11 @@ final class DefaultArtifactContainer implements ArtifactContainer {
     }
 
     @Override
-    public Collection<Path> getArtifactPaths(String searchingDirectory, Optional<List<String>> artifactNames, ProcessingType processingType) {
+    public Collection<Path> getArtifactPaths(
+            String searchingDirectory,
+            Optional<List<String>> artifactNames,
+            ProcessingType processingType
+    ) {
         if (artifactNames.isPresent()) {
             return artifactCollector.collect(searchingDirectory,artifactNames, processingType).values();
         } else {
@@ -63,7 +71,11 @@ final class DefaultArtifactContainer implements ArtifactContainer {
     }
 
     @Override
-    public Collection<String> getArtifactSignatures(String searchingDirectory, Optional<List<String>> artifactNames, ProcessingType processingType) {
+    public Collection<String> getArtifactSignatures(
+            String searchingDirectory,
+            Optional<List<String>> artifactNames,
+            ProcessingType processingType
+    ) {
         if (artifactNames.isPresent()) {
             return artifactCollector.collect(searchingDirectory, artifactNames, processingType).keySet();
         } else {

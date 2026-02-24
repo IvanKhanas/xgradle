@@ -79,7 +79,10 @@ final class PomRedactorService implements PomService {
     }
 
     @Override
-    public HashMap<String, Path> excludeArtifacts(List<String> excludedArtifacts, HashMap<String, Path> artifactCoordinatesMap) {
+    public HashMap<String, Path> excludeArtifacts(
+            List<String> excludedArtifacts,
+            HashMap<String, Path> artifactCoordinatesMap
+    ) {
         if (excludedArtifacts != null && !excludedArtifacts.isEmpty()) {
             return artifactCoordinatesMap.entrySet().stream()
                     .filter(entry -> {

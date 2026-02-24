@@ -32,16 +32,16 @@ public enum DependencyContext {
                     DependencyContext second
             )
     {
-        if(first == null) {
+        if (first == null) {
             return second;
         }
-        if(second == null) {
+        if (second == null) {
             return first;
         }
-        if(first == ALL && second == ALL) {
+        if (first == ALL && second == ALL) {
             return ALL;
         }
-        if(first != second) {
+        if (first != second) {
             return ALL;
         }
         return first;

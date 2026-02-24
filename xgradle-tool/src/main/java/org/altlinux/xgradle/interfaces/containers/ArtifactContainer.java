@@ -39,7 +39,11 @@ public interface ArtifactContainer {
      * @param processingType the type of processing (LIBRARY or PLUGINS)
      * @return map of artifact signatures to file paths
      */
-    HashMap<String, Path> getArtifacts(String searchingDir, Optional<List<String>> artifactName, ProcessingType processingType);
+    HashMap<String, Path> getArtifacts(
+            String searchingDir,
+            Optional<List<String>> artifactName,
+            ProcessingType processingType
+    );
 
     /**
      * Retrieves artifact file paths from the specified directory based on processing type.
@@ -49,7 +53,11 @@ public interface ArtifactContainer {
      * @param processingType the type of processing (LIBRARY or PLUGINS)
      * @return collection of artifact file paths
      */
-    Collection<Path> getArtifactPaths(String searchingDir, Optional<List<String>> artifactName, ProcessingType processingType);
+    Collection<Path> getArtifactPaths(
+            String searchingDir,
+            Optional<List<String>> artifactName,
+            ProcessingType processingType
+    );
 
     /**
      * Retrieves artifact signatures from the specified directory based on processing type.
@@ -59,5 +67,9 @@ public interface ArtifactContainer {
      * @param processingType the type of processing (LIBRARY or PLUGINS)
      * @return collection of artifact signatures
      */
-    Collection<String> getArtifactSignatures(String searchingDir, Optional<List<String>> artifactName, ProcessingType processingType);
+    Collection<String> getArtifactSignatures(
+            String searchingDir,
+            Optional<List<String>> artifactName,
+            ProcessingType processingType
+    );
 }

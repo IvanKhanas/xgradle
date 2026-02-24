@@ -70,7 +70,7 @@ final class XmvnBomCompatRegistrar implements Registrar {
 
         if (artifactName.isPresent()) {
             artifacts = pomProcessor.pomsFromDirectory(searchingDir, artifactName);
-        }else {
+        } else {
             artifacts = pomProcessor.pomsFromDirectory(searchingDir, Optional.empty());
         }
 
@@ -100,7 +100,7 @@ final class XmvnBomCompatRegistrar implements Registrar {
 
         if (artifacts.isEmpty()) {
             logger.info("No BOM registered");
-        }else {
+        } else {
             logger.info("BOM`s registered successfully");
         }
     }

@@ -155,7 +155,8 @@ public class CliArgumentsContainer {
 
     @Parameter(
             names = "--change-dependency",
-            description = "Change dependency: pass exactly two values (source then target), each is groupId:artifactId[:version[:scope]]",
+            description = "Change dependency: pass exactly two values (source then target), " +
+                    "each is groupId:artifactId[:version[:scope]]",
             order = 18
     )
     private List<String> changeDependencies;
@@ -269,7 +270,7 @@ public class CliArgumentsContainer {
         return installPlugin;
     }
 
-    public boolean hasBomRegistration(){
+    public boolean hasBomRegistration() {
         return registerBom;
     }
 
@@ -281,11 +282,11 @@ public class CliArgumentsContainer {
         return allowSnapshots;
     }
 
-    public boolean hasHelp(){
+    public boolean hasHelp() {
         return help;
     }
 
-    public List<String> getRemoveParentPoms(){
+    public List<String> getRemoveParentPoms() {
         return removeParentPoms;
     }
 

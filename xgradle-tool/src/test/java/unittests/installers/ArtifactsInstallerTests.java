@@ -171,7 +171,10 @@ class ArtifactsInstallerTests {
         assertTrue(Files.exists(outPoms.resolve("plugin-parent.pom")));
 
         assertTrue(Files.exists(outJars.resolve("plugin-main.jar")));
-        assertArrayEquals("JAR".getBytes(StandardCharsets.UTF_8), Files.readAllBytes(outJars.resolve("plugin-main.jar")));
+        assertArrayEquals(
+                "JAR".getBytes(StandardCharsets.UTF_8),
+                Files.readAllBytes(outJars.resolve("plugin-main.jar"))
+        );
 
         long jarCount;
         try (var s = Files.list(outJars)) {

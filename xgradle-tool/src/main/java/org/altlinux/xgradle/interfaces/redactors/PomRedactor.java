@@ -23,7 +23,7 @@ import java.nio.file.Path;
  *
  * @author Ivan Khanas <xeno@altlinux.org>
  */
-public interface PomRedactor{
+public interface PomRedactor {
 
     /**
      * Removes the parent block from the specified POM file.

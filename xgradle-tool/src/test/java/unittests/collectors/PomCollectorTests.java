@@ -55,8 +55,11 @@ class PomCollectorTests {
                             @Override
                             protected void configure() {
                                 bind(ArtifactCollector.class).toInstance(
-                                        (String searchingDir, Optional<List<String>> artifactName, org.altlinux.xgradle.impl.enums.ProcessingType processingType)
-                                                -> new HashMap<String, Path>()
+                                        (
+                                                String searchingDir,
+                                                Optional<List<String>> artifactName,
+                                                org.altlinux.xgradle.impl.enums.ProcessingType processingType
+                                        ) -> new HashMap<String, Path>()
                                 );
                             }
                         })

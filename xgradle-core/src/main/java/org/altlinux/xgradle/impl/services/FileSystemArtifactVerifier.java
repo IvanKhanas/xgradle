@@ -32,7 +32,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Implementation of {@link ArtifactVerifier} that checks for the physical presence of artifact files in the local filesystem.
+ * Implementation of {@link ArtifactVerifier} that checks for the physical presence
+ * of artifact files in the local filesystem.
  * Implements {@link ArtifactVerifier}.
  *
  * @author Ivan Khanas <xeno@altlinux.org>

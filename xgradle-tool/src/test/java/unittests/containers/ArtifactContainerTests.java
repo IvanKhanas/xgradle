@@ -145,7 +145,11 @@ class ArtifactContainerTests {
 
         when(artifactCollector.collect("/repo", Optional.empty(), ProcessingType.LIBRARY)).thenReturn(collected);
 
-        Collection<String> signatures = container.getArtifactSignatures("/repo", Optional.empty(), ProcessingType.LIBRARY);
+        Collection<String> signatures = container.getArtifactSignatures(
+                "/repo",
+                Optional.empty(),
+                ProcessingType.LIBRARY
+        );
 
         assertEquals(new HashSet<>(collected.keySet()), new HashSet<>(signatures));
         verify(artifactCollector).collect("/repo", Optional.empty(), ProcessingType.LIBRARY);

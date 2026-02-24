@@ -75,7 +75,7 @@ public class TestDependenciesBlockParser {
 
         assertEquals("apiguardian-api", parsedDeps.get(0).getArtifactId());
         assertEquals("surefire-api" ,parsedDeps.get(4).getArtifactId());
-        assertEquals("plexus-xml", parsedDeps.get(parsedDeps.size()-1).getArtifactId());
+        assertEquals("plexus-xml", parsedDeps.get(parsedDeps.size() - 1).getArtifactId());
 
         assertTrue(checkDependencyScope(parsedDeps, "surefire-api", "compile"));
         assertTrue(checkDependencyScope(parsedDeps, "maven-core", "provided"));
@@ -104,7 +104,7 @@ public class TestDependenciesBlockParser {
         assertEquals("plexus-utils", parsedDeps.get(0).getArtifactId());
         assertEquals("jmh-core", parsedDeps.get(1).getArtifactId());
         assertEquals("jmh-generator-annprocess", parsedDeps.get(2).getArtifactId());
-        assertEquals("junit", parsedDeps.get(parsedDeps.size()-1).getArtifactId());
+        assertEquals("junit", parsedDeps.get(parsedDeps.size() - 1).getArtifactId());
 
         assertTrue(checkDependencyScope(parsedDeps, "plexus-utils", "test"));
         assertTrue(checkDependencyScope(parsedDeps, "jmh-core", "test"));
@@ -130,7 +130,7 @@ public class TestDependenciesBlockParser {
 
         assertEquals("junit-jupiter-api", parsedDeps.get(0).getArtifactId());
         assertEquals("junit-jupiter-params", parsedDeps.get(1).getArtifactId());
-        assertEquals("junit-jupiter-engine", parsedDeps.get(parsedDeps.size()-1).getArtifactId());
+        assertEquals("junit-jupiter-engine", parsedDeps.get(parsedDeps.size() - 1).getArtifactId());
 
         assertTrue(checkDependencyScope(parsedDeps, "junit-jupiter-api", "compile"));
         assertTrue(checkDependencyScope(parsedDeps, "junit-jupiter-params", "compile"));
@@ -153,7 +153,7 @@ public class TestDependenciesBlockParser {
         assertFalse(parsedDeps.isEmpty());
 
         assertEquals("asm", parsedDeps.get(0).getArtifactId());
-        assertEquals("asm-tree", parsedDeps.get(parsedDeps.size()-1).getArtifactId());
+        assertEquals("asm-tree", parsedDeps.get(parsedDeps.size() - 1).getArtifactId());
 
         assertTrue(checkDependencyScope(parsedDeps, "asm", "compile"));
         assertTrue(checkDependencyScope(parsedDeps, "asm-tree", "compile"));
@@ -177,8 +177,8 @@ public class TestDependenciesBlockParser {
 
         assertEquals("wagon-provider-api", parsedDeps.get(0).getArtifactId());
         assertEquals("wagon-http-shared", parsedDeps.get(1).getArtifactId());
-        assertEquals("javax.servlet-api", parsedDeps.get(parsedDeps.size()-2).getArtifactId());
-        assertEquals("plexus-container-default", parsedDeps.get(parsedDeps.size()-1).getArtifactId());
+        assertEquals("javax.servlet-api", parsedDeps.get(parsedDeps.size() - 2).getArtifactId());
+        assertEquals("plexus-container-default", parsedDeps.get(parsedDeps.size() - 1).getArtifactId());
 
         assertTrue(checkDependencyScope(parsedDeps, "wagon-http-shared", "compile"));
         assertTrue(checkDependencyScope(parsedDeps, "httpclient", "compile"));

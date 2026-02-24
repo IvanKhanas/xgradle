@@ -95,8 +95,10 @@ class JavadocProcessorTests {
 
                                 bind(Key.get(new TypeLiteral<PomParser<HashMap<String, Path>>>() {}, Library.class))
                                         .toInstance(libraryParserDummy);
-                                bind(Key.get(new TypeLiteral<PomParser<HashMap<String, Path>>>() {}, GradlePlugin.class))
-                                        .toInstance(gradlePluginParserDummy);
+                                bind(Key.get(
+                                        new TypeLiteral<PomParser<HashMap<String, Path>>>() {},
+                                        GradlePlugin.class
+                                )).toInstance(gradlePluginParserDummy);
                                 bind(Key.get(new TypeLiteral<PomParser<Set<Path>>>() {}, Bom.class))
                                         .toInstance(bomParserDummy);
 

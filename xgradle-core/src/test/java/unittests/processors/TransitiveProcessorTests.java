@@ -73,8 +73,18 @@ class TransitiveProcessorTests {
 
         TransitiveProcessor processor = injector.getInstance(TransitiveProcessor.class);
 
-        MavenCoordinate a = MavenCoordinate.builder().groupId("g").artifactId("a").version("1").build();
-        MavenCoordinate b = MavenCoordinate.builder().groupId("g").artifactId("b").version("1").testContext(true).build();
+        MavenCoordinate a = MavenCoordinate.builder()
+                .groupId("g")
+                .artifactId("a")
+                .version("1")
+                .build();
+
+        MavenCoordinate b = MavenCoordinate.builder()
+                .groupId("g")
+                .artifactId("b")
+                .version("1")
+                .testContext(true)
+                .build();
 
         Map<String, MavenCoordinate> systemArtifacts = new HashMap<>();
         systemArtifacts.put("g:a", a);

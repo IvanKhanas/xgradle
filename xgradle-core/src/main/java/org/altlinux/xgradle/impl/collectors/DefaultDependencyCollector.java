@@ -23,7 +23,8 @@ import org.gradle.api.invocation.Gradle;
 import java.util.*;
 
 /**
- * Default implementation of {@link DependencyCollector} that inspects all projects in a Gradle build and gathers declared dependencies.
+ * Default implementation of {@link DependencyCollector} that inspects all projects in a Gradle build
+ * and gathers declared dependencies.
  * Implements {@link DependencyCollector}.
  *
  * @author Ivan Khanas <xeno@altlinux.org>
