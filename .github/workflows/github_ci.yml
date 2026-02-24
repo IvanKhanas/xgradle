@@ -5,11 +5,31 @@ on:
   pull_request:
 
 jobs:
+  checkstyle:
+    name: Checkstyle
+    runs-on: ubuntu-latest
+    container:
+      image: registry.altlinux.org/sisyphus/alt:latest
+
+    steps:
+      - name: Install build dependencies
+        run: |
+          apt-get update
+          apt-get install -y \
+            glibc-pthread \
+            git \
+            java-11-openjdk-devel
+      - uses: actions/checkout@v4
+
+      - name: Run checkstyle check
+        run: ./gradlew checkstyle -Djava11
+
   publishing:
     name: Publishing (JDK ${{ matrix.java }})
     runs-on: ubuntu-latest
     container:
       image: registry.altlinux.org/sisyphus/alt:latest
+    needs: checkstyle
     strategy:
       matrix:
         java: [11, 17]
