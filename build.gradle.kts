@@ -13,6 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import org.gradle.api.plugins.quality.Checkstyle
+import org.gradle.api.plugins.quality.CheckstyleExtension
+
 plugins {
     java
     `maven-publish`
@@ -37,6 +40,26 @@ subprojects {
     apply(plugin = "java")
     apply(plugin = "maven-publish")
     apply(plugin = "com.gradleup.shadow")
+    apply(plugin = "checkstyle")
+
+    configure<CheckstyleExtension> {
+        configFile = rootProject.file("checkstyle.xml")
+        isIgnoreFailures = false
+        isShowViolations = true
+        maxErrors = 0
+    }
+
+    tasks.withType<Checkstyle>().configureEach {
+
+        reports {
+            xml.required.set(true)
+            html.required.set(true)
+        }
+    }
+
+    tasks.register<Checkstyle>("checkstyle") {
+        dependsOn("checkstyleMain", "checkstyleTest")
+    }
 
     java {
 	// Please make sure that all dependencies in your distribution have Class file version 55.0 or lower.

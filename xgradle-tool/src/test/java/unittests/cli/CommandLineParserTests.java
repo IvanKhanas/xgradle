@@ -42,7 +42,7 @@ class CommandLineParserTests {
      */
     @Test
     @DisplayName("Returns empty list for null input")
-    void returnsEmptyList_forNull() {
+    void returnsEmptyListForNull() {
         assertEquals(List.of(), parser.parseCommandLine(null));
     }
 
@@ -52,7 +52,7 @@ class CommandLineParserTests {
      */
     @Test
     @DisplayName("Returns empty list for blank input")
-    void returnsEmptyList_forBlank() {
+    void returnsEmptyListForBlank() {
         assertAll(
                 () -> assertEquals(List.of(), parser.parseCommandLine("")),
                 () -> assertEquals(List.of(), parser.parseCommandLine("   ")),
@@ -66,7 +66,7 @@ class CommandLineParserTests {
      */
     @Test
     @DisplayName("Splits by whitespace when no quotes")
-    void splitsByWhitespace_noQuotes() {
+    void splitsByWhitespaceNoQuotes() {
         assertEquals(
                 List.of("a", "bb", "ccc"),
                 parser.parseCommandLine("a   bb\tccc")
@@ -105,7 +105,7 @@ class CommandLineParserTests {
      */
     @Test
     @DisplayName("Removes wrapping quotes around the whole command")
-    void stripsWrappingQuotes_wholeCommand() {
+    void stripsWrappingQuotesWholeCommand() {
         assertAll(
                 () -> assertEquals(List.of("cmd", "x", "y"), parser.parseCommandLine("\"cmd x y\"")),
                 () -> assertEquals(List.of("cmd", "x", "y"), parser.parseCommandLine("'cmd x y'"))
@@ -131,7 +131,7 @@ class CommandLineParserTests {
      */
     @Test
     @DisplayName("Inside quotes, backslash escapes next character (double quotes)")
-    void escapesInsideQuotes_doubleQuotes() {
+    void escapesInsideQuotesDoubleQuotes() {
         assertEquals(
                 List.of("cmd", "a\"b", "tail"),
                 parser.parseCommandLine("cmd \"a\\\"b\" tail")
@@ -144,7 +144,7 @@ class CommandLineParserTests {
      */
     @Test
     @DisplayName("Inside quotes, backslash escapes next character (single quotes)")
-    void escapesInsideQuotes_singleQuotes() {
+    void escapesInsideQuotesSingleQuotes() {
         assertEquals(
                 List.of("cmd", "a'b", "tail"),
                 parser.parseCommandLine("cmd 'a\\'b' tail")
@@ -156,7 +156,7 @@ class CommandLineParserTests {
      */
     @Test
     @DisplayName("Backslash outside quotes is treated as a normal character")
-    void backslashOutsideQuotes_isLiteral() {
+    void backslashOutsideQuotesIsLiteral() {
         assertEquals(
                 List.of("cmd", "a\\b", "tail"),
                 parser.parseCommandLine("cmd a\\b tail")
@@ -168,7 +168,7 @@ class CommandLineParserTests {
      */
     @Test
     @DisplayName("Throws for unclosed quote (double quote)")
-    void throwsForUnclosedQuote_double() {
+    void throwsForUnclosedQuoteDouble() {
         IllegalArgumentException ex = assertThrows(
                 IllegalArgumentException.class,
                 () -> parser.parseCommandLine("cmd \"oops")
@@ -181,7 +181,7 @@ class CommandLineParserTests {
      */
     @Test
     @DisplayName("Throws for unclosed quote (single quote)")
-    void throwsForUnclosedQuote_single() {
+    void throwsForUnclosedQuoteSingle() {
         IllegalArgumentException ex = assertThrows(
                 IllegalArgumentException.class,
                 () -> parser.parseCommandLine("cmd 'oops")

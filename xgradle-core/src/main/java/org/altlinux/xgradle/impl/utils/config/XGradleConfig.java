@@ -36,7 +36,7 @@ public final class XGradleConfig {
 
     private static final Object LOCK = new Object();
     private static final Properties PROPERTIES = new Properties();
-    private static volatile boolean LOADED = false;
+    private static volatile boolean loaded = false;
 
     private static final Set<String> SUPPORTED_KEYS = Set.of(
             "java.library.dir",
@@ -92,7 +92,7 @@ public final class XGradleConfig {
     static void resetForTests() {
         synchronized (LOCK) {
             PROPERTIES.clear();
-            LOADED = false;
+            loaded = false;
         }
     }
 
@@ -107,15 +107,15 @@ public final class XGradleConfig {
     }
 
     private static void ensureLoaded() {
-        if (LOADED) {
+        if (loaded) {
             return;
         }
         synchronized (LOCK) {
-            if (LOADED) {
+            if (loaded) {
                 return;
             }
             loadFromDisk();
-            LOADED = true;
+            loaded = true;
         }
     }
 

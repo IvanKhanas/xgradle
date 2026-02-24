@@ -37,15 +37,15 @@ public class CliVersion {
             throw new FileNotFoundException("Could not find /application.properties");
         }
 
-        String VERSION = prop.getProperty("version");
-        String COMMITHASH = prop.getProperty("commitHash");
-        String BUILDTIME = prop.getProperty("buildTime", "N/A");
+        String version = prop.getProperty("version");
+        String commitHash = prop.getProperty("commitHash");
+        String buildTime = prop.getProperty("buildTime", "N/A");
 
-        String BANNER_TEMPLATE = "----------------------------------------------------------\n" +
+        String bannerTemplate = "----------------------------------------------------------\n" +
                 "| Version: %-45s |\n" +
                 "| Revision: %-44s |\n" +
                 "| Build Time: %-42s |\n" +
                 "----------------------------------------------------------";
-        System.out.printf(BANNER_TEMPLATE + "%n", VERSION, COMMITHASH, BUILDTIME);
+        System.out.printf(bannerTemplate + "%n", version, commitHash, buildTime);
     }
 }
