@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 import org.gradle.api.Project
+import org.gradle.api.provider.Provider
 import org.gradle.language.jvm.tasks.ProcessResources
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 
-private fun Project.gitCommitIdProvider() =
+private fun Project.gitCommitIdProvider(): Provider<String> =
     providers.systemProperty("gitCommitId")
         .orElse(providers.provider { git("rev-parse", "HEAD~0") })
         .orElse("<Unknown>")
