@@ -51,7 +51,6 @@ import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -105,14 +104,14 @@ public class XmvnCompatRegistrarTests {
     }
 
     @Test
-    @DisplayName("artifactName absent: gets artifacts with Optional.empty and registers each pom+jar pair")
+    @DisplayName("artifactName absent: gets artifacts with empty list and registers each pom+jar pair")
     void registerAllPairsWithoutNames() throws Exception {
 
         Map<String, Path> artifacts = new LinkedHashMap<>();
         artifacts.put("/repo/a.pom", Path.of("/repo/a.jar"));
         artifacts.put("/repo/b.pom", Path.of("/repo/b.jar"));
 
-        when(artifactContainer.getArtifacts(eq(DIRECTORY), eq(Optional.empty()), eq(ProcessingType.LIBRARY)))
+        when(artifactContainer.getArtifacts(eq(DIRECTORY), eq(List.of()), eq(ProcessingType.LIBRARY)))
                 .thenReturn(new LinkedHashMap<>(artifacts));
 
         when(commandLineParser.parseCommandLine(CMD))
@@ -121,9 +120,9 @@ public class XmvnCompatRegistrarTests {
         when(commandExecutor.execute(any(ProcessBuilder.class)))
                 .thenReturn(ExitCode.SUCCESS.getExitCode());
 
-        registrar.registerArtifacts(DIRECTORY, CMD, Optional.empty());
+        registrar.registerArtifacts(DIRECTORY, CMD, List.of());
 
-        verify(artifactContainer).getArtifacts(DIRECTORY, Optional.empty(), ProcessingType.LIBRARY);
+        verify(artifactContainer).getArtifacts(DIRECTORY, List.of(), ProcessingType.LIBRARY);
 
         ArgumentCaptor<ProcessBuilder> processBuilderCaptor = ArgumentCaptor.forClass(ProcessBuilder.class);
         verify(commandExecutor, times(2)).execute(processBuilderCaptor.capture());
@@ -139,7 +138,7 @@ public class XmvnCompatRegistrarTests {
     @Test
     @DisplayName("artifactName present: passes names filter to container")
     void userNamesFilter() throws Exception {
-        Optional<List<String>> names = Optional.of(List.of("x", "y"));
+        List<String> names = List.of("x", "y");
 
         Map<String, Path> artifacts = new LinkedHashMap<>();
         artifacts.put("repo/x.pom", Path.of("/repo/x.jar"));
@@ -160,12 +159,12 @@ public class XmvnCompatRegistrarTests {
     @Test
     @DisplayName("No artifacts -> logs and does not execute")
     void logsWhenNoArtifacts() throws IOException, InterruptedException {
-        when(artifactContainer.getArtifacts(eq(DIRECTORY), eq(Optional.empty()), eq(ProcessingType.LIBRARY)))
+        when(artifactContainer.getArtifacts(eq(DIRECTORY), eq(List.of()), eq(ProcessingType.LIBRARY)))
                 .thenReturn(new LinkedHashMap<>());
 
         when(commandLineParser.parseCommandLine(CMD)).thenReturn(PARSED_CMD);
 
-        registrar.registerArtifacts(DIRECTORY, CMD, Optional.empty());
+        registrar.registerArtifacts(DIRECTORY, CMD, List.of());
 
         InOrder inOrder = inOrder(commandLineParser, logger);
         inOrder.verify(commandLineParser).parseCommandLine(CMD);
@@ -178,14 +177,14 @@ public class XmvnCompatRegistrarTests {
     @DisplayName("Empty parsed command -> throws and does not execute")
     void throwsWhenCommandEmpty() throws IOException, InterruptedException {
 
-        when(artifactContainer.getArtifacts(eq(DIRECTORY), eq(Optional.empty()), eq(ProcessingType.LIBRARY)))
+        when(artifactContainer.getArtifacts(eq(DIRECTORY), eq(List.of()), eq(ProcessingType.LIBRARY)))
                 .thenReturn(new LinkedHashMap<>());
 
         when(commandLineParser.parseCommandLine("")).thenReturn(List.of());
 
         EmptyRegisterCommandException exception = assertThrows(
                 EmptyRegisterCommandException.class,
-                () -> registrar.registerArtifacts(DIRECTORY, "", Optional.empty())
+                () -> registrar.registerArtifacts(DIRECTORY, "", List.of())
         );
                 assertEquals("Register command is empty: " + "\'\'", exception.getMessage());
                 verify(commandExecutor, never()).execute(any());
@@ -197,7 +196,7 @@ public class XmvnCompatRegistrarTests {
         Map<String, Path> artifacts = new LinkedHashMap<>();
         artifacts.put("/repo/a.pom", Path.of("/repo/a.jar"));
 
-        when(artifactContainer.getArtifacts(eq(DIRECTORY), eq(Optional.empty()), eq(ProcessingType.LIBRARY)))
+        when(artifactContainer.getArtifacts(eq(DIRECTORY), eq(List.of()), eq(ProcessingType.LIBRARY)))
                 .thenReturn(new LinkedHashMap<>(artifacts));
 
         when(commandLineParser.parseCommandLine(CMD)).thenReturn(PARSED_CMD);
@@ -207,7 +206,7 @@ public class XmvnCompatRegistrarTests {
 
         RuntimeException exception = assertThrows(
                 RuntimeException.class,
-                () -> registrar.registerArtifacts(DIRECTORY, CMD, Optional.empty())
+                () -> registrar.registerArtifacts(DIRECTORY, CMD, List.of())
         );
 
         assertTrue(exception.getMessage().contains("Failed to register artifact, exit code:"));

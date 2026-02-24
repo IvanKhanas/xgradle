@@ -46,8 +46,8 @@ import org.slf4j.Logger;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.HashMap;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -149,22 +149,22 @@ class ArtifactsInstallerTests {
         pomModels.put(metaPom, readModel(metaPom));
         pomModels.put(parentPom, readModel(parentPom));
 
-        when(pomChainResolver.resolve(eq(repo.toString()), eq(Optional.empty()), eq(artifacts)))
+        when(pomChainResolver.resolve(eq(repo.toString()), eq(List.of()), eq(artifacts)))
                 .thenReturn(new PluginPomChainResult(pomModels, Set.of(mainPom, metaPom, parentPom)));
 
-        when(artifactContainer.getArtifacts(eq(repo.toString()), eq(Optional.empty()), eq(ProcessingType.PLUGINS)))
+        when(artifactContainer.getArtifacts(eq(repo.toString()), eq(List.of()), eq(ProcessingType.PLUGINS)))
                 .thenReturn(artifacts);
 
         installer.install(
                 repo.toString(),
-                Optional.empty(),
+                List.of(),
                 outPoms.toString(),
                 outJars.toString(),
                 ProcessingType.PLUGINS
         );
 
-        verify(artifactContainer, times(1)).getArtifacts(repo.toString(), Optional.empty(), ProcessingType.PLUGINS);
-        verify(pomChainResolver, times(1)).resolve(repo.toString(), Optional.empty(), artifacts);
+        verify(artifactContainer, times(1)).getArtifacts(repo.toString(), List.of(), ProcessingType.PLUGINS);
+        verify(pomChainResolver, times(1)).resolve(repo.toString(), List.of(), artifacts);
 
         assertTrue(Files.exists(outPoms.resolve("plugin-main.pom")));
         assertTrue(Files.exists(outPoms.resolve("plugin-meta.pom")));
@@ -217,15 +217,15 @@ class ArtifactsInstallerTests {
         pomModels.put(pom1, readModel(pom1));
         pomModels.put(pom2, readModel(pom2));
 
-        when(pomChainResolver.resolve(eq(repo.toString()), eq(Optional.empty()), eq(artifacts)))
+        when(pomChainResolver.resolve(eq(repo.toString()), eq(List.of()), eq(artifacts)))
                 .thenReturn(new PluginPomChainResult(pomModels, Set.of(pom1, pom2)));
 
-        when(artifactContainer.getArtifacts(eq(repo.toString()), eq(Optional.empty()), eq(ProcessingType.PLUGINS)))
+        when(artifactContainer.getArtifacts(eq(repo.toString()), eq(List.of()), eq(ProcessingType.PLUGINS)))
                 .thenReturn(artifacts);
 
         installer.install(
                 repo.toString(),
-                Optional.empty(),
+                List.of(),
                 outPoms.toString(),
                 outJars.toString(),
                 ProcessingType.PLUGINS

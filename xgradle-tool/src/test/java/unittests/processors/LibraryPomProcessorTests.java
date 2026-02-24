@@ -46,7 +46,6 @@ import org.slf4j.Logger;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -56,16 +55,29 @@ import static org.mockito.Mockito.*;
 @DisplayName("@Library PomProcessor<HashMap<String,Path>> (DefaultLibraryPomProcessor)")
 class LibraryPomProcessorTests {
 
-    @Mock private PomParser<HashMap<String, Path>> libraryParser;
-    @Mock private PomService pomService;
-    @Mock private ToolConfig toolConfig;
+    @Mock
+    private PomParser<HashMap<String, Path>> libraryParser;
 
-    @Mock private PomParser<HashMap<String, Path>> gradlePluginParserDummy;
-    @Mock private PomParser<HashMap<String, Path>> javadocParserDummy;
-    @Mock private PomParser<Set<Path>> bomParserDummy;
+    @Mock
+    private PomService pomService;
 
-    @Mock private ArtifactFactory artifactFactory;
-    @Mock private Logger logger;
+    @Mock
+    private ToolConfig toolConfig;
+
+    @Mock
+    private PomParser<HashMap<String, Path>> gradlePluginParserDummy;
+
+    @Mock
+    private PomParser<HashMap<String, Path>> javadocParserDummy;
+
+    @Mock
+    private PomParser<Set<Path>> bomParserDummy;
+
+    @Mock
+    private ArtifactFactory artifactFactory;
+
+    @Mock
+    private Logger logger;
 
     private PomProcessor<HashMap<String, Path>> processor;
 
@@ -108,7 +120,7 @@ class LibraryPomProcessorTests {
     @DisplayName("Delegates to parser; applies excludeArtifacts -> removeParentBlocks " +
             "-> excludeSnapshots (when allowSnapshots=false)")
     void processesWithNamesAndFiltersInOrder() {
-        Optional<List<String>> names = Optional.of(List.of("a", "b"));
+        List<String> names = List.of("a", "b");
 
         HashMap<String, Path> parsed = new HashMap<>();
         parsed.put("/repo/a.pom", Path.of("/repo/a.jar"));
@@ -146,7 +158,7 @@ class LibraryPomProcessorTests {
         HashMap<String, Path> parsed = new HashMap<>();
         parsed.put("/repo/x.pom", Path.of("/repo/x.jar"));
 
-        when(libraryParser.getArtifactCoords("/repo", Optional.empty())).thenReturn(parsed);
+        when(libraryParser.getArtifactCoords("/repo", List.of())).thenReturn(parsed);
 
         when(toolConfig.getExcludedArtifacts()).thenReturn(List.of());
         when(toolConfig.getRemoveParentPoms()).thenReturn(List.of());
@@ -154,11 +166,11 @@ class LibraryPomProcessorTests {
 
         when(pomService.excludeArtifacts(List.of(), parsed)).thenReturn(parsed);
 
-        HashMap<String, Path> result = processor.pomsFromDirectory("/repo", Optional.empty());
+        HashMap<String, Path> result = processor.pomsFromDirectory("/repo", List.of());
         assertSame(parsed, result);
 
         InOrder inOrder = inOrder(libraryParser, pomService, toolConfig);
-        inOrder.verify(libraryParser).getArtifactCoords("/repo", Optional.empty());
+        inOrder.verify(libraryParser).getArtifactCoords("/repo", List.of());
         inOrder.verify(toolConfig).getExcludedArtifacts();
         inOrder.verify(pomService).excludeArtifacts(List.of(), parsed);
         inOrder.verify(toolConfig).getRemoveParentPoms();

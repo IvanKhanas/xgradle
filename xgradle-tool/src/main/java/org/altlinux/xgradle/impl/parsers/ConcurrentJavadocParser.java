@@ -34,7 +34,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Optional;
 import java.util.List;
 
 /**
@@ -56,11 +55,11 @@ final class ConcurrentJavadocParser implements PomParser<HashMap<String, Path>> 
     }
 
     @Override
-    public HashMap<String, Path> getArtifactCoords(String searchingDir, Optional<List<String>> artifactNames) {
+    public HashMap<String, Path> getArtifactCoords(String searchingDir, List<String> artifactNames) {
         Collection<Path> pomPaths;
 
-        if (artifactNames.isPresent()) {
-            pomPaths = pomContainer.getSelectedPoms(searchingDir, artifactNames.get());
+        if (artifactNames != null && !artifactNames.isEmpty()) {
+            pomPaths = pomContainer.getSelectedPoms(searchingDir, artifactNames);
         } else {
             pomPaths = pomContainer.getAllPoms(searchingDir);
         }

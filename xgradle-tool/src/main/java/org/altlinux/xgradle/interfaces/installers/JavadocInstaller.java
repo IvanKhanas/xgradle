@@ -16,7 +16,6 @@
 package org.altlinux.xgradle.interfaces.installers;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Interface for Javadoc artifacts installation operations.
@@ -30,8 +29,8 @@ public interface JavadocInstaller {
      * Installs Javadoc artifacts to the specified target directory.
      *
      * @param searchingDir the directory to search for Javadoc artifacts
-     * @param artifactNames optional list of artifact names to filter by
+     * @param artifactNames list of artifact names to filter by (null or empty to process all)
      * @param jarInstallationDir target directory for Javadoc JAR files
      */
-    void installJavadoc(String searchingDir, Optional<List<String>> artifactNames, String jarInstallationDir);
+    void installJavadoc(String searchingDir, List<String> artifactNames, String jarInstallationDir);
 }

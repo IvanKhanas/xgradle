@@ -43,7 +43,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -162,7 +161,7 @@ class JavadocXmvnCompatControllerTests {
     @Test
     @DisplayName("Delegates to JavadocInstaller when javadoc flag and required paths are set")
     void delegatesToJavadocInstaller() {
-        Optional<List<String>> artifactNames = Optional.of(List.of("lib"));
+        List<String> artifactNames = List.of("lib");
 
         when(args.hasJavadocRegistration()).thenReturn(true);
         when(args.hasSearchingDirectory()).thenReturn(true);

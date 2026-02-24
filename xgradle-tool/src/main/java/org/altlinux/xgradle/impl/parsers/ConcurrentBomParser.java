@@ -36,7 +36,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -71,11 +70,11 @@ final class ConcurrentBomParser implements PomParser<Set<Path>> {
     }
 
     @Override
-    public Set<Path> getArtifactCoords(String searchingDir, Optional<List<String>> artifactNames) {
+    public Set<Path> getArtifactCoords(String searchingDir, List<String> artifactNames) {
         Set<Path> pomPaths;
 
-        if (artifactNames.isPresent()) {
-            pomPaths = pomContainer.getSelectedPoms(searchingDir, artifactNames.get());
+        if (artifactNames != null && !artifactNames.isEmpty()) {
+            pomPaths = pomContainer.getSelectedPoms(searchingDir, artifactNames);
         } else {
             pomPaths = pomContainer.getAllPoms(searchingDir);
         }

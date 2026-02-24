@@ -44,7 +44,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
@@ -109,7 +108,7 @@ class LibraryXmvnCompatControllerTests {
     @Test
     @DisplayName("Delegates to @Library Registrar when xmvn-register is set and bom/javadoc are not set")
     void delegatesWhenXmvnRegisterSetAndNotBomNorJavadoc() {
-        Optional<List<String>> names = Optional.of(List.of("a"));
+        List<String> names = List.of("a");
 
         when(args.hasXmvnRegister()).thenReturn(true);
         when(args.hasBomRegistration()).thenReturn(false);

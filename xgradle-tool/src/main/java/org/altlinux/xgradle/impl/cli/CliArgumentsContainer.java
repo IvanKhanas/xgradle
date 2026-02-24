@@ -22,7 +22,6 @@ import com.google.inject.Singleton;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Container for command-line arguments using JCommander annotations.
@@ -242,8 +241,8 @@ public class CliArgumentsContainer {
         return searchingDirectory != null && !searchingDirectory.isEmpty();
     }
 
-    public Optional<List<String>> getArtifactName() {
-        return Optional.ofNullable(artifactNames);
+    public List<String> getArtifactName() {
+        return artifactNames == null ? List.of() : artifactNames;
     }
 
     public boolean hasArtifactName() {

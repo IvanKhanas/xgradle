@@ -85,11 +85,11 @@ final class DefaultApplication implements Application {
             jCommander.parse(args);
             cliArgs.validateMutuallyExclusive();
         } catch (ParameterException e) {
-            logger.error(e.getMessage());
+            logger.error("Invalid CLI arguments: {}", e.getMessage());
             jCommander.usage();
             return ExitCode.ERROR;
         } catch (RuntimeException e) {
-            logger.error(e.getMessage(), e);
+            logger.error("Unexpected error while parsing CLI arguments", e);
             return ExitCode.ERROR;
         }
 
@@ -103,7 +103,7 @@ final class DefaultApplication implements Application {
                 pomRedactionController.get().configure();
                 return ExitCode.SUCCESS;
             } catch (RuntimeException e) {
-                logger.error(e.getMessage(), e);
+                logger.error("POM redaction failed", e);
                 return ExitCode.ERROR;
             }
         }
@@ -125,11 +125,11 @@ final class DefaultApplication implements Application {
             javadocXmvnController.get().configureXmvnCompatFunctions(jCommander, args, cliArgs, logger);
             return ExitCode.SUCCESS;
         } catch (CliUsageException e) {
-            logger.error(e.getMessage());
+            logger.error("Invalid CLI usage: {}", e.getMessage());
             jCommander.usage();
             return ExitCode.ERROR;
         } catch (RuntimeException e) {
-            logger.error(e.getMessage(), e);
+            logger.error("Unhandled error while executing command", e);
             return ExitCode.ERROR;
         }
     }

@@ -55,9 +55,7 @@ final class DefaultRepositoryManager implements RepositoryManager {
     public void configurePluginsRepository(Settings settings, List<File> baseDirs) {
         List<File> validDirs = getValidDirectories(baseDirs);
         if (validDirs.isEmpty()) {
-            if (logger != null) {
-                logger.warn("No valid system jars directories for plugin repositories");
-            }
+            logger.warn("No valid system jars directories for plugin repositories");
             return;
         }
         List<File> dirs = scanDirectories(validDirs);
@@ -90,9 +88,7 @@ final class DefaultRepositoryManager implements RepositoryManager {
                         .filter(path -> !path.equals(basePath))
                         .forEach(path -> allDirs.add(path.toFile()));
             } catch (Exception e) {
-                if (logger != null) {
-                    logger.error("Directory scan error: {}", e.getMessage());
-                }
+                logger.error("Directory scan error: {}", e.getMessage());
             }
         }
         return new ArrayList<>(allDirs);
@@ -111,7 +107,7 @@ final class DefaultRepositoryManager implements RepositoryManager {
                 invalidDirs.add(dir);
             }
         }
-        if (!invalidDirs.isEmpty() && logger != null) {
+        if (!invalidDirs.isEmpty()) {
             logger.warn("Skipping invalid lib directories: {}", invalidDirs);
         }
         return validDirs;
@@ -137,9 +133,7 @@ final class DefaultRepositoryManager implements RepositoryManager {
             repo.setName(repoName);
             List<File> allDirs = scanDirectories(baseDirs);
             allDirs.forEach(repo::dir);
-            if (logger != null) {
-                logger.info("Configured DependencyManagement repository with {} directories", allDirs.size());
-            }
+            logger.info("Configured DependencyManagement repository with {} directories", allDirs.size());
         });
     }
 }

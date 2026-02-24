@@ -41,7 +41,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -110,7 +109,7 @@ class ArtifactCollectorTests {
     @Test
     @DisplayName("Delegates LIBRARY to @Library PomProcessor")
     void delegatesLibrary() {
-        Optional<List<String>> names = Optional.of(List.of("a", "b"));
+        List<String> names = List.of("a", "b");
         HashMap<String, Path> expected = new HashMap<>();
 
         when(libraryProcessor.pomsFromDirectory("/repo", names)).thenReturn(expected);
@@ -128,7 +127,7 @@ class ArtifactCollectorTests {
     @Test
     @DisplayName("Delegates PLUGINS to @GradlePlugin PomProcessor")
     void delegatesPlugins() {
-        Optional<List<String>> names = Optional.empty();
+        List<String> names = List.of();
         HashMap<String, Path> expected = new HashMap<>();
 
         when(pluginProcessor.pomsFromDirectory("/repo", names)).thenReturn(expected);
@@ -146,7 +145,7 @@ class ArtifactCollectorTests {
     @Test
     @DisplayName("Delegates JAVADOC to @Javadoc PomProcessor")
     void delegatesJavadoc() {
-        Optional<List<String>> names = Optional.empty();
+        List<String> names = List.of();
         HashMap<String, Path> expected = new HashMap<>();
 
         when(javadocProcessor.pomsFromDirectory("/repo", names)).thenReturn(expected);
@@ -166,7 +165,7 @@ class ArtifactCollectorTests {
     void rejectsNullProcessingType() {
         NullPointerException ex = assertThrows(
                 NullPointerException.class,
-                () -> collector.collect("/repo", Optional.empty(), null)
+                () -> collector.collect("/repo", List.of(), null)
         );
         assertEquals("Processing type can not be null!", ex.getMessage());
         verifyNoInteractions(libraryProcessor, pluginProcessor, javadocProcessor);
@@ -176,9 +175,9 @@ class ArtifactCollectorTests {
      * Ensures the collector passes through the exact Optional instance (contract: do not unwrap/rebuild).
      */
     @Test
-    @DisplayName("Passes through Optional artifact names as-is")
-    void passesThroughOptionalAsIs() {
-        Optional<List<String>> names = Optional.of(List.of("foo"));
+    @DisplayName("Passes through artifact names as-is")
+    void passesThroughNamesAsIs() {
+        List<String> names = List.of("foo");
         HashMap<String, Path> expected = new HashMap<>();
 
         when(pluginProcessor.pomsFromDirectory("/repo", names)).thenReturn(expected);

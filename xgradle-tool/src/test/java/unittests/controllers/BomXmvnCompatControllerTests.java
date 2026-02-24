@@ -43,7 +43,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -157,7 +156,7 @@ class BomXmvnCompatControllerTests {
     @Test
     @DisplayName("Delegates to @Bom Registrar when xmvn-register is set and bom flag is set")
     void delegatesToBomRegistrar() {
-        Optional<List<String>> artifactNames = Optional.of(List.of("a", "b"));
+        List<String> artifactNames = List.of("a", "b");
 
         when(args.hasXmvnRegister()).thenReturn(true);
         when(args.hasBomRegistration()).thenReturn(true);

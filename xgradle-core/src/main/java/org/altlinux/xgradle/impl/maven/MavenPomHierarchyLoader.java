@@ -75,7 +75,7 @@ final class MavenPomHierarchyLoader implements PomHierarchyLoader {
             try (InputStream is = Files.newInputStream(pomPath)) {
                 return modelReader.read(is, null);
             } catch (Exception e) {
-                logger.debug("Failed to load POM: " + pomPath, e);
+                logger.debug("Failed to load POM: {}", pomPath, e);
                 return null;
             }
         });

@@ -68,13 +68,13 @@ final class DefaultPluginPomParser implements PomParser<HashMap<String, Path>> {
     }
 
     @Override
-    public HashMap<String, Path> getArtifactCoords(String searchingDir, Optional<List<String>> artifactNames) {
-        if (artifactNames == null || !artifactNames.isPresent()) {
+    public HashMap<String, Path> getArtifactCoords(String searchingDir, List<String> artifactNames) {
+        if (artifactNames == null || artifactNames.isEmpty()) {
             return new HashMap<>();
         }
 
         HashMap<String, Path> result = new HashMap<>();
-        List<String> artifactNameValues = artifactNames.get();
+        List<String> artifactNameValues = artifactNames;
 
         Collection<Path> allPomPaths = pomContainer.getAllPoms(searchingDir);
 

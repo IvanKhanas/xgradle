@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.Optional;
 import java.util.List;
 
 /**
@@ -64,13 +63,12 @@ final class XmvnCompatRegistrar implements Registrar {
     }
 
     @Override
-    public void registerArtifacts(String searchingDir, String registerCommand, Optional<List<String>> artifactName) {
-        Map<String, Path> artifacts;
-        if (artifactName.isPresent()) {
-            artifacts = artifactContainer.getArtifacts(searchingDir, artifactName, ProcessingType.LIBRARY);
-        } else {
-            artifacts = artifactContainer.getArtifacts(searchingDir, Optional.empty(), ProcessingType.LIBRARY);
-        }
+    public void registerArtifacts(String searchingDir, String registerCommand, List<String> artifactNames) {
+        Map<String, Path> artifacts = artifactContainer.getArtifacts(
+                searchingDir,
+                artifactNames,
+                ProcessingType.LIBRARY
+        );
 
         List<String> baseCommand = commandLineParser.parseCommandLine(registerCommand);
 
@@ -86,7 +84,7 @@ final class XmvnCompatRegistrar implements Registrar {
             currentCommand.add(pomPath);
             currentCommand.add(jarPath.toString());
 
-            logger.info("\nRegistering pair: " + String.join(" ", currentCommand));
+            logger.info("\nRegistering pair: {}", String.join(" ", currentCommand));
 
             ProcessBuilder processBuilder = new ProcessBuilder(currentCommand);
 

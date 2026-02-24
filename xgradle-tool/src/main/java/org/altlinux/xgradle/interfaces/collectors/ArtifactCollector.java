@@ -19,7 +19,6 @@ import org.altlinux.xgradle.impl.enums.ProcessingType;
 
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.Optional;
 import java.util.List;
 
 /**
@@ -35,13 +34,13 @@ public interface ArtifactCollector {
      * Collects artifacts from the specified directory based on processing type.
      *
      * @param searchingDirectory the directory to search for artifacts
-     * @param artifactName optional list of artifact names to filter by
+     * @param artifactNames list of artifact names to filter by (null or empty to process all)
      * @param processingType the type of processing (LIBRARY or PLUGINS)
      * @return map of artifact coordinates to file paths
      */
     HashMap<String, Path> collect(
             String searchingDirectory,
-            Optional<List<String>> artifactName,
+            List<String> artifactNames,
             ProcessingType processingType
     );
 }

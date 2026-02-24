@@ -83,7 +83,7 @@ class ArtifactContainerTests {
     @Test
     @DisplayName("getArtifacts delegates to ArtifactCollector.collect when artifactNames is present")
     void getArtifactsDelegatesWhenArtifactNamesPresent() {
-        Optional<List<String>> names = Optional.of(List.of("a", "b"));
+        List<String> names = List.of("a", "b");
         HashMap<String, Path> expected = new HashMap<>();
         expected.put("g:a:1", Path.of("/repo/a.pom"));
 
@@ -97,20 +97,20 @@ class ArtifactContainerTests {
     }
 
     /**
-     * Ensures getArtifacts delegates to ArtifactCollector.collect with Optional.empty when artifactNames is empty.
+     * Ensures getArtifacts delegates to ArtifactCollector.collect with empty list when artifactNames is empty.
      */
     @Test
-    @DisplayName("getArtifacts delegates to ArtifactCollector.collect with Optional.empty when artifactNames is empty")
+    @DisplayName("getArtifacts delegates to ArtifactCollector.collect with empty list when artifactNames is empty")
     void getArtifactsDelegatesWhenArtifactNamesEmpty() {
         HashMap<String, Path> expected = new HashMap<>();
         expected.put("g:b:2", Path.of("/repo/b.pom"));
 
-        when(artifactCollector.collect("/repo", Optional.empty(), ProcessingType.PLUGINS)).thenReturn(expected);
+        when(artifactCollector.collect("/repo", List.of(), ProcessingType.PLUGINS)).thenReturn(expected);
 
-        HashMap<String, Path> actual = container.getArtifacts("/repo", Optional.empty(), ProcessingType.PLUGINS);
+        HashMap<String, Path> actual = container.getArtifacts("/repo", List.of(), ProcessingType.PLUGINS);
 
         assertSame(expected, actual);
-        verify(artifactCollector).collect("/repo", Optional.empty(), ProcessingType.PLUGINS);
+        verify(artifactCollector).collect("/repo", List.of(), ProcessingType.PLUGINS);
         verifyNoMoreInteractions(artifactCollector);
     }
 
@@ -124,12 +124,12 @@ class ArtifactContainerTests {
         collected.put("g:a:1", Path.of("/repo/a.jar"));
         collected.put("g:b:2", Path.of("/repo/b.jar"));
 
-        when(artifactCollector.collect("/repo", Optional.empty(), ProcessingType.LIBRARY)).thenReturn(collected);
+        when(artifactCollector.collect("/repo", List.of(), ProcessingType.LIBRARY)).thenReturn(collected);
 
-        Collection<Path> paths = container.getArtifactPaths("/repo", Optional.empty(), ProcessingType.LIBRARY);
+        Collection<Path> paths = container.getArtifactPaths("/repo", List.of(), ProcessingType.LIBRARY);
 
         assertEquals(new HashSet<>(collected.values()), new HashSet<>(paths));
-        verify(artifactCollector).collect("/repo", Optional.empty(), ProcessingType.LIBRARY);
+        verify(artifactCollector).collect("/repo", List.of(), ProcessingType.LIBRARY);
         verifyNoMoreInteractions(artifactCollector);
     }
 
@@ -143,16 +143,16 @@ class ArtifactContainerTests {
         collected.put("g:a:1", Path.of("/repo/a.jar"));
         collected.put("g:b:2", Path.of("/repo/b.jar"));
 
-        when(artifactCollector.collect("/repo", Optional.empty(), ProcessingType.LIBRARY)).thenReturn(collected);
+        when(artifactCollector.collect("/repo", List.of(), ProcessingType.LIBRARY)).thenReturn(collected);
 
         Collection<String> signatures = container.getArtifactSignatures(
                 "/repo",
-                Optional.empty(),
+                List.of(),
                 ProcessingType.LIBRARY
         );
 
         assertEquals(new HashSet<>(collected.keySet()), new HashSet<>(signatures));
-        verify(artifactCollector).collect("/repo", Optional.empty(), ProcessingType.LIBRARY);
+        verify(artifactCollector).collect("/repo", List.of(), ProcessingType.LIBRARY);
         verifyNoMoreInteractions(artifactCollector);
     }
 
@@ -164,15 +164,15 @@ class ArtifactContainerTests {
     void getArtifactsPropagatesCollectorExceptions() {
         RuntimeException boom = new RuntimeException("boom");
 
-        when(artifactCollector.collect("/repo", Optional.empty(), ProcessingType.LIBRARY)).thenThrow(boom);
+        when(artifactCollector.collect("/repo", List.of(), ProcessingType.LIBRARY)).thenThrow(boom);
 
         RuntimeException ex = assertThrows(
                 RuntimeException.class,
-                () -> container.getArtifacts("/repo", Optional.empty(), ProcessingType.LIBRARY)
+                () -> container.getArtifacts("/repo", List.of(), ProcessingType.LIBRARY)
         );
         assertSame(boom, ex);
 
-        verify(artifactCollector).collect("/repo", Optional.empty(), ProcessingType.LIBRARY);
+        verify(artifactCollector).collect("/repo", List.of(), ProcessingType.LIBRARY);
         verifyNoMoreInteractions(artifactCollector);
     }
 
@@ -184,15 +184,15 @@ class ArtifactContainerTests {
     void getArtifactPathsPropagatesCollectorExceptions() {
         RuntimeException boom = new RuntimeException("boom");
 
-        when(artifactCollector.collect("/repo", Optional.empty(), ProcessingType.LIBRARY)).thenThrow(boom);
+        when(artifactCollector.collect("/repo", List.of(), ProcessingType.LIBRARY)).thenThrow(boom);
 
         RuntimeException ex = assertThrows(
                 RuntimeException.class,
-                () -> container.getArtifactPaths("/repo", Optional.empty(), ProcessingType.LIBRARY)
+                () -> container.getArtifactPaths("/repo", List.of(), ProcessingType.LIBRARY)
         );
         assertSame(boom, ex);
 
-        verify(artifactCollector).collect("/repo", Optional.empty(), ProcessingType.LIBRARY);
+        verify(artifactCollector).collect("/repo", List.of(), ProcessingType.LIBRARY);
         verifyNoMoreInteractions(artifactCollector);
     }
 
@@ -204,29 +204,32 @@ class ArtifactContainerTests {
     void getArtifactSignaturesPropagatesCollectorExceptions() {
         RuntimeException boom = new RuntimeException("boom");
 
-        when(artifactCollector.collect("/repo", Optional.empty(), ProcessingType.LIBRARY)).thenThrow(boom);
+        when(artifactCollector.collect("/repo", List.of(), ProcessingType.LIBRARY)).thenThrow(boom);
 
         RuntimeException ex = assertThrows(
                 RuntimeException.class,
-                () -> container.getArtifactSignatures("/repo", Optional.empty(), ProcessingType.LIBRARY)
+                () -> container.getArtifactSignatures("/repo", List.of(), ProcessingType.LIBRARY)
         );
         assertSame(boom, ex);
 
-        verify(artifactCollector).collect("/repo", Optional.empty(), ProcessingType.LIBRARY);
+        verify(artifactCollector).collect("/repo", List.of(), ProcessingType.LIBRARY);
         verifyNoMoreInteractions(artifactCollector);
     }
 
     /**
-     * Verifies current behavior: passing null Optional for artifactNames causes NullPointerException.
+     * Verifies current behavior: null artifactNames is passed through to the collector.
      */
     @Test
-    @DisplayName("Null Optional artifactNames is rejected (current behavior)")
-    void nullOptionalArtifactNamesIsRejected() {
-        assertThrows(
-                NullPointerException.class,
-                () -> container.getArtifacts("/repo", null, ProcessingType.LIBRARY)
-        );
-        verifyNoInteractions(artifactCollector);
+    @DisplayName("Null artifactNames is passed through (current behavior)")
+    void nullArtifactNamesIsPassedThrough() {
+        HashMap<String, Path> expected = new HashMap<>();
+        when(artifactCollector.collect("/repo", null, ProcessingType.LIBRARY)).thenReturn(expected);
+
+        HashMap<String, Path> actual = container.getArtifacts("/repo", null, ProcessingType.LIBRARY);
+
+        assertSame(expected, actual);
+        verify(artifactCollector).collect("/repo", null, ProcessingType.LIBRARY);
+        verifyNoMoreInteractions(artifactCollector);
     }
 
     /**
@@ -236,12 +239,12 @@ class ArtifactContainerTests {
     @DisplayName("Null searchingDirectory is passed through (current behavior)")
     void nullSearchingDirectoryIsPassedThrough() {
         HashMap<String, Path> expected = new HashMap<>();
-        when(artifactCollector.collect(null, Optional.empty(), ProcessingType.LIBRARY)).thenReturn(expected);
+        when(artifactCollector.collect(null, List.of(), ProcessingType.LIBRARY)).thenReturn(expected);
 
-        HashMap<String, Path> actual = container.getArtifacts(null, Optional.empty(), ProcessingType.LIBRARY);
+        HashMap<String, Path> actual = container.getArtifacts(null, List.of(), ProcessingType.LIBRARY);
 
         assertSame(expected, actual);
-        verify(artifactCollector).collect(null, Optional.empty(), ProcessingType.LIBRARY);
+        verify(artifactCollector).collect(null, List.of(), ProcessingType.LIBRARY);
         verifyNoMoreInteractions(artifactCollector);
     }
 
@@ -252,12 +255,12 @@ class ArtifactContainerTests {
     @DisplayName("Null processingType is passed through (current behavior)")
     void nullProcessingTypeIsPassedThrough() {
         HashMap<String, Path> expected = new HashMap<>();
-        when(artifactCollector.collect("/repo", Optional.empty(), null)).thenReturn(expected);
+        when(artifactCollector.collect("/repo", List.of(), null)).thenReturn(expected);
 
-        HashMap<String, Path> actual = container.getArtifacts("/repo", Optional.empty(), null);
+        HashMap<String, Path> actual = container.getArtifacts("/repo", List.of(), null);
 
         assertSame(expected, actual);
-        verify(artifactCollector).collect("/repo", Optional.empty(), null);
+        verify(artifactCollector).collect("/repo", List.of(), null);
         verifyNoMoreInteractions(artifactCollector);
     }
 }

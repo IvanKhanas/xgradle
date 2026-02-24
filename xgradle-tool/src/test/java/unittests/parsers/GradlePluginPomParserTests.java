@@ -68,7 +68,7 @@ public class GradlePluginPomParserTests {
 
     @Test
     void whenArtifactNamesEmptyReturnsEmptyAndDoesNotCallPomContainer(@TempDir Path tmp) {
-        HashMap<String, Path> result = parser.getArtifactCoords(tmp.toString(), Optional.empty());
+        HashMap<String, Path> result = parser.getArtifactCoords(tmp.toString(), List.of());
         assertTrue(result.isEmpty());
         verifyNoInteractions(pomContainer);
     }
@@ -97,7 +97,7 @@ public class GradlePluginPomParserTests {
         Set<Path> all = new HashSet<Path>(Arrays.asList(pluginPom, otherPom));
         when(pomContainer.getAllPoms(tmp.toString())).thenReturn(all);
 
-        HashMap<String, Path> result = parser.getArtifactCoords(tmp.toString(), Optional.of(Arrays.asList("plug")));
+        HashMap<String, Path> result = parser.getArtifactCoords(tmp.toString(), List.of("plug"));
 
         assertEquals(1, result.size());
         assertEquals(pluginJar, result.get(pluginPom.toString()));
@@ -121,7 +121,7 @@ public class GradlePluginPomParserTests {
 
         when(pomContainer.getAllPoms(tmp.toString())).thenReturn(Collections.singleton(markerPom));
 
-        HashMap<String, Path> result = parser.getArtifactCoords(tmp.toString(), Optional.of(Arrays.asList("marker")));
+        HashMap<String, Path> result = parser.getArtifactCoords(tmp.toString(), List.of("marker"));
 
         assertEquals(1, result.size());
         assertEquals(depJar, result.get(markerPom.toString()));
@@ -142,7 +142,7 @@ public class GradlePluginPomParserTests {
 
         when(pomContainer.getAllPoms(tmp.toString())).thenReturn(Collections.singleton(pom));
 
-        HashMap<String, Path> result = parser.getArtifactCoords(tmp.toString(), Optional.of(Arrays.asList("pp")));
+        HashMap<String, Path> result = parser.getArtifactCoords(tmp.toString(), List.of("pp"));
 
         assertEquals(1, result.size());
         assertEquals(jar, result.get(pom.toString()));

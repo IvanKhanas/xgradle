@@ -119,7 +119,7 @@ final class DefaultPomRedactor implements PomRedactor {
         Model model = readModel(pomPath);
 
         if (model.getParent() == null) {
-            logger.warn("POM file hasn`t parent block, cannot remove: " + pomPath);
+            logger.warn("POM file hasn`t parent block, cannot remove: {}", pomPath);
             return;
         }
 

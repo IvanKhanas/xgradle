@@ -33,7 +33,6 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Optional;
 import java.util.List;
 import java.util.Set;
 
@@ -65,14 +64,8 @@ final class XmvnBomCompatRegistrar implements Registrar {
     }
 
     @Override
-    public void registerArtifacts(String searchingDir, String command, Optional<List<String>> artifactName) {
-        Set<Path> artifacts;
-
-        if (artifactName.isPresent()) {
-            artifacts = pomProcessor.pomsFromDirectory(searchingDir, artifactName);
-        } else {
-            artifacts = pomProcessor.pomsFromDirectory(searchingDir, Optional.empty());
-        }
+    public void registerArtifacts(String searchingDir, String command, List<String> artifactNames) {
+        Set<Path> artifacts = pomProcessor.pomsFromDirectory(searchingDir, artifactNames);
 
         List<String> commandParts = commandLineParser.parseCommandLine(command);
 
@@ -83,7 +76,7 @@ final class XmvnBomCompatRegistrar implements Registrar {
         for (Path part : artifacts) {
             List<String> currentCommand = new ArrayList<>(commandParts);
             currentCommand.add(part.toString());
-            logger.info("Registering BOM: " + String.join(" ", currentCommand));
+            logger.info("Registering BOM: {}", String.join(" ", currentCommand));
 
             ProcessBuilder processBuilder = new ProcessBuilder(currentCommand);
 

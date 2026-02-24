@@ -20,7 +20,6 @@ import org.altlinux.xgradle.impl.enums.ProcessingType;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Optional;
 import java.util.List;
 
 /**
@@ -35,13 +34,13 @@ public interface ArtifactContainer {
      * Retrieves artifacts from the specified directory based on processing type.
      *
      * @param searchingDir the directory to search for artifacts
-     * @param artifactName optional list of artifact names to filter by
+     * @param artifactNames list of artifact names to filter by (null or empty to process all)
      * @param processingType the type of processing (LIBRARY or PLUGINS)
      * @return map of artifact signatures to file paths
      */
     HashMap<String, Path> getArtifacts(
             String searchingDir,
-            Optional<List<String>> artifactName,
+            List<String> artifactNames,
             ProcessingType processingType
     );
 
@@ -49,13 +48,13 @@ public interface ArtifactContainer {
      * Retrieves artifact file paths from the specified directory based on processing type.
      *
      * @param searchingDir the directory to search for artifacts
-     * @param artifactName optional list of artifact names to filter by
+     * @param artifactNames list of artifact names to filter by (null or empty to process all)
      * @param processingType the type of processing (LIBRARY or PLUGINS)
      * @return collection of artifact file paths
      */
     Collection<Path> getArtifactPaths(
             String searchingDir,
-            Optional<List<String>> artifactName,
+            List<String> artifactNames,
             ProcessingType processingType
     );
 
@@ -63,13 +62,13 @@ public interface ArtifactContainer {
      * Retrieves artifact signatures from the specified directory based on processing type.
      *
      * @param searchingDir the directory to search for artifacts
-     * @param artifactName optional list of artifact names to filter by
+     * @param artifactNames list of artifact names to filter by (null or empty to process all)
      * @param processingType the type of processing (LIBRARY or PLUGINS)
      * @return collection of artifact signatures
      */
     Collection<String> getArtifactSignatures(
             String searchingDir,
-            Optional<List<String>> artifactName,
+            List<String> artifactNames,
             ProcessingType processingType
     );
 }

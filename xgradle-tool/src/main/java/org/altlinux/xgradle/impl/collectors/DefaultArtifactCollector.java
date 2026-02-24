@@ -29,7 +29,6 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * Default implementation of ArtifactCollector for collecting artifacts based on processing type.
@@ -57,7 +56,7 @@ final class DefaultArtifactCollector implements ArtifactCollector {
     @Override
     public HashMap<String,Path> collect(
             String searchingDir,
-            Optional<List<String>> artifactName,
+            List<String> artifactNames,
             ProcessingType processingType
     ) {
 
@@ -65,11 +64,11 @@ final class DefaultArtifactCollector implements ArtifactCollector {
 
         switch (processingType) {
             case PLUGINS:
-                return gradlePlugins.pomsFromDirectory(searchingDir, artifactName);
+                return gradlePlugins.pomsFromDirectory(searchingDir, artifactNames);
             case JAVADOC:
-                return javadocProcessor.pomsFromDirectory(searchingDir, artifactName);
+                return javadocProcessor.pomsFromDirectory(searchingDir, artifactNames);
             case LIBRARY:
-                return libraryPomProcessor.pomsFromDirectory(searchingDir, artifactName);
+                return libraryPomProcessor.pomsFromDirectory(searchingDir, artifactNames);
             default:
                 throw new IllegalStateException("Unsupported processing type: " + processingType);
         }

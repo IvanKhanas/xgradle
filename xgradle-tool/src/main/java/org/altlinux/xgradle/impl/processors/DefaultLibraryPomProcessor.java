@@ -26,7 +26,6 @@ import org.altlinux.xgradle.interfaces.services.PomService;
 
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.Optional;
 import java.util.List;
 
 /**
@@ -54,8 +53,8 @@ final class DefaultLibraryPomProcessor implements PomProcessor<HashMap<String, P
     }
 
     @Override
-    public HashMap<String, Path> pomsFromDirectory(String searchingDir, Optional<List<String>> artifactName) {
-        HashMap<String, Path> artifacts = getArtifactsFromParser(searchingDir, artifactName);
+    public HashMap<String, Path> pomsFromDirectory(String searchingDir, List<String> artifactNames) {
+        HashMap<String, Path> artifacts = getArtifactsFromParser(searchingDir, artifactNames);
 
         artifacts = pomService.excludeArtifacts(toolConfig.getExcludedArtifacts(), artifacts);
         pomService.removeParentBlocks(artifacts, toolConfig.getRemoveParentPoms());
@@ -67,11 +66,7 @@ final class DefaultLibraryPomProcessor implements PomProcessor<HashMap<String, P
         return artifacts;
     }
 
-    private HashMap<String, Path> getArtifactsFromParser(String searchingDir, Optional<List<String>> artifactName) {
-        if (artifactName.isPresent()) {
-            return pomParser.getArtifactCoords(searchingDir, artifactName);
-        } else {
-            return pomParser.getArtifactCoords(searchingDir, Optional.empty());
-        }
+    private HashMap<String, Path> getArtifactsFromParser(String searchingDir, List<String> artifactNames) {
+        return pomParser.getArtifactCoords(searchingDir, artifactNames);
     }
 }

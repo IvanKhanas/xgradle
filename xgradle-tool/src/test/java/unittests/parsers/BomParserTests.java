@@ -48,7 +48,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -134,7 +133,7 @@ class BomParserTests {
         when(data.getCoordinates()).thenReturn(coords);
         when(artifactCache.add(data)).thenReturn(true);
 
-        Set<Path> result = parser.getArtifactCoords("/repo", Optional.empty());
+        Set<Path> result = parser.getArtifactCoords("/repo", List.of());
 
         assertEquals(Set.of(bomPom), result);
 
@@ -170,7 +169,7 @@ class BomParserTests {
         when(data.getCoordinates()).thenReturn(coords);
         when(artifactCache.add(data)).thenReturn(true);
 
-        Set<Path> result = parser.getArtifactCoords("/repo", Optional.of(names));
+        Set<Path> result = parser.getArtifactCoords("/repo", names);
 
         assertEquals(Set.of(bomPom), result);
 
@@ -222,7 +221,7 @@ class BomParserTests {
         when(existing.getPomPath()).thenReturn(bom1);
         when(artifactCache.get(coords)).thenReturn(existing);
 
-        Set<Path> result = parser.getArtifactCoords("/repo", Optional.empty());
+        Set<Path> result = parser.getArtifactCoords("/repo", List.of());
 
         assertEquals(1, result.size());
         assertTrue(result.contains(bom1) || result.contains(bom2));
@@ -259,7 +258,7 @@ class BomParserTests {
         when(data.getCoordinates()).thenReturn(coords);
         when(artifactCache.add(data)).thenReturn(true);
 
-        Set<Path> result = parser.getArtifactCoords("/repo", Optional.empty());
+        Set<Path> result = parser.getArtifactCoords("/repo", List.of());
 
         assertEquals(Set.of(bom), result);
 

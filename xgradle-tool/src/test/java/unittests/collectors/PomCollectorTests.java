@@ -34,7 +34,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -57,7 +56,7 @@ class PomCollectorTests {
                                 bind(ArtifactCollector.class).toInstance(
                                         (
                                                 String searchingDir,
-                                                Optional<List<String>> artifactName,
+                                                List<String> artifactNames,
                                                 org.altlinux.xgradle.impl.enums.ProcessingType processingType
                                         ) -> new HashMap<String, Path>()
                                 );

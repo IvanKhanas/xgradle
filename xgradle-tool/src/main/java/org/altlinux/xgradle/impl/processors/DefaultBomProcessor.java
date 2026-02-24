@@ -25,7 +25,6 @@ import org.altlinux.xgradle.interfaces.processors.PomProcessor;
 import org.altlinux.xgradle.interfaces.services.PomService;
 
 import java.nio.file.Path;
-import java.util.Optional;
 import java.util.Set;
 import java.util.List;
 
@@ -54,7 +53,7 @@ final class DefaultBomProcessor implements PomProcessor<Set<Path>> {
     }
 
     @Override
-    public Set<Path> pomsFromDirectory(String searchingDir, Optional<List<String>> artifactNames) {
+    public Set<Path> pomsFromDirectory(String searchingDir, List<String> artifactNames) {
         Set<Path> artifacts = getArtifactsFromParser(searchingDir, artifactNames);
 
         artifacts = pomService.excludeArtifacts(toolConfig.getExcludedArtifacts(), artifacts);
@@ -67,11 +66,7 @@ final class DefaultBomProcessor implements PomProcessor<Set<Path>> {
         return artifacts;
     }
 
-    private Set<Path> getArtifactsFromParser(String searchingDir, Optional<List<String>> artifactNames) {
-        if (artifactNames.isPresent()) {
-            return pomParser.getArtifactCoords(searchingDir, artifactNames);
-        } else {
-            return pomParser.getArtifactCoords(searchingDir, Optional.empty());
-        }
+    private Set<Path> getArtifactsFromParser(String searchingDir, List<String> artifactNames) {
+        return pomParser.getArtifactCoords(searchingDir, artifactNames);
     }
 }

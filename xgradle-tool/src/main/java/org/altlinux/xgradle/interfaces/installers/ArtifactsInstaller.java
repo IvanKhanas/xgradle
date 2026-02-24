@@ -18,7 +18,6 @@ package org.altlinux.xgradle.interfaces.installers;
 import org.altlinux.xgradle.impl.enums.ProcessingType;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Interface for artifacts installation operations.
@@ -32,13 +31,13 @@ public interface ArtifactsInstaller {
      * Installs artifacts to the specified target directories.
      *
      * @param searchingDirectory the directory to search for artifacts
-     * @param artifactName optional list of artifact names to filter by
+     * @param artifactNames list of artifact names to filter by (null or empty to process all)
      * @param pomInstallationDirectory target directory for POM files
      * @param jarInstallationDirectory target directory for JAR files
      * @param processingType the type of processing (LIBRARY or PLUGINS)
      */
     void install(String searchingDirectory,
-                 Optional<List<String>> artifactName,
+                 List<String> artifactNames,
                  String pomInstallationDirectory,
                  String jarInstallationDirectory,
                  ProcessingType processingType);

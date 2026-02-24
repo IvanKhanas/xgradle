@@ -18,7 +18,6 @@ package org.altlinux.xgradle.interfaces.resolvers;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Resolves full POM chain for Gradle plugins (parent + pom dependencies).
@@ -31,13 +30,13 @@ public interface PluginPomChainResolver {
      * Resolves full POM chain from selected POMs and mapped artifacts.
      *
      * @param searchingDirectory directory to search for POMs
-     * @param artifactName optional list of artifact names to filter by
+     * @param artifactNames list of artifact names to filter by (null or empty to process all)
      * @param artifactsMap map of POM paths to artifacts
      * @return resolved POM chain result
      */
     PluginPomChainResult resolve(
             String searchingDirectory,
-            Optional<List<String>> artifactName,
+            List<String> artifactNames,
             Map<String, Path> artifactsMap
     );
 }

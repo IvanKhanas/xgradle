@@ -43,7 +43,6 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -65,7 +64,7 @@ public final class DefaultPluginPomChainResolver implements PluginPomChainResolv
 
     public PluginPomChainResult resolve(
             String searchingDirectory,
-            Optional<List<String>> artifactName,
+            List<String> artifactNames,
             Map<String, Path> artifactsMap
     ) {
         Map<Path, Model> pomModels = new HashMap<>();
@@ -74,7 +73,7 @@ public final class DefaultPluginPomChainResolver implements PluginPomChainResolv
 
         Set<Path> pomPaths = resolvePomChain(
                 searchingDirectory,
-                artifactName,
+                artifactNames,
                 artifactsMap,
                 pomModels,
                 pomByCoords
@@ -103,7 +102,7 @@ public final class DefaultPluginPomChainResolver implements PluginPomChainResolv
 
     private Set<Path> resolvePomChain(
             String searchingDirectory,
-            Optional<List<String>> artifactName,
+            List<String> artifactNames,
             Map<String, Path> artifactsMap,
             Map<Path, Model> pomModels,
             Map<String, Path> pomByCoords
@@ -116,8 +115,8 @@ public final class DefaultPluginPomChainResolver implements PluginPomChainResolv
             }
         }
 
-        if (artifactName != null && artifactName.isPresent()) {
-            collected.addAll(pomContainer.getSelectedPoms(searchingDirectory, artifactName.get()));
+        if (artifactNames != null && !artifactNames.isEmpty()) {
+            collected.addAll(pomContainer.getSelectedPoms(searchingDirectory, artifactNames));
         }
 
         Deque<Path> queue = new ArrayDeque<>(collected);

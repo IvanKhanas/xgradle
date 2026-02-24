@@ -53,7 +53,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -64,15 +63,29 @@ import static org.mockito.Mockito.*;
 @DisplayName("@Javadoc PomProcessor<HashMap<String,Path>> (DefaultJavadocProcessor)")
 class JavadocProcessorTests {
 
-    @Mock private PomParser<HashMap<String, Path>> javadocParser;
-    @Mock private PomService pomService;
-    @Mock private ToolConfig toolConfig;
-    @Mock private ArtifactFactory artifactFactory;
-    @Mock private Logger logger;
+    @Mock
+    private PomParser<HashMap<String, Path>> javadocParser;
 
-    @Mock private PomParser<HashMap<String, Path>> libraryParserDummy;
-    @Mock private PomParser<HashMap<String, Path>> gradlePluginParserDummy;
-    @Mock private PomParser<Set<Path>> bomParserDummy;
+    @Mock
+    private PomService pomService;
+
+    @Mock
+    private ToolConfig toolConfig;
+
+    @Mock
+    private ArtifactFactory artifactFactory;
+
+    @Mock
+    private Logger logger;
+
+    @Mock
+    private PomParser<HashMap<String, Path>> libraryParserDummy;
+
+    @Mock
+    private PomParser<HashMap<String, Path>> gradlePluginParserDummy;
+
+    @Mock
+    private PomParser<Set<Path>> bomParserDummy;
 
     private PomProcessor<HashMap<String, Path>> processor;
 
@@ -141,7 +154,7 @@ class JavadocProcessorTests {
         when(pomService.excludeArtifacts(eq(List.of()), ArgumentMatchers.<HashMap<String, Path>>any()))
                 .thenAnswer(inv -> inv.getArgument(1));
 
-        HashMap<String, Path> result = processor.pomsFromDirectory(tmp.toString(), Optional.empty());
+        HashMap<String, Path> result = processor.pomsFromDirectory(tmp.toString(), List.of());
 
         assertEquals(1, result.size());
         assertTrue(result.containsKey(pom1.toString()) || result.containsKey(pom2.toString()));
@@ -152,7 +165,7 @@ class JavadocProcessorTests {
         assertEquals(1, cap.getValue().size());
 
         InOrder inOrder = inOrder(javadocParser, toolConfig, pomService);
-        inOrder.verify(javadocParser).getArtifactCoords(eq(tmp.toString()), eq(Optional.empty()));
+        inOrder.verify(javadocParser).getArtifactCoords(eq(tmp.toString()), eq(List.of()));
         inOrder.verify(toolConfig).getExcludedArtifacts();
         inOrder.verify(pomService).excludeArtifacts(eq(List.of()), ArgumentMatchers.<HashMap<String, Path>>any());
         inOrder.verify(toolConfig).isAllowSnapshots();
@@ -178,7 +191,7 @@ class JavadocProcessorTests {
         when(pomService.excludeArtifacts(eq(List.of()), ArgumentMatchers.<HashMap<String, Path>>any()))
                 .thenAnswer(inv -> inv.getArgument(1));
 
-        HashMap<String, Path> result = processor.pomsFromDirectory(tmp.toString(), Optional.empty());
+        HashMap<String, Path> result = processor.pomsFromDirectory(tmp.toString(), List.of());
 
         assertEquals(1, result.size());
         assertEquals(jd, result.get(badPom.toString()));
@@ -211,12 +224,12 @@ class JavadocProcessorTests {
         HashMap<String, Path> afterSnapshots = new HashMap<>();
         when(pomService.excludeSnapshots(ArgumentMatchers.<HashMap<String, Path>>any())).thenReturn(afterSnapshots);
 
-        HashMap<String, Path> result = processor.pomsFromDirectory(tmp.toString(), Optional.empty());
+        HashMap<String, Path> result = processor.pomsFromDirectory(tmp.toString(), List.of());
 
         assertSame(afterSnapshots, result);
 
         InOrder inOrder = inOrder(javadocParser, toolConfig, pomService);
-        inOrder.verify(javadocParser).getArtifactCoords(eq(tmp.toString()), eq(Optional.empty()));
+        inOrder.verify(javadocParser).getArtifactCoords(eq(tmp.toString()), eq(List.of()));
         inOrder.verify(toolConfig).getExcludedArtifacts();
         inOrder.verify(pomService).excludeArtifacts(eq(List.of()), ArgumentMatchers.<HashMap<String, Path>>any());
         inOrder.verify(toolConfig).isAllowSnapshots();

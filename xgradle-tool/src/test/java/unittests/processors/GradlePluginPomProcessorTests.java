@@ -46,7 +46,6 @@ import org.slf4j.Logger;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -127,7 +126,7 @@ class GradlePluginPomProcessorTests {
         HashMap<String, Path> afterExclude = new HashMap<>(parsed);
         HashMap<String, Path> afterSnapshots = new HashMap<>(parsed);
 
-        when(pluginParser.getArtifactCoords("/repo", Optional.empty())).thenReturn(parsed);
+        when(pluginParser.getArtifactCoords("/repo", List.of())).thenReturn(parsed);
 
         when(toolConfig.getExcludedArtifacts()).thenReturn(List.of("bad"));
         when(toolConfig.isAllowSnapshots()).thenReturn(false);
@@ -135,11 +134,11 @@ class GradlePluginPomProcessorTests {
         when(pomService.excludeArtifacts(List.of("bad"), parsed)).thenReturn(afterExclude);
         when(pomService.excludeSnapshots(afterExclude)).thenReturn(afterSnapshots);
 
-        HashMap<String, Path> result = processor.pomsFromDirectory("/repo", Optional.empty());
+        HashMap<String, Path> result = processor.pomsFromDirectory("/repo", List.of());
         assertSame(afterSnapshots, result);
 
         InOrder inOrder = inOrder(pluginParser, toolConfig, pomService);
-        inOrder.verify(pluginParser).getArtifactCoords("/repo", Optional.empty());
+        inOrder.verify(pluginParser).getArtifactCoords("/repo", List.of());
         inOrder.verify(toolConfig).getExcludedArtifacts();
         inOrder.verify(pomService).excludeArtifacts(List.of("bad"), parsed);
         inOrder.verify(toolConfig).isAllowSnapshots();
@@ -154,18 +153,18 @@ class GradlePluginPomProcessorTests {
         HashMap<String, Path> parsed = new HashMap<>();
         parsed.put("/repo/p.pom", Path.of("/repo/p.jar"));
 
-        when(pluginParser.getArtifactCoords("/repo", Optional.empty())).thenReturn(parsed);
+        when(pluginParser.getArtifactCoords("/repo", List.of())).thenReturn(parsed);
 
         when(toolConfig.getExcludedArtifacts()).thenReturn(List.of());
         when(toolConfig.isAllowSnapshots()).thenReturn(true);
 
         when(pomService.excludeArtifacts(List.of(), parsed)).thenReturn(parsed);
 
-        HashMap<String, Path> result = processor.pomsFromDirectory("/repo", Optional.empty());
+        HashMap<String, Path> result = processor.pomsFromDirectory("/repo", List.of());
         assertSame(parsed, result);
 
         InOrder inOrder = inOrder(pluginParser, toolConfig, pomService);
-        inOrder.verify(pluginParser).getArtifactCoords("/repo", Optional.empty());
+        inOrder.verify(pluginParser).getArtifactCoords("/repo", List.of());
         inOrder.verify(toolConfig).getExcludedArtifacts();
         inOrder.verify(pomService).excludeArtifacts(List.of(), parsed);
         inOrder.verify(toolConfig).isAllowSnapshots();

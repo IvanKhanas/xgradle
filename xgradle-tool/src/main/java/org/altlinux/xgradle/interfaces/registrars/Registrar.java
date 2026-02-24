@@ -16,7 +16,6 @@
 package org.altlinux.xgradle.interfaces.registrars;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Interface for artifact registration operations.
@@ -32,7 +31,7 @@ public interface Registrar {
      *
      * @param searchingDir the directory to search for artifacts
      * @param registerCommand the command to use for registration
-     * @param artifactName optional list of artifact names to filter by
+     * @param artifactNames list of artifact names to filter by (null or empty to process all)
      */
-    void registerArtifacts(String searchingDir, String registerCommand, Optional<List<String>> artifactName);
+    void registerArtifacts(String searchingDir, String registerCommand, List<String> artifactNames);
 }

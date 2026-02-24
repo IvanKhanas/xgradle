@@ -39,7 +39,6 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.HashSet;
 
@@ -68,7 +67,7 @@ final class DefaultJavadocInstaller implements JavadocInstaller {
     }
 
     @Override
-    public void installJavadoc(String searchingDir, Optional<List<String>> artifactNames, String jarInstallationDir) {
+    public void installJavadoc(String searchingDir, List<String> artifactNames, String jarInstallationDir) {
         HashMap<String, Path> javadocMap = artifactCollector.collect(
                 searchingDir,
                 artifactNames,

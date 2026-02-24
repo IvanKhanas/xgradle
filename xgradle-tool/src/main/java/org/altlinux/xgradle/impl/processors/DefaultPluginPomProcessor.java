@@ -26,7 +26,6 @@ import org.altlinux.xgradle.interfaces.services.PomService;
 
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.Optional;
 import java.util.List;
 
 /**
@@ -54,7 +53,7 @@ final class DefaultPluginPomProcessor implements PomProcessor<HashMap<String, Pa
     }
 
     @Override
-    public HashMap<String, Path> pomsFromDirectory(String searchingDir, Optional<List<String>> artifactNames) {
+    public HashMap<String, Path> pomsFromDirectory(String searchingDir, List<String> artifactNames) {
         HashMap<String, Path> artifacts = pluginsParser.getArtifactCoords(searchingDir, artifactNames);
         artifacts = pomService.excludeArtifacts(toolConfig.getExcludedArtifacts(), artifacts);
 

@@ -25,8 +25,6 @@ import org.altlinux.xgradle.interfaces.containers.ArtifactContainer;
 import java.util.List;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Optional;
-
 import java.nio.file.Path;
 
 /**
@@ -47,39 +45,27 @@ final class DefaultArtifactContainer implements ArtifactContainer {
     @Override
     public HashMap<String, Path> getArtifacts(
             String searchingDirectory,
-            Optional<List<String>> artifactNames,
+            List<String> artifactNames,
             ProcessingType processingType
     ) {
-        if (artifactNames.isPresent()) {
-            return artifactCollector.collect(searchingDirectory, artifactNames, processingType);
-        } else {
-            return artifactCollector.collect(searchingDirectory, Optional.empty(), processingType);
-        }
+        return artifactCollector.collect(searchingDirectory, artifactNames, processingType);
     }
 
     @Override
     public Collection<Path> getArtifactPaths(
             String searchingDirectory,
-            Optional<List<String>> artifactNames,
+            List<String> artifactNames,
             ProcessingType processingType
     ) {
-        if (artifactNames.isPresent()) {
-            return artifactCollector.collect(searchingDirectory,artifactNames, processingType).values();
-        } else {
-            return artifactCollector.collect(searchingDirectory, Optional.empty(), processingType).values();
-        }
+        return artifactCollector.collect(searchingDirectory, artifactNames, processingType).values();
     }
 
     @Override
     public Collection<String> getArtifactSignatures(
             String searchingDirectory,
-            Optional<List<String>> artifactNames,
+            List<String> artifactNames,
             ProcessingType processingType
     ) {
-        if (artifactNames.isPresent()) {
-            return artifactCollector.collect(searchingDirectory, artifactNames, processingType).keySet();
-        } else {
-            return artifactCollector.collect(searchingDirectory, Optional.empty(), processingType).keySet();
-        }
+        return artifactCollector.collect(searchingDirectory, artifactNames, processingType).keySet();
     }
 }

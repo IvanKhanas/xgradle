@@ -47,7 +47,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
 
 import static org.mockito.Mockito.*;
@@ -155,7 +154,7 @@ class ApplicationTests {
         ExitCode code = application.run(new String[]{"--xmvn-register=cmd"});
 
         assertEquals(ExitCode.ERROR, code);
-        verify(logger).error("bad args");
+        verify(logger).error("Invalid CLI arguments: {}", "bad args");
         verify(jCommander).usage();
 
         verifyNoInteractions(
@@ -175,7 +174,7 @@ class ApplicationTests {
         ExitCode code = application.run(new String[]{"--xmvn-register=cmd"});
 
         assertEquals(ExitCode.ERROR, code);
-        verify(logger).error("bad args");
+        verify(logger).error("Invalid CLI arguments: {}", "bad args");
         verify(jCommander).usage();
 
         verifyNoInteractions(
@@ -196,7 +195,7 @@ class ApplicationTests {
         ExitCode code = application.run(new String[]{"--xmvn-register=cmd"});
 
         assertEquals(ExitCode.ERROR, code);
-        verify(logger).error(eq("missing required arg"));
+        verify(logger).error("Invalid CLI usage: {}", "missing required arg");
         verify(jCommander).usage();
 
         verifyNoInteractions(pluginsController, bomXmvnController, javadocXmvnController, pomRedactionController);
@@ -211,7 +210,7 @@ class ApplicationTests {
         ExitCode code = application.run(new String[]{"--xmvn-register=cmd"});
 
         assertEquals(ExitCode.ERROR, code);
-        verify(logger).error(eq("boom"), same(boom));
+        verify(logger).error("Unhandled error while executing command", boom);
 
         verifyNoInteractions(pluginsController, bomXmvnController, javadocXmvnController, pomRedactionController);
     }

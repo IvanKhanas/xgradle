@@ -46,7 +46,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -108,13 +107,13 @@ class XmvnBomCompatRegistrarTests {
         boms.add(Path.of("/repo/bom-1.pom"));
         boms.add(Path.of("/repo/bom-2.pom"));
 
-        when(bomPomProcessor.pomsFromDirectory(eq(DIRECTORY), eq(Optional.empty()))).thenReturn(boms);
+        when(bomPomProcessor.pomsFromDirectory(eq(DIRECTORY), eq(List.of()))).thenReturn(boms);
         when(commandLineParser.parseCommandLine(CMD)).thenReturn(PARSED_CMD);
         when(commandExecutor.execute(any(ProcessBuilder.class))).thenReturn(ExitCode.SUCCESS.getExitCode());
 
-        registrar.registerArtifacts(DIRECTORY, CMD, Optional.empty());
+        registrar.registerArtifacts(DIRECTORY, CMD, List.of());
 
-        verify(bomPomProcessor).pomsFromDirectory(DIRECTORY, Optional.empty());
+        verify(bomPomProcessor).pomsFromDirectory(DIRECTORY, List.of());
 
         ArgumentCaptor<ProcessBuilder> cap = ArgumentCaptor.forClass(ProcessBuilder.class);
         verify(commandExecutor, times(2)).execute(cap.capture());
@@ -129,7 +128,7 @@ class XmvnBomCompatRegistrarTests {
     @Test
     @DisplayName("artifactName present: passes names to processor")
     void usesNamesFilter() throws Exception {
-        Optional<List<String>> names = Optional.of(List.of("a", "b"));
+        List<String> names = List.of("a", "b");
 
         Set<Path> boms = new LinkedHashSet<>();
         boms.add(Path.of("/repo/bom-a.pom"));
@@ -148,10 +147,10 @@ class XmvnBomCompatRegistrarTests {
     @Test
     @DisplayName("No BOMs => logs and does not execute")
     void logsWhenNoBoms() throws IOException, InterruptedException {
-        when(bomPomProcessor.pomsFromDirectory(eq(DIRECTORY), eq(Optional.empty()))).thenReturn(Set.of());
+        when(bomPomProcessor.pomsFromDirectory(eq(DIRECTORY), eq(List.of()))).thenReturn(Set.of());
         when(commandLineParser.parseCommandLine(CMD)).thenReturn(PARSED_CMD);
 
-        registrar.registerArtifacts(DIRECTORY, CMD, Optional.empty());
+        registrar.registerArtifacts(DIRECTORY, CMD, List.of());
 
         verify(commandExecutor, never()).execute(any());
         verify(logger).info("No BOM registered");
@@ -163,12 +162,12 @@ class XmvnBomCompatRegistrarTests {
         Set<Path> boms = new LinkedHashSet<>();
         boms.add(Path.of("/repo/bom-1.pom"));
 
-        when(bomPomProcessor.pomsFromDirectory(eq(DIRECTORY), eq(Optional.empty()))).thenReturn(boms);
+        when(bomPomProcessor.pomsFromDirectory(eq(DIRECTORY), eq(List.of()))).thenReturn(boms);
         when(commandLineParser.parseCommandLine("   ")).thenReturn(List.of());
 
         EmptyRegisterCommandException ex = assertThrows(
                 EmptyRegisterCommandException.class,
-                () -> registrar.registerArtifacts(DIRECTORY, "   ", Optional.empty())
+                () -> registrar.registerArtifacts(DIRECTORY, "   ", List.of())
         );
         assertEquals("Register command is empty: " + "\'   \'", ex.getMessage());
 
@@ -181,13 +180,13 @@ class XmvnBomCompatRegistrarTests {
         Set<Path> boms = new LinkedHashSet<>();
         boms.add(Path.of("/repo/bom-1.pom"));
 
-        when(bomPomProcessor.pomsFromDirectory(eq(DIRECTORY), eq(Optional.empty()))).thenReturn(boms);
+        when(bomPomProcessor.pomsFromDirectory(eq(DIRECTORY), eq(List.of()))).thenReturn(boms);
         when(commandLineParser.parseCommandLine(CMD)).thenReturn(PARSED_CMD);
         when(commandExecutor.execute(any(ProcessBuilder.class))).thenReturn(ExitCode.ERROR.getExitCode());
 
         RuntimeException ex = assertThrows(
                 RuntimeException.class,
-                () -> registrar.registerArtifacts(DIRECTORY, CMD, Optional.empty())
+                () -> registrar.registerArtifacts(DIRECTORY, CMD, List.of())
         );
 
         assertTrue(ex.getMessage().contains("Failed to register artifact, exit code:"));
@@ -199,13 +198,13 @@ class XmvnBomCompatRegistrarTests {
         Set<Path> boms = new LinkedHashSet<>();
         boms.add(Path.of("/repo/bom-1.pom"));
 
-        when(bomPomProcessor.pomsFromDirectory(eq(DIRECTORY), eq(Optional.empty()))).thenReturn(boms);
+        when(bomPomProcessor.pomsFromDirectory(eq(DIRECTORY), eq(List.of()))).thenReturn(boms);
         when(commandLineParser.parseCommandLine(CMD)).thenReturn(PARSED_CMD);
         when(commandExecutor.execute(any(ProcessBuilder.class))).thenThrow(new IOException("boom"));
 
         RuntimeException ex = assertThrows(
                 RuntimeException.class,
-                () -> registrar.registerArtifacts(DIRECTORY, CMD, Optional.empty())
+                () -> registrar.registerArtifacts(DIRECTORY, CMD, List.of())
         );
 
         assertNotNull(ex.getCause());
@@ -218,13 +217,13 @@ class XmvnBomCompatRegistrarTests {
         Set<Path> boms = new LinkedHashSet<>();
         boms.add(Path.of("/repo/bom-1.pom"));
 
-        when(bomPomProcessor.pomsFromDirectory(eq(DIRECTORY), eq(Optional.empty()))).thenReturn(boms);
+        when(bomPomProcessor.pomsFromDirectory(eq(DIRECTORY), eq(List.of()))).thenReturn(boms);
         when(commandLineParser.parseCommandLine(CMD)).thenReturn(PARSED_CMD);
         when(commandExecutor.execute(any(ProcessBuilder.class))).thenThrow(new InterruptedException("stop"));
 
         RuntimeException ex = assertThrows(
                 RuntimeException.class,
-                () -> registrar.registerArtifacts(DIRECTORY, CMD, Optional.empty())
+                () -> registrar.registerArtifacts(DIRECTORY, CMD, List.of())
         );
 
         assertNotNull(ex.getCause());

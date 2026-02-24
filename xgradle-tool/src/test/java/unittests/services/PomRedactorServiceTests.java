@@ -28,7 +28,10 @@ import org.altlinux.xgradle.impl.services.ServicesModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -39,20 +42,22 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @DisplayName("PomRedactorService")
+@ExtendWith(MockitoExtension.class)
 class PomRedactorServiceTests {
 
     @TempDir
     Path tempDir;
 
     private PomService service;
+
+    @Mock
     private PomRedactor redactor;
+
+    @Mock
     private PomContainer pomContainer;
 
     @BeforeEach
     void setUp() {
-        redactor = mock(PomRedactor.class);
-        pomContainer = mock(PomContainer.class);
-
         Injector injector = Guice.createInjector(
                 Modules.override(new ServicesModule())
                         .with(new AbstractModule() {

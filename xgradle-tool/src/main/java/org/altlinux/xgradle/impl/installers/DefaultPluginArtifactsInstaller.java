@@ -40,7 +40,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.List;
 
@@ -71,14 +70,14 @@ final class DefaultPluginArtifactsInstaller implements ArtifactsInstaller {
     @Override
     public void install(
             String searchingDirectory,
-            Optional<List<String>> artifactName,
+            List<String> artifactNames,
             String pomInstallationDirectory,
             String jarInstallationDirectory,
             ProcessingType processingType
     ) {
         HashMap<String, Path> artifactsMap = artifactContainer.getArtifacts(
                 searchingDirectory,
-                artifactName,
+                artifactNames,
                 processingType
         );
         Path targetPomDir = Paths.get(pomInstallationDirectory);
@@ -87,9 +86,9 @@ final class DefaultPluginArtifactsInstaller implements ArtifactsInstaller {
         try {
             if (!Files.exists(targetPomDir) && Files.isWritable(targetPomDir.getParent())) {
                 Files.createDirectories(targetPomDir);
-                logger.info("Created target directory: {}", targetPomDir);
+                logger.info("Created POM target directory: {}", targetPomDir);
             } else if (!Files.isWritable(targetPomDir)) {
-                logger.error("Wrong access rights for target directory: {}", targetPomDir);
+                logger.error("Wrong access rights for POM target directory: {}", targetPomDir);
                 return;
             }
         } catch (IOException e) {
@@ -99,9 +98,9 @@ final class DefaultPluginArtifactsInstaller implements ArtifactsInstaller {
         try {
             if (!Files.exists(targetJarDir) && Files.isWritable(targetJarDir.getParent())) {
                 Files.createDirectories(targetJarDir);
-                logger.info("Created target directory: {}", targetJarDir);
+                logger.info("Created JAR target directory: {}", targetJarDir);
             } else if (!Files.isWritable(targetJarDir)) {
-                logger.error("Wrong access rights for target directory: {}", targetJarDir);
+                logger.error("Wrong access rights for JAR target directory: {}", targetJarDir);
                 return;
             }
         } catch (IOException e) {
@@ -110,7 +109,7 @@ final class DefaultPluginArtifactsInstaller implements ArtifactsInstaller {
 
         PluginPomChainResult pomChain = pomChainResolver.resolve(
                 searchingDirectory,
-                artifactName,
+                artifactNames,
                 artifactsMap
         );
         Map<Path, Model> pomModels = pomChain.getPomModels();
@@ -164,9 +163,10 @@ final class DefaultPluginArtifactsInstaller implements ArtifactsInstaller {
 
                     try {
                         Files.copy(jarPath, targetJar, StandardCopyOption.REPLACE_EXISTING);
-                        logger.info("Copied JAR: {} -> {} (based on POM: {})", jarPath, targetJar, mainPomPath);
+                        logger.info("Copied JAR from main POM: {} -> {} (POM: {})",
+                                jarPath, targetJar, mainPomPath);
                     } catch (IOException e) {
-                        logger.error("Failed to copy JAR: {}", jarPath, e);
+                        logger.error("Failed to copy JAR from main POM: {}", jarPath, e);
                     }
                 }
             } else {
@@ -180,10 +180,10 @@ final class DefaultPluginArtifactsInstaller implements ArtifactsInstaller {
 
                     try {
                         Files.copy(jarPath, targetJar, StandardCopyOption.REPLACE_EXISTING);
-                        logger.warn("\nCopied JAR without main POM: {} -> {} (based on POM: {})",
+                        logger.warn("Copied JAR without main POM: {} -> {} (POM: {})",
                                 jarPath, targetJar, firstPomPath);
                     } catch (IOException e) {
-                        logger.error("Failed to copy JAR: {}", jarPath, e);
+                        logger.error("Failed to copy JAR without main POM: {}", jarPath, e);
                     }
                 }
             }
@@ -205,9 +205,9 @@ final class DefaultPluginArtifactsInstaller implements ArtifactsInstaller {
 
             try {
                 Files.copy(jarPath, targetJar, StandardCopyOption.REPLACE_EXISTING);
-                logger.info("Copied JAR: {} -> {} (based on POM: {})", jarPath, targetJar, pomPath);
+                logger.info("Copied JAR from POM-only entry: {} -> {} (POM: {})", jarPath, targetJar, pomPath);
             } catch (IOException e) {
-                logger.error("Failed to copy JAR: {}", jarPath, e);
+                logger.error("Failed to copy JAR from POM-only entry: {}", jarPath, e);
             }
         }
     }

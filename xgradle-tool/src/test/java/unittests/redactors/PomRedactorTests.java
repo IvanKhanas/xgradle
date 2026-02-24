@@ -219,7 +219,7 @@ class PomRedactorTests {
 
         redactor.removeParent(pom);
 
-        verify(logger, times(1)).warn(startsWith("POM file hasn`t parent block, cannot remove: "));
+        verify(logger, times(1)).warn("POM file hasn`t parent block, cannot remove: {}", pom);
         Model model = readModel(pom);
         assertNull(model.getParent());
     }

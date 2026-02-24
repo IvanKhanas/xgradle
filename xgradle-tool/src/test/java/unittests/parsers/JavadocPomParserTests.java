@@ -78,7 +78,7 @@ public class JavadocPomParserTests {
 
         when(pomContainer.getAllPoms(tmp.toString())).thenReturn(Collections.singleton(pom));
 
-        HashMap<String, Path> result = parser.getArtifactCoords(tmp.toString(), Optional.empty());
+        HashMap<String, Path> result = parser.getArtifactCoords(tmp.toString(), List.of());
 
         assertEquals(1, result.size());
         assertEquals(javadoc, result.get(pom.toString()));
@@ -94,7 +94,7 @@ public class JavadocPomParserTests {
 
         when(pomContainer.getAllPoms(tmp.toString())).thenReturn(Collections.singleton(pom));
 
-        HashMap<String, Path> result = parser.getArtifactCoords(tmp.toString(), Optional.empty());
+        HashMap<String, Path> result = parser.getArtifactCoords(tmp.toString(), List.of());
 
         assertTrue(result.isEmpty());
     }
@@ -111,7 +111,7 @@ public class JavadocPomParserTests {
 
         when(pomContainer.getAllPoms(tmp.toString())).thenReturn(Collections.singleton(pom));
 
-        HashMap<String, Path> result = parser.getArtifactCoords(tmp.toString(), Optional.empty());
+        HashMap<String, Path> result = parser.getArtifactCoords(tmp.toString(), List.of());
 
         assertEquals(1, result.size());
         assertEquals(javadoc, result.get(pom.toString()));
@@ -131,7 +131,7 @@ public class JavadocPomParserTests {
         List<String> names = List.of("lib");
         when(pomContainer.getSelectedPoms(tmp.toString(), names)).thenReturn(Collections.singleton(pom));
 
-        HashMap<String, Path> result = parser.getArtifactCoords(tmp.toString(), Optional.of(names));
+        HashMap<String, Path> result = parser.getArtifactCoords(tmp.toString(), names);
 
         assertEquals(1, result.size());
         assertEquals(javadoc, result.get(pom.toString()));

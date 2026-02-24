@@ -45,7 +45,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -184,7 +183,7 @@ class PluginsInstallationControllerTests {
         when(args.getSearchingDirectory()).thenReturn("/repo");
 
         when(args.hasArtifactName()).thenReturn(true);
-        when(args.getArtifactName()).thenReturn(Optional.of(List.of("my-plugin")));
+        when(args.getArtifactName()).thenReturn(List.of("my-plugin"));
 
         when(args.hasPomInstallationDirectory()).thenReturn(true);
         when(args.getPomInstallationDirectory()).thenReturn("/poms");
@@ -196,7 +195,7 @@ class PluginsInstallationControllerTests {
 
         verify(artifactsInstaller).install(
                 "/repo",
-                Optional.of(List.of("my-plugin")),
+                List.of("my-plugin"),
                 "/poms",
                 "/jars",
                 ProcessingType.PLUGINS

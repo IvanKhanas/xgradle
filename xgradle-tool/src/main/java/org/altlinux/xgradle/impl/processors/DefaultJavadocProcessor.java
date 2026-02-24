@@ -38,7 +38,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.List;
 
@@ -73,8 +72,8 @@ final class DefaultJavadocProcessor implements PomProcessor<HashMap<String, Path
     }
 
     @Override
-    public HashMap<String, Path> pomsFromDirectory(String searchingDir, Optional<List<String>> artifactName) {
-        HashMap<String, Path> artifacts = javadocParser.getArtifactCoords(searchingDir, artifactName);
+    public HashMap<String, Path> pomsFromDirectory(String searchingDir, List<String> artifactNames) {
+        HashMap<String, Path> artifacts = javadocParser.getArtifactCoords(searchingDir, artifactNames);
 
         artifacts = filterDuplicateArtifacts(artifacts);
         artifacts = pomService.excludeArtifacts(toolConfig.getExcludedArtifacts(), artifacts);

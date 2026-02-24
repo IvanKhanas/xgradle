@@ -43,8 +43,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.HashMap;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -125,12 +125,12 @@ class JavadocInstallerTests {
         HashMap<String, Path> map = new HashMap<>();
         map.put(pomPath.toString(), javadocJar);
 
-        when(artifactCollector.collect(eq(repo.toString()), eq(Optional.empty()), eq(ProcessingType.JAVADOC)))
+        when(artifactCollector.collect(eq(repo.toString()), eq(List.of()), eq(ProcessingType.JAVADOC)))
                 .thenReturn(map);
 
         when(toolConfig.getInstallPrefix()).thenReturn(null);
 
-        installer.installJavadoc(repo.toString(), Optional.empty(), jarDir.toString());
+        installer.installJavadoc(repo.toString(), List.of(), jarDir.toString());
 
         Path copied = jarDir.resolve("lib-javadoc.jar");
         assertTrue(Files.exists(copied));
@@ -163,12 +163,12 @@ class JavadocInstallerTests {
         HashMap<String, Path> map = new HashMap<>();
         map.put(pomPath.toString(), javadocJar);
 
-        when(artifactCollector.collect(eq(repo.toString()), eq(Optional.empty()), eq(ProcessingType.JAVADOC)))
+        when(artifactCollector.collect(eq(repo.toString()), eq(List.of()), eq(ProcessingType.JAVADOC)))
                 .thenReturn(map);
 
         when(toolConfig.getInstallPrefix()).thenReturn(prefix.toString());
 
-        installer.installJavadoc(repo.toString(), Optional.empty(), jarDir.toString());
+        installer.installJavadoc(repo.toString(), List.of(), jarDir.toString());
 
         assertTrue(Files.exists(mfiles));
         String content = Files.readString(mfiles, StandardCharsets.UTF_8).trim();
@@ -198,17 +198,17 @@ class JavadocInstallerTests {
         HashMap<String, Path> map = new HashMap<>();
         map.put(pomPath.toString(), javadocJar);
 
-        when(artifactCollector.collect(eq(repo.toString()), eq(Optional.empty()), eq(ProcessingType.JAVADOC)))
+        when(artifactCollector.collect(eq(repo.toString()), eq(List.of()), eq(ProcessingType.JAVADOC)))
                 .thenReturn(map);
 
         when(toolConfig.getInstallPrefix()).thenReturn(null);
 
-        installer.installJavadoc(repo.toString(), Optional.empty(), jarDir.toString());
+        installer.installJavadoc(repo.toString(), List.of(), jarDir.toString());
 
         assertTrue(Files.exists(mfiles));
         String first = Files.readString(mfiles, StandardCharsets.UTF_8);
 
-        installer.installJavadoc(repo.toString(), Optional.empty(), jarDir.toString());
+        installer.installJavadoc(repo.toString(), List.of(), jarDir.toString());
 
         assertTrue(Files.exists(mfiles));
         String second = Files.readString(mfiles, StandardCharsets.UTF_8);
@@ -225,10 +225,10 @@ class JavadocInstallerTests {
         Path jarDir = tempDir.resolve("install");
         Files.createDirectories(jarDir);
 
-        when(artifactCollector.collect(eq(repo.toString()), eq(Optional.empty()), eq(ProcessingType.JAVADOC)))
+        when(artifactCollector.collect(eq(repo.toString()), eq(List.of()), eq(ProcessingType.JAVADOC)))
                 .thenReturn(new HashMap<>());
 
-        installer.installJavadoc(repo.toString(), Optional.empty(), jarDir.toString());
+        installer.installJavadoc(repo.toString(), List.of(), jarDir.toString());
 
         assertFalse(Files.exists(mfiles));
         try (var s = Files.list(jarDir)) {

@@ -48,7 +48,6 @@ import org.slf4j.Logger;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -125,7 +124,7 @@ class BomProcessorTests {
     @DisplayName("Delegates to parser;" +
             "applies excludeArtifacts -> removeParentBlocks -> excludeSnapshots (when allowSnapshots=false)")
     void processesAndFiltersInOrder() {
-        Optional<List<String>> names = Optional.of(List.of("bom"));
+        List<String> names = List.of("bom");
 
         Set<Path> parsed = Set.of(Path.of("/repo/bom.pom"));
         Set<Path> afterExclude = Set.of(Path.of("/repo/bom.pom"));
@@ -160,7 +159,7 @@ class BomProcessorTests {
     void snapshotsAllowed() {
         Set<Path> parsed = Set.of(Path.of("/repo/bom.pom"));
 
-        when(bomParser.getArtifactCoords("/repo", Optional.empty())).thenReturn(parsed);
+        when(bomParser.getArtifactCoords("/repo", List.of())).thenReturn(parsed);
 
         when(toolConfig.getExcludedArtifacts()).thenReturn(List.of());
         when(toolConfig.getRemoveParentPoms()).thenReturn(List.of());
@@ -168,11 +167,11 @@ class BomProcessorTests {
 
         when(pomService.excludeArtifacts(List.of(), parsed)).thenReturn(parsed);
 
-        Set<Path> result = processor.pomsFromDirectory("/repo", Optional.empty());
+        Set<Path> result = processor.pomsFromDirectory("/repo", List.of());
         assertSame(parsed, result);
 
         InOrder inOrder = inOrder(bomParser, pomService, toolConfig);
-        inOrder.verify(bomParser).getArtifactCoords("/repo", Optional.empty());
+        inOrder.verify(bomParser).getArtifactCoords("/repo", List.of());
         inOrder.verify(toolConfig).getExcludedArtifacts();
         inOrder.verify(pomService).excludeArtifacts(List.of(), parsed);
         inOrder.verify(toolConfig).getRemoveParentPoms();

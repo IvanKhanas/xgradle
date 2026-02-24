@@ -44,7 +44,7 @@ public class CliArgumentsContainerTest {
     }
 
     @Test
-    @DisplayName("Defaults: no args -> all optionals are empty, all flags are false, all has* are false")
+    @DisplayName("Defaults: no args -> all lists empty or null, all flags are false, all has* are false")
     void defaultsNoArgs() {
         CliArgumentsContainer args = parse();
 
@@ -166,7 +166,7 @@ public class CliArgumentsContainerTest {
     }
 
     @Test
-    @DisplayName("JCommander: parses --artifacts list and exposes as Optional<List<String>>")
+    @DisplayName("JCommander: parses --artifacts list and exposes as List<String>")
     void parsesArtifactsList() {
         CliArgumentsContainer args = parseAndValidate(
                 "--searching-directory=/home/xeno/.m2",
@@ -176,8 +176,7 @@ public class CliArgumentsContainerTest {
 
         assertAll(
                 () -> assertTrue(args.hasArtifactName()),
-                () -> assertTrue(args.getArtifactName().isPresent()),
-                () -> assertEquals(List.of("aaa", "bbb", "ccc"), args.getArtifactName().orElseThrow())
+                () -> assertEquals(List.of("aaa", "bbb", "ccc"), args.getArtifactName())
         );
     }
 

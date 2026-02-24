@@ -16,7 +16,6 @@
 package org.altlinux.xgradle.interfaces.parsers;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Generic interface for POM file parsing operations.
@@ -31,9 +30,9 @@ public interface PomParser<R> {
      * Retrieves artifact coordinates from the specified directory, optionally filtered by artifact names.
      *
      * @param searchingDir the directory to search for POM files
-     * @param artifactName optional list of artifact names to filter by
+     * @param artifactNames list of artifact names to filter by (null or empty to process all)
      * @return parsed results of type R
      */
-    R getArtifactCoords(String searchingDir, Optional<List<String>> artifactName);
+    R getArtifactCoords(String searchingDir, List<String> artifactNames);
 
 }

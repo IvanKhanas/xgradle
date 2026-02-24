@@ -30,7 +30,7 @@ import static org.altlinux.xgradle.impl.utils.logging.LogPainter.*;
 public class DependencyLogger {
 
     public void logSection(String title, Logger logger) {
-        logger.lifecycle(green("\n--- " + title + " ---"));
+        logger.lifecycle(green(String.format("\n--- %s ---", title)));
     }
 
     public void logInitialDependencies(Set<String> dependencies, Logger logger) {

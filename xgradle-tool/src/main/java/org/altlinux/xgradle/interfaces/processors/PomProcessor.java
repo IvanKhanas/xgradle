@@ -16,7 +16,6 @@
 package org.altlinux.xgradle.interfaces.processors;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Generic interface for POM file processors.
@@ -31,8 +30,8 @@ public interface PomProcessor<R> {
      * Retrieves POM files from the specified directory, optionally filtered by artifact names.
      *
      * @param searchingDir the directory to search for POM files
-     * @param artifactName optional list of artifact names to filter by
+     * @param artifactNames list of artifact names to filter by (null or empty to process all)
      * @return processed results of type R
      */
-    R pomsFromDirectory(String searchingDir, Optional<List<String>> artifactName);
+    R pomsFromDirectory(String searchingDir, List<String> artifactNames);
 }

@@ -37,7 +37,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -72,11 +71,11 @@ final class ConcurrentLibraryPomParser implements PomParser<HashMap<String, Path
     }
 
     @Override
-    public HashMap<String, Path> getArtifactCoords(String searchingDir, Optional<List<String>> artifactNames) {
+    public HashMap<String, Path> getArtifactCoords(String searchingDir, List<String> artifactNames) {
         Collection<Path> pomPaths;
 
-        if (artifactNames.isPresent()) {
-            pomPaths = pomContainer.getSelectedPoms(searchingDir, artifactNames.get());
+        if (artifactNames != null && !artifactNames.isEmpty()) {
+            pomPaths = pomContainer.getSelectedPoms(searchingDir, artifactNames);
         } else {
             pomPaths = pomContainer.getAllPoms(searchingDir);
         }

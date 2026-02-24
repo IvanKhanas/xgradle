@@ -51,7 +51,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -139,7 +138,7 @@ class LibraryPomParserTests {
         when(pomContainer.getSelectedPoms(dir.toString(), names)).thenReturn(Set.of(pom));
         when(artifactCache.add(any(ArtifactData.class))).thenReturn(true);
 
-        HashMap<String, Path> result = parser.getArtifactCoords(dir.toString(), Optional.of(names));
+        HashMap<String, Path> result = parser.getArtifactCoords(dir.toString(), names);
 
         assertAll(
                 () -> assertEquals(1, result.size()),
@@ -169,7 +168,7 @@ class LibraryPomParserTests {
         when(pomContainer.getAllPoms(dir.toString())).thenReturn(Set.of(pom));
         when(artifactCache.add(any(ArtifactData.class))).thenReturn(true);
 
-        HashMap<String, Path> result = parser.getArtifactCoords(dir.toString(), Optional.empty());
+        HashMap<String, Path> result = parser.getArtifactCoords(dir.toString(), List.of());
 
         assertAll(
                 () -> assertEquals(1, result.size()),
@@ -198,7 +197,7 @@ class LibraryPomParserTests {
         when(pomContainer.getAllPoms(dir.toString())).thenReturn(Set.of(pom));
         when(artifactCache.add(any(ArtifactData.class))).thenReturn(true);
 
-        HashMap<String, Path> result = parser.getArtifactCoords(dir.toString(), Optional.empty());
+        HashMap<String, Path> result = parser.getArtifactCoords(dir.toString(), List.of());
 
         assertAll(
                 () -> assertEquals(1, result.size()),
@@ -242,7 +241,7 @@ class LibraryPomParserTests {
         when(existing.getPomPath()).thenReturn(existingPom);
         when(artifactCache.get(any(ArtifactCoordinates.class))).thenReturn(existing);
 
-        HashMap<String, Path> result = parser.getArtifactCoords(dir.toString(), Optional.empty());
+        HashMap<String, Path> result = parser.getArtifactCoords(dir.toString(), List.of());
 
         assertEquals(1, result.size());
 
