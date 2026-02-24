@@ -43,7 +43,6 @@ subprojects {
     apply(plugin = "checkstyle")
 
     configure<CheckstyleExtension> {
-        configFile = rootProject.file("checkstyle.xml")
         isIgnoreFailures = false
         isShowViolations = true
         maxErrors = 0
