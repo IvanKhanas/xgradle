@@ -100,3 +100,51 @@ jobs:
             -Djava.library.dir="/usr/share/java" \
             -Dmaven.poms.dir="/usr/share/maven-poms" \
             --info
+
+  coverage:
+    name: Test coverage
+    runs-on: ubuntu-latest
+    container:
+      image: registry.altlinux.org/sisyphus/alt:latest
+    needs: tests
+
+    steps:
+      - name: Install build dependencies
+        run: |
+          apt-get update
+          apt-get install -y \
+            glibc-pthread \
+            git \
+            google-gson \
+            maven-lib \
+            shadow-gradle-plugin \
+            java-17-openjdk-devel
+
+      - uses: actions/checkout@v4
+
+      - name: Run jacoco check
+        run: |
+          ./gradlew build \
+            jacocoTestReport \
+            -Djava.library.dir="/usr/share/java" \
+            -Dmaven.poms.dir="/usr/share/maven-poms"
+
+      - name: Add coverage to PR
+        id: jacoco
+        uses: ALonelyDuck/jacoco-report@v1.2
+        with:
+            paths: |
+              ${{ github.workspace }}/**/build/reports/jacoco/test/jacocoTestReport.xml
+            token: ${{ secrets.GITHUB_TOKEN }}
+            min-coverage-overall: 80
+            min-coverage-changed-files: 80
+            title: Code Coverage
+#            update-comment: true
+
+      - name: Fail PR if change coverage is less than 80%
+        if: ${{ steps.jacoco.outputs.coverage-changed-percentage < 80.0 }}
+        uses: actions/github-script@v6
+        with:
+          script: core.setFailed('Coverage of changed files is less than 80%!')
+
+      # TODO improve code coverage to 80% and create step that fails PR lesser than 80% coverage-overall

@@ -15,6 +15,7 @@
  */
 import org.gradle.api.plugins.quality.Checkstyle
 import org.gradle.api.plugins.quality.CheckstyleExtension
+import org.gradle.testing.jacoco.tasks.JacocoReport
 
 plugins {
     java
@@ -41,6 +42,7 @@ subprojects {
     apply(plugin = "maven-publish")
     apply(plugin = "com.gradleup.shadow")
     apply(plugin = "checkstyle")
+    apply(plugin = "jacoco")
 
     configure<CheckstyleExtension> {
         isIgnoreFailures = false
@@ -49,7 +51,6 @@ subprojects {
     }
 
     tasks.withType<Checkstyle>().configureEach {
-
         reports {
             xml.required.set(true)
             html.required.set(true)
@@ -58,6 +59,15 @@ subprojects {
 
     tasks.register<Checkstyle>("checkstyle") {
         dependsOn("checkstyleMain", "checkstyleTest")
+    }
+
+    tasks.named<JacocoReport>("jacocoTestReport") {
+        dependsOn(tasks.check)
+        reports {
+            xml.required.set(true)
+            html.required.set(true)
+            csv.required.set(false)
+        }
     }
 
     java {
