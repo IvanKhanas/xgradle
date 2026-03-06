@@ -22,6 +22,7 @@ import com.google.inject.Singleton;
 import org.altlinux.xgradle.impl.utils.config.XGradleConfig;
 import org.altlinux.xgradle.interfaces.collectors.PomFilesCollector;
 import org.altlinux.xgradle.interfaces.resolution.ResolutionStep;
+import org.altlinux.xgradle.interfaces.resolution.Order;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -33,6 +34,7 @@ import java.util.List;
  * @author Ivan Khanas <xeno@altlinux.org>
  */
 @Singleton
+@Order(200)
 final class CollectPomFilesStep implements ResolutionStep {
 
     private final Provider<PomFilesCollector> collectorProvider;

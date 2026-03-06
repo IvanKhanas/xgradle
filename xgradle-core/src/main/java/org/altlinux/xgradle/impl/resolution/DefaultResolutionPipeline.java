@@ -20,6 +20,7 @@ import com.google.inject.Singleton;
 import org.altlinux.xgradle.interfaces.resolution.ResolutionPipeline;
 import org.altlinux.xgradle.interfaces.resolution.ResolutionStep;
 
+import java.util.ArrayList;
 import java.util.List;
 /**
  * Pipeline for Resolution.
@@ -35,7 +36,7 @@ final class DefaultResolutionPipeline implements ResolutionPipeline {
 
     @Inject
     DefaultResolutionPipeline (List<ResolutionStep> resolutionSteps) {
-        this.resolutionSteps = resolutionSteps;
+        this.resolutionSteps = orderSteps(resolutionSteps);
     }
 
     @Override
@@ -46,4 +47,9 @@ final class DefaultResolutionPipeline implements ResolutionPipeline {
         return ext;
     }
 
+    private static List<ResolutionStep> orderSteps(List<ResolutionStep> steps) {
+        List<ResolutionStep> ordered = new ArrayList<>(steps);
+        ordered.sort(ResolutionStepOrdering.INSTANCE);
+        return List.copyOf(ordered);
+    }
 }

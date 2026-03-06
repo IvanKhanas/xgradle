@@ -20,6 +20,7 @@ import com.google.inject.Singleton;
 import org.altlinux.xgradle.interfaces.processors.TransitiveProcessor;
 import org.altlinux.xgradle.interfaces.processors.TransitiveResult;
 import org.altlinux.xgradle.interfaces.resolution.ResolutionStep;
+import org.altlinux.xgradle.interfaces.resolution.Order;
 import org.altlinux.xgradle.interfaces.services.VersionScanner;
 import org.altlinux.xgradle.impl.model.MavenCoordinate;
 import org.gradle.api.logging.Logger;
@@ -36,6 +37,7 @@ import java.util.Set;
  * @author Ivan Khanas <xeno@altlinux.org>
  */
 @Singleton
+@Order(800)
 final class ResolveTransitivesAndScanMissingStep implements ResolutionStep {
 
     private final TransitiveProcessor transitiveProcessor;

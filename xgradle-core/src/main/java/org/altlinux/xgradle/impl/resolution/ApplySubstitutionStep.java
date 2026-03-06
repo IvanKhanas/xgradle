@@ -19,6 +19,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.altlinux.xgradle.interfaces.resolution.ResolutionStep;
+import org.altlinux.xgradle.interfaces.resolution.Order;
 import org.altlinux.xgradle.interfaces.resolvers.DependencySubstitutor;
 
 /**
@@ -28,6 +29,7 @@ import org.altlinux.xgradle.interfaces.resolvers.DependencySubstitutor;
  * @author Ivan Khanas <xeno@altlinux.org>
  */
 @Singleton
+@Order(1000)
 final class ApplySubstitutionStep implements ResolutionStep {
 
     private final DependencySubstitutor substitutor;

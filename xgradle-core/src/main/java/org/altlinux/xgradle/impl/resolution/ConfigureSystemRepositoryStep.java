@@ -20,6 +20,7 @@ import com.google.inject.Singleton;
 
 import org.altlinux.xgradle.interfaces.managers.RepositoryManager;
 import org.altlinux.xgradle.interfaces.resolution.ResolutionStep;
+import org.altlinux.xgradle.interfaces.resolution.Order;
 import org.altlinux.xgradle.impl.extensions.SystemDepsExtension;
 
 import java.io.File;
@@ -32,6 +33,7 @@ import java.util.List;
  * @author Ivan Khanas <xeno@altlinux.org>
  */
 @Singleton
+@Order(100)
 final class ConfigureSystemRepositoryStep implements ResolutionStep {
 
     private final RepositoryManager repositoryManager;

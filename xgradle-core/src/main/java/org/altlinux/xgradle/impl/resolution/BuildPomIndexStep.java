@@ -20,6 +20,7 @@ import com.google.inject.Singleton;
 
 import org.altlinux.xgradle.interfaces.indexing.PomIndexBuilder;
 import org.altlinux.xgradle.interfaces.resolution.ResolutionStep;
+import org.altlinux.xgradle.interfaces.resolution.Order;
 
 /**
  * Builds a POM index from collected POM files.
@@ -28,6 +29,7 @@ import org.altlinux.xgradle.interfaces.resolution.ResolutionStep;
  * @author Ivan Khanas <xeno@altlinux.org>
  */
 @Singleton
+@Order(300)
 final class BuildPomIndexStep implements ResolutionStep {
 
     private final PomIndexBuilder builder;

@@ -21,6 +21,7 @@ import com.google.inject.Singleton;
 import org.altlinux.xgradle.interfaces.processors.BomProcessor;
 import org.altlinux.xgradle.interfaces.processors.BomResult;
 import org.altlinux.xgradle.interfaces.resolution.ResolutionStep;
+import org.altlinux.xgradle.interfaces.resolution.Order;
 import org.altlinux.xgradle.impl.model.ConfigurationInfoSnapshot;
 
 import java.util.Map;
@@ -33,6 +34,7 @@ import java.util.Set;
  * @author Ivan Khanas <xeno@altlinux.org>
  */
 @Singleton
+@Order(600)
 final class ApplyBomsStep implements ResolutionStep {
 
     private final BomProcessor bomProcessor;

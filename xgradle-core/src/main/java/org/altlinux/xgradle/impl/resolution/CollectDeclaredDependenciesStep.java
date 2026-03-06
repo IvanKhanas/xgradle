@@ -20,6 +20,7 @@ import com.google.inject.Singleton;
 
 import org.altlinux.xgradle.interfaces.collectors.DependencyCollector;
 import org.altlinux.xgradle.interfaces.resolution.ResolutionStep;
+import org.altlinux.xgradle.interfaces.resolution.Order;
 
 /**
  * Collects declared project dependencies and requested versions.
@@ -28,6 +29,7 @@ import org.altlinux.xgradle.interfaces.resolution.ResolutionStep;
  * @author Ivan Khanas <xeno@altlinux.org>
  */
 @Singleton
+@Order(400)
 final class CollectDeclaredDependenciesStep implements ResolutionStep {
 
     private final DependencyCollector dependencyCollector;

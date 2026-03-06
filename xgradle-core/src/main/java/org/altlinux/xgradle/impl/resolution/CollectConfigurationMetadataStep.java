@@ -20,6 +20,7 @@ import com.google.inject.Singleton;
 
 import org.altlinux.xgradle.interfaces.collectors.ConfigurationInfoCollector;
 import org.altlinux.xgradle.interfaces.resolution.ResolutionStep;
+import org.altlinux.xgradle.interfaces.resolution.Order;
 import org.altlinux.xgradle.impl.model.ConfigurationInfoSnapshot;
 
 /**
@@ -29,6 +30,7 @@ import org.altlinux.xgradle.impl.model.ConfigurationInfoSnapshot;
  * @author Ivan Khanas <xeno@altlinux.org>
  */
 @Singleton
+@Order(500)
 final class CollectConfigurationMetadataStep implements ResolutionStep {
 
     private final ConfigurationInfoCollector configurationInfoCollector;

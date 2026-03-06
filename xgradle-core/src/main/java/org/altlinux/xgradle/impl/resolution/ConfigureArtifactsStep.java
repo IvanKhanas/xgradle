@@ -20,6 +20,7 @@ import com.google.inject.Singleton;
 
 import org.altlinux.xgradle.interfaces.configurators.ArtifactConfigurator;
 import org.altlinux.xgradle.interfaces.resolution.ResolutionStep;
+import org.altlinux.xgradle.interfaces.resolution.Order;
 import org.altlinux.xgradle.impl.model.ConfigurationInfo;
 import org.altlinux.xgradle.impl.model.ConfigurationInfoSnapshot;
 
@@ -33,6 +34,7 @@ import java.util.Set;
  * @author Ivan Khanas <xeno@altlinux.org>
  */
 @Singleton
+@Order(900)
 final class ConfigureArtifactsStep implements ResolutionStep {
 
     private final ArtifactConfigurator artifactConfigurator;

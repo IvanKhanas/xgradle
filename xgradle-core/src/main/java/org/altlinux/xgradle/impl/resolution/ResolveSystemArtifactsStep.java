@@ -19,6 +19,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.altlinux.xgradle.interfaces.resolution.ResolutionStep;
+import org.altlinux.xgradle.interfaces.resolution.Order;
 import org.altlinux.xgradle.interfaces.resolvers.ArtifactResolver;
 
 /**
@@ -28,6 +29,7 @@ import org.altlinux.xgradle.interfaces.resolvers.ArtifactResolver;
  * @author Ivan Khanas <xeno@altlinux.org>
  */
 @Singleton
+@Order(700)
 final class ResolveSystemArtifactsStep implements ResolutionStep {
 
     private final ArtifactResolver artifactResolver;
