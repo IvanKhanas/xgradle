@@ -77,23 +77,13 @@ The result: **reproducible builds in fully offline environments** (CI, air-gappe
 Build the project with Gradle:
 
 ```
-gradle build \
-  -Djava.library.dir=/path/to/jars1,/path/to/jars2 \
-  -Dmaven.poms.dir=/path/to/poms \
-  -Prelease
+gradle build -Prelease
 ```
 
 If Gradle is not installed on your system, use the Gradle Wrapper:
 
 ```
 ./gradlew build -Prelease
-```
-
-Optional: generate SBOM during build:
-
-```
-./gradlew build -Dgenerate.sbom=spdx
-./gradlew build -Dgenerate.sbom=cyclonedx
 ```
 
 ---
