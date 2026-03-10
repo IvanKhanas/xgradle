@@ -17,6 +17,30 @@ pipeline {
       }
     }
 
+    stage('Checkstyle') {
+      agent {
+        dockerContainer {
+          image 'xenoalt/alt-sisyphus-java:1.0.0-j21'
+        }
+      }
+      steps {
+        sh '''
+          apt-get update
+          apt-get install -y \
+            git \
+            java-11-openjdk-devel
+        '''
+        deleteDir()
+        unstash 'src'
+        sh './gradlew checkstyle -Djava11'
+      }
+      post {
+        always {
+          archiveArtifacts artifacts: '**/build/reports/checkstyle/**', allowEmptyArchive: true
+        }
+      }
+    }
+
     stage('Build (JDK 11)') {
       agent {
         dockerContainer {
@@ -24,7 +48,9 @@ pipeline {
         }
       }
       steps {
-        sh 'apt-get update'
+        sh '''
+          apt-get update
+        '''
         deleteDir()
         unstash 'src'
         sh './gradlew publishToMavenLocal -Djava11'
@@ -38,7 +64,9 @@ pipeline {
         }
       }
       steps {
-        sh 'apt-get update'
+        sh '''
+          apt-get update
+        '''
         deleteDir()
         unstash 'src'
         sh './gradlew publishToMavenLocal'
@@ -52,8 +80,10 @@ pipeline {
         }
       }
       steps {
-        sh '''apt-get update && \
-            apt-get install -y google-gson \
+        sh '''
+          apt-get update
+          apt-get install -y \
+            google-gson \
             maven-lib \
             shadow-gradle-plugin
         '''
@@ -61,11 +91,14 @@ pipeline {
         unstash 'src'
         sh '''
           ./gradlew build \
-            -Djava.library.dir="/usr/share/java" \
-            -Dmaven.poms.dir="/usr/share/maven-poms" \
             -Djava11 \
             --info
         '''
+      }
+      post {
+        always {
+          junit allowEmptyResults: true, testResults: '**/build/test-results/test/*.xml'
+        }
       }
     }
 
@@ -76,19 +109,56 @@ pipeline {
         }
       }
       steps {
-              sh '''apt-get update && \
-                  apt-get install -y google-gson \
-                  maven-lib \
-                  shadow-gradle-plugin
-              '''
+        sh '''
+          apt-get update
+          apt-get install -y \
+            google-gson \
+            apache-commons-io \
+            apache-commons-cli \
+            shadow-gradle-plugin
+        '''
         deleteDir()
         unstash 'src'
         sh '''
           ./gradlew build \
-            -Djava.library.dir="/usr/share/java" \
-            -Dmaven.poms.dir="/usr/share/maven-poms" \
             --info
         '''
+      }
+      post {
+        always {
+          junit allowEmptyResults: true, testResults: '**/build/test-results/test/*.xml'
+        }
+      }
+    }
+
+    stage('JaCoCo Report') {
+      agent {
+        dockerContainer {
+          image 'xenoalt/alt-sisyphus-java:1.0.0-j21'
+        }
+      }
+      steps {
+        sh '''
+          apt-get update
+          apt-get install -y \
+            google-gson \
+            apache-commons-io \
+            apache-commons-cli \
+            shadow-gradle-plugin
+        '''
+        deleteDir()
+        unstash 'src'
+        sh '''
+          ./gradlew test jacocoTestReport \
+            --info
+        '''
+      }
+      post {
+        always {
+          junit allowEmptyResults: true, testResults: '**/build/test-results/test/*.xml'
+          archiveArtifacts artifacts: '**/build/reports/jacoco/**', allowEmptyArchive: true
+          archiveArtifacts artifacts: '**/build/reports/tests/**', allowEmptyArchive: true
+        }
       }
     }
   }

@@ -20,6 +20,6 @@ jar {
     archiveBaseName = "testMixedBuild"
 }
 
-tasks.named('shadowJar') {
-    mainClassName = "com.example.Main"
+application {
+    mainClass = "com.example.Main"
 }

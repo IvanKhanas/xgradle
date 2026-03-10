@@ -23,6 +23,9 @@ profile:
 #    paths:
 #      - <path/where/not/run/inspection>
 
+exclude:
+  - name: ConstantValue
+
 projectJDK: "17" #(Applied in CI/CD pipeline)
 
 #Execute shell command before Qodana execution (Applied in CI/CD pipeline)

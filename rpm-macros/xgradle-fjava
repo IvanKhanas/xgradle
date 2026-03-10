@@ -55,7 +55,7 @@
 # =========================================================
 
 # Cli tool for packaging with xgradle.
-%__xgradle_cli xgradle-tool
+%__xgradle_cli xgradle-cli
 
 # Artifacts installation paths for ALT Linux.
 %_artifacts_installation_paths --jar-installation-dir=%buildroot/%_javadir/%name --pom-installation-dir=%buildroot/%_mavenpomdir/%name
@@ -74,3 +74,9 @@
 
 # Installs artifacts registered for xmvn.
 %gradle_install %mvn_install
+
+# SPDX format sbom generating flag.
+%generate_spdx_sbom -Dgenerate.sbom=spdx
+
+# CycloneDX format sbom generating flag.
+%generate_cyclonedx_sbom -Dgenerate.sbom=cyclonedx

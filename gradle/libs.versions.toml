@@ -15,6 +15,7 @@ failureaccess = "1.0.1"
 jakarta-inject = "1.0.5"
 asm = "9.4"
 aopalliance = "1.0"
+gson = "2.10.1"
 
 [libraries]
 maven-model = { module = "org.apache.maven:maven-model", version.ref = "maven-model" }
@@ -32,6 +33,8 @@ mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito"}
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito"}
 
 jcommander = { module = "org.jcommander:jcommander", version.ref = "jcommander" }
+
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }

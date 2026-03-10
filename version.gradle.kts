@@ -47,13 +47,13 @@ tasks.withType<ProcessResources>().configureEach {
     filteringCharset = "UTF-8"
 
     when (project.path) {
-        ":xgradle-core" -> {
+        ":xgradle-resolution-plugin" -> {
             filesMatching("logo.txt") {
                 filter { line -> line.replace("@version@", rootProject.version.toString()) }
             }
         }
 
-        ":xgradle-tool" -> {
+        ":xgradle-cli" -> {
             val commitId = project.gitCommitIdProvider()
             val time = buildTime()
 

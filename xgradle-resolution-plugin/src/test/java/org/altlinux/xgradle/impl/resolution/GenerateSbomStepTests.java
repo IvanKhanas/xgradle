@@ -1,0 +1,155 @@
+/*
+ * Copyright 2025 BaseALT Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.altlinux.xgradle.impl.resolution;
+
+import org.altlinux.xgradle.impl.enums.SbomFormat;
+import org.altlinux.xgradle.impl.model.MavenCoordinate;
+import org.altlinux.xgradle.interfaces.processors.PluginProcessor;
+import org.altlinux.xgradle.interfaces.services.SbomGenerationService;
+import org.gradle.api.Action;
+import org.gradle.api.Project;
+import org.gradle.api.invocation.Gradle;
+import org.gradle.api.logging.Logger;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+/**
+ * @author Ivan Khanas xeno@altlinux.org
+ */
+@ExtendWith(MockitoExtension.class)
+@DisplayName("GenerateSbomStep")
+class GenerateSbomStepTests {
+
+    @Mock
+    private SbomGenerationService sbomGenerationService;
+
+    @Mock
+    private PluginProcessor pluginProcessor;
+
+    @Mock
+    private Gradle gradle;
+
+    @Mock
+    private Project rootProject;
+
+    @Mock
+    private Logger logger;
+
+    @AfterEach
+    void clearSbomProperty() {
+        System.clearProperty("generate.sbom");
+    }
+
+    @Test
+    @DisplayName("Snapshots dependencies and delegates generation with plugin artifacts")
+    void snapshotsDependenciesAndDelegatesGenerationWithPluginArtifacts() {
+        System.setProperty("generate.sbom", "spdx");
+
+        MavenCoordinate dependency = MavenCoordinate.builder()
+                .groupId("org.example")
+                .artifactId("core-lib")
+                .version("1.2.3")
+                .build();
+
+        MavenCoordinate pluginArtifact = MavenCoordinate.builder()
+                .groupId("com.acme.plugin")
+                .artifactId("awesome-gradle-plugin")
+                .version("2.0.0")
+                .build();
+
+        when(gradle.getRootProject()).thenReturn(rootProject);
+        when(rootProject.getLogger()).thenReturn(logger);
+        when(pluginProcessor.getResolvedPluginArtifacts()).thenReturn(List.of(pluginArtifact));
+
+        doAnswer(invocation -> {
+            @SuppressWarnings("unchecked")
+            Action<Object> callback = invocation.getArgument(0);
+            callback.execute(null);
+            return null;
+        }).when(gradle).buildFinished(any(Action.class));
+
+        ResolutionContext resolutionContext = new ResolutionContext(gradle);
+        resolutionContext.putSystemArtifact("org.example:core-lib", dependency);
+
+        GenerateSbomStep step = new GenerateSbomStep(
+                sbomGenerationService,
+                pluginProcessor
+        );
+        step.execute(resolutionContext);
+
+        verify(sbomGenerationService).generate(
+                eq(gradle),
+                eq(SbomFormat.SPDX),
+                argThat(this::containsDependency),
+                argThat(plugins -> containsCoordinate(
+                        plugins,
+                        "com.acme.plugin",
+                        "awesome-gradle-plugin",
+                        "2.0.0"
+                )),
+                eq(logger)
+        );
+    }
+
+    private boolean containsDependency(Map<String, MavenCoordinate> artifactsSnapshot) {
+        if (artifactsSnapshot == null) {
+            return false;
+        }
+        MavenCoordinate coordinate = artifactsSnapshot.get("org.example:core-lib");
+        return coordinate != null
+                && "org.example".equals(coordinate.getGroupId())
+                && "core-lib".equals(coordinate.getArtifactId())
+                && "1.2.3".equals(coordinate.getVersion());
+    }
+
+    private boolean containsCoordinate(
+            Collection<MavenCoordinate> artifacts,
+            String groupId,
+            String artifactId,
+            String version
+    ) {
+        if (artifacts == null) {
+            return false;
+        }
+
+        for (MavenCoordinate artifact : artifacts) {
+            if (artifact == null) {
+                continue;
+            }
+            if (groupId.equals(artifact.getGroupId())
+                    && artifactId.equals(artifact.getArtifactId())
+                    && version.equals(artifact.getVersion())) {
+                return true;
+            }
+        }
+        return false;
+    }
+}

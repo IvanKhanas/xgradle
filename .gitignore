@@ -17,6 +17,7 @@ gradlew*
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
+project
 
 ### Eclipse ###
 .apt_generated

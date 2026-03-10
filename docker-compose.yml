@@ -13,7 +13,7 @@ services:
     volumes:
       - ./project:/app
     user: "1000:1000"
-    command: ["xgradle-tool", "--help"]
+    command: ["xgradle-cli", "--help"]
 
   xgradle-builder:
     build:
