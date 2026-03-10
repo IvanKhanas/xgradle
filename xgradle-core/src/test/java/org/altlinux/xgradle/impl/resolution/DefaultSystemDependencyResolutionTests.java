@@ -25,6 +25,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -49,7 +50,9 @@ class DefaultSystemDependencyResolutionTests {
     @Test
     @DisplayName("Runs pipeline and reports with same context")
     void runsPipelineAndReporter() {
-        DefaultResolutionPipeline pipeline = new DefaultResolutionPipeline(List.of(step));
+        DefaultResolutionPipeline pipeline = new DefaultResolutionPipeline(
+                new LinkedHashSet<>(List.of(step))
+        );
 
         DefaultSystemDependencyResolution resolution =
                 new DefaultSystemDependencyResolution(pipeline, reporter);

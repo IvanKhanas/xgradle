@@ -30,6 +30,10 @@ XMvn: https://fedora-java.github.io/xmvn
     - Installs/exports JARs, POMs and related metadata into target directories
     - Optionally patches/redacts POM files to fit offline/system packaging needs
 
+- **xgradle-sbom-generator (library module)** — generates SBOM reports from resolved artifacts in:
+    - SPDX JSON
+    - CycloneDX JSON
+
 The result: **reproducible builds in fully offline environments** (CI, air-gapped hosts, distro build farms).
 
 ---
@@ -43,6 +47,7 @@ The result: **reproducible builds in fully offline environments** (CI, air-gappe
 - org.apache.maven:maven-model-builder
 - org.codehaus.plexus:plexus-utils
 - org.jcommander:jcommander
+- com.google.code.gson:gson
 - org.slf4j:slf4j-api
 - org.slf4j:slf4j-simple
 - org.slf4j:log4j-over-slf4j
@@ -82,6 +87,13 @@ If Gradle is not installed on your system, use the Gradle Wrapper:
 
 ```
 ./gradlew build -Prelease
+```
+
+Optional: generate SBOM during build:
+
+```
+./gradlew build -Dgenerate.sbom=spdx
+./gradlew build -Dgenerate.sbom=cyclonedx
 ```
 
 ---

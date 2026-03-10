@@ -16,14 +16,15 @@
 package org.altlinux.xgradle.impl.resolution;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
+import com.google.inject.multibindings.Multibinder;
 
+import org.altlinux.xgradle.impl.collectors.DefaultSbomComponentCollector;
+import org.altlinux.xgradle.impl.services.DefaultSbomGenerationService;
+import org.altlinux.xgradle.interfaces.collectors.SbomComponentCollector;
 import org.altlinux.xgradle.interfaces.resolution.ResolutionReporter;
 import org.altlinux.xgradle.interfaces.resolution.ResolutionStep;
 import org.altlinux.xgradle.interfaces.resolution.SystemDependencyResolution;
-
-import java.util.List;
+import org.altlinux.xgradle.interfaces.services.SbomGenerationService;
 /**
  * Guice module for Resolution bindings.
  *
@@ -36,35 +37,26 @@ public final class ResolutionModule extends AbstractModule {
     protected void configure() {
         bind(SystemDependencyResolution.class).to(DefaultSystemDependencyResolution.class);
         bind(ResolutionReporter.class).to(DefaultResolutionReporter.class);
+        bind(SbomComponentCollector.class).to(DefaultSbomComponentCollector.class);
+        bind(SbomGenerationService.class).to(DefaultSbomGenerationService.class);
+        bindResolutionSteps();
     }
 
-    @Provides
-    @Singleton
-    List<ResolutionStep> steps(
-            ConfigureSystemRepositoryStep configureSystemRepositoryStep,
+    private void bindResolutionSteps() {
+        Multibinder<ResolutionStep> steps =
+                Multibinder.newSetBinder(binder(), ResolutionStep.class);
 
-            CollectPomFilesStep collectPomFilesStep,
-            BuildPomIndexStep buildPomIndexStep,
-
-            CollectDeclaredDependenciesStep collectDependenciesStep,
-            CollectConfigurationMetadataStep collectConfigurationMetadataStep,
-            ApplyBomsStep applyBomsStep,
-            ResolveSystemArtifactsStep resolveSystemArtifactsStep,
-            ResolveTransitivesAndScanMissingStep resolveTransitivesAndScanMissingStep,
-            ConfigureArtifactsStep configureArtifactsStep,
-            ApplySubstitutionStep applySubstitutionStep
-    ) {
-        return List.of(
-                configureSystemRepositoryStep,
-                collectPomFilesStep,
-                buildPomIndexStep,
-                collectDependenciesStep,
-                collectConfigurationMetadataStep,
-                applyBomsStep,
-                resolveSystemArtifactsStep,
-                resolveTransitivesAndScanMissingStep,
-                configureArtifactsStep,
-                applySubstitutionStep
-        );
+        steps.addBinding().to(ConfigureSystemRepositoryStep.class);
+        steps.addBinding().to(CollectPomFilesStep.class);
+        steps.addBinding().to(BuildPomIndexStep.class);
+        steps.addBinding().to(CollectDeclaredDependenciesStep.class);
+        steps.addBinding().to(CollectConfigurationMetadataStep.class);
+        steps.addBinding().to(ApplyBomsStep.class);
+        steps.addBinding().to(ResolveSystemArtifactsStep.class);
+        steps.addBinding().to(ResolveTransitivesAndScanMissingStep.class);
+        steps.addBinding().to(ConfigureArtifactsStep.class);
+        steps.addBinding().to(ApplySubstitutionStep.class);
+        steps.addBinding().to(CollectResolvedJarsStep.class);
+        steps.addBinding().to(GenerateSbomStep.class);
     }
 }

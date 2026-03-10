@@ -15,7 +15,11 @@
  */
 package org.altlinux.xgradle.interfaces.processors;
 
+import org.altlinux.xgradle.impl.model.MavenCoordinate;
 import org.gradle.api.initialization.Settings;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Processor for Gradle plugin resolution.
@@ -39,5 +43,14 @@ public interface PluginProcessor extends Processor<Settings> {
     @Deprecated
     default void configurePluginResolution(Settings settings) {
         process(settings);
+    }
+
+    /**
+     * Returns plugin artifacts resolved via plugin management strategy.
+     *
+     * @return immutable collection of resolved plugin artifacts
+     */
+    default Collection<MavenCoordinate> getResolvedPluginArtifacts() {
+        return List.of();
     }
 }

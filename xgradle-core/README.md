@@ -32,6 +32,13 @@ set** (prepared by packaging) rather than downloading from the network.
 - Configures `pluginManagement.repositories` to include the same system JAR directories,
   allowing Gradle plugins to be resolved from local/system artifacts.
 
+### 3) Optional SBOM generation
+- If `generate.sbom` is set to `spdx` or `cyclonedx`, xgradle-core generates an SBOM report
+  from resolved build artifacts.
+- Report path:
+  - `build/reports/xgradle/sbom-spdx.json`
+  - `build/reports/xgradle/sbom-cyclonedx.json`
+
 ---
 
 ## Configuration
@@ -47,6 +54,7 @@ xgradle-core is configured via **system properties** or the user config file
 | `disable.logo=true` | Disable ASCII banner printing. |
 | `enable.ansi.color=true` | Enable ANSI colors in xgradle logs. |
 | `xgradle.scan.depth` | Max directory scan depth for system artifacts (default `3`). |
+| `generate.sbom` | SBOM format: `spdx` or `cyclonedx`. |
 
 Example config file (`~/.xgradle/xgradle.config`):
 
@@ -56,6 +64,7 @@ maven.poms.dir=/usr/share/maven-poms
 disable.logo=true
 enable.ansi.color=true
 xgradle.scan.depth=3
+generate.sbom=spdx
 ```
 
 ## Usage Example:
@@ -64,4 +73,6 @@ xgradle.scan.depth=3
 gradle build \
   -Djava.library.dir=/usr/share/java,/usr/local/share/java \
   -Dmaven.poms.dir=/usr/share/maven-poms \
+  -Dgenerate.sbom=cyclonedx \
   --offline
+```

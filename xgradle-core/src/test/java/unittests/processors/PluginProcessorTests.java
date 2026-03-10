@@ -40,7 +40,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.nio.file.Path;
+import java.util.Collection;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -128,5 +130,13 @@ class PluginProcessorTests {
 
         verify(details).useModule("com.acme.plugin:plugin-artifact:1.0");
         verify(details).useVersion("1.0");
+
+        Collection<MavenCoordinate> resolved = processor.getResolvedPluginArtifacts();
+        assertEquals(1, resolved.size());
+
+        MavenCoordinate resolvedCoord = resolved.iterator().next();
+        assertEquals("com.acme.plugin", resolvedCoord.getGroupId());
+        assertEquals("plugin-artifact", resolvedCoord.getArtifactId());
+        assertEquals("1.0", resolvedCoord.getVersion());
     }
 }

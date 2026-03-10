@@ -22,6 +22,7 @@ import org.altlinux.xgradle.interfaces.resolution.ResolutionStep;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 /**
  * Pipeline for Resolution.
  * Implements {@link ResolutionPipeline}.
@@ -35,7 +36,7 @@ final class DefaultResolutionPipeline implements ResolutionPipeline {
     private final List<ResolutionStep> resolutionSteps;
 
     @Inject
-    DefaultResolutionPipeline (List<ResolutionStep> resolutionSteps) {
+    DefaultResolutionPipeline (Set<ResolutionStep> resolutionSteps) {
         this.resolutionSteps = orderSteps(resolutionSteps);
     }
 
@@ -47,7 +48,7 @@ final class DefaultResolutionPipeline implements ResolutionPipeline {
         return ext;
     }
 
-    private static List<ResolutionStep> orderSteps(List<ResolutionStep> steps) {
+    private static List<ResolutionStep> orderSteps(Set<ResolutionStep> steps) {
         List<ResolutionStep> ordered = new ArrayList<>(steps);
         ordered.sort(ResolutionStepOrdering.INSTANCE);
         return List.copyOf(ordered);

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-// src/test/java/unittests/processors/BomProcessorTests.java
 package unittests.processors;
 
 import com.google.inject.AbstractModule;

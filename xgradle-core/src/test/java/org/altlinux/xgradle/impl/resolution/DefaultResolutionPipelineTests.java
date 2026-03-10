@@ -24,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.InOrder;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
@@ -47,7 +48,9 @@ class DefaultResolutionPipelineTests {
     @Test
     @DisplayName("Executes steps in order")
     void executesStepsInOrder() {
-        DefaultResolutionPipeline pipeline = new DefaultResolutionPipeline(List.of(step1, step2));
+        DefaultResolutionPipeline pipeline = new DefaultResolutionPipeline(
+                new LinkedHashSet<>(List.of(step1, step2))
+        );
         ResolutionContext context = new ResolutionContext(gradle);
 
         pipeline.run(context);

@@ -24,6 +24,7 @@ import org.altlinux.xgradle.impl.services.ServicesModule;
 import org.altlinux.xgradle.interfaces.maven.PomFinder;
 import org.altlinux.xgradle.interfaces.parsers.PomParser;
 import org.altlinux.xgradle.interfaces.services.ArtifactVerifier;
+import org.altlinux.xgradle.interfaces.services.PomMetadataReader;
 import org.altlinux.xgradle.interfaces.services.VersionScanner;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -55,6 +56,9 @@ class VersionScannerTests {
     @Mock
     private ArtifactVerifier verifier;
 
+    @Mock
+    private PomMetadataReader pomMetadataReader;
+
     @Test
     @DisplayName("Scans dependencies and resolves coordinates")
     void scansDependencies() {
@@ -76,6 +80,7 @@ class VersionScannerTests {
                         bind(PomFinder.class).toInstance(pomFinder);
                         bind(PomParser.class).toInstance(pomParser);
                         bind(ArtifactVerifier.class).toInstance(verifier);
+                        bind(PomMetadataReader.class).toInstance(pomMetadataReader);
                     }
                 })
         );
@@ -107,6 +112,7 @@ class VersionScannerTests {
                         bind(PomFinder.class).toInstance(pomFinder);
                         bind(PomParser.class).toInstance(pomParser);
                         bind(ArtifactVerifier.class).toInstance(verifier);
+                        bind(PomMetadataReader.class).toInstance(pomMetadataReader);
                     }
                 })
         );

@@ -25,8 +25,11 @@ import org.gradle.api.initialization.Settings;
 import org.gradle.api.logging.Logger;
 import org.gradle.plugin.management.PluginResolveDetails;
 
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.altlinux.xgradle.impl.utils.logging.LogPainter.green;
@@ -43,6 +46,7 @@ final class DefaultPluginProcessor implements PluginProcessor {
     private final VersionScanner versionScanner;
     private final Logger logger;
     private final PomParser pomParser;
+    private final Map<String, MavenCoordinate> resolvedPluginArtifacts = new LinkedHashMap<>();
 
     @Inject
     DefaultPluginProcessor(VersionScanner versionScanner, PomParser pomParser, Logger logger) {
@@ -53,6 +57,7 @@ final class DefaultPluginProcessor implements PluginProcessor {
 
     @Override
     public void process(Settings settings) {
+        resolvedPluginArtifacts.clear();
         Set<String> processedBoms = new HashSet<>();
         settings.getPluginManagement()
                 .getResolutionStrategy()
@@ -106,6 +111,28 @@ final class DefaultPluginProcessor implements PluginProcessor {
         String module = coord.getGroupId() + ":" + coord.getArtifactId() + ":" + coord.getVersion();
         requested.useModule(module);
         requested.useVersion(coord.getVersion());
+        rememberResolvedPlugin(coord);
         logger.lifecycle(green("Resolved plugin: {} -> {}"), requested.getRequested().getId().getId(), module);
+    }
+
+    @Override
+    public Collection<MavenCoordinate> getResolvedPluginArtifacts() {
+        return List.copyOf(resolvedPluginArtifacts.values());
+    }
+
+    private void rememberResolvedPlugin(MavenCoordinate coord) {
+        if (coord == null) {
+            return;
+        }
+
+        String groupId = coord.getGroupId();
+        String artifactId = coord.getArtifactId();
+        if (groupId == null || artifactId == null) {
+            return;
+        }
+
+        String version = coord.getVersion();
+        String key = groupId + ":" + artifactId + ":" + (version != null ? version : "");
+        resolvedPluginArtifacts.putIfAbsent(key, coord);
     }
 }

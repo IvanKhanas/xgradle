@@ -64,6 +64,8 @@ public final class XGradlePluginModule extends AbstractModule {
 
         install(new ConfiguratorsModule());
 
+        install(new SbomModule());
+
         install(new ResolutionModule());
     }
 }

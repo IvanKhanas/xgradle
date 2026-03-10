@@ -23,6 +23,7 @@ plugins {
 
 dependencies {
     compileOnly(gradleApi())
+    implementation(project(":xgradle-sbom-generator"))
     implementation(libs.bundles.maven.tooling)
     implementation(libs.guice)
     runtimeOnly(libs.plexus.utils)
@@ -32,6 +33,8 @@ dependencies {
     testImplementation(libs.bundles.testing)
     testRuntimeOnly(libs.bundles.testing.platform)
 
+    shadow(project(":xgradle-sbom-generator"))
+    shadow(libs.gson)
     shadow(libs.bundles.maven.tooling)
     shadow(libs.plexus.utils)
     shadow(libs.guice)
@@ -43,7 +46,7 @@ gradlePlugin{
     plugins{
         create(project.name) {
             id = project.group as String
-            implementationClass = "${project.group}.plugin.XGradlePlugin"
+            implementationClass = "${project.group}.impl.plugin.XGradlePlugin"
         }
     }
 }

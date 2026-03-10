@@ -18,6 +18,7 @@ package org.altlinux.xgradle.impl.services;
 
 import com.google.inject.AbstractModule;
 import org.altlinux.xgradle.interfaces.services.ArtifactVerifier;
+import org.altlinux.xgradle.interfaces.services.PomMetadataReader;
 import org.altlinux.xgradle.interfaces.services.VersionScanner;
 /**
  * Guice module for Services bindings.
@@ -31,5 +32,6 @@ public final class ServicesModule extends AbstractModule {
     protected void configure() {
         bind(VersionScanner.class).to(DependencyVersionScanner.class);
         bind(ArtifactVerifier.class).to(FileSystemArtifactVerifier.class);
+        bind(PomMetadataReader.class).to(DefaultPomMetadataReader.class);
     }
 }

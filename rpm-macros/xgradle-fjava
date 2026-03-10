@@ -74,3 +74,9 @@
 
 # Installs artifacts registered for xmvn.
 %gradle_install %mvn_install
+
+# SPDX format sbom generating flag.
+%generate_spdx_sbom -Dgenerate.sbom=spdx
+
+# CycloneDX format sbom generating flag.
+%generate_cyclonedx_sbom -Dgenerate.sbom=cyclonedx

@@ -43,7 +43,8 @@ public final class XGradleConfig {
             "maven.poms.dir",
             "disable.logo",
             "enable.ansi.color",
-            "xgradle.scan.depth"
+            "xgradle.scan.depth",
+            "generate.sbom"
     );
 
     public static String getProperty(String key) {

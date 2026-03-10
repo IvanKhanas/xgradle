@@ -44,12 +44,24 @@ import static org.junit.jupiter.api.Assertions.*;
 public class E2ETests {
 
     private File pluginJar;
+    private File testLibDir;
 
     @BeforeEach
     public void preparePluginJar() {
         pluginJar = new File("build/dist/xgradle-core.jar");
         if (!pluginJar.exists()) {
             throw new IllegalStateException("Could not find plugin jar: " + pluginJar.getAbsolutePath());
+        }
+
+        testLibDir = findExistingDirectory(
+                "../testlibs",
+                "testlibs",
+                "../../testlibs"
+        );
+        if (testLibDir == null) {
+            throw new IllegalStateException(
+                    "Could not find testlibs directory. user.dir=" + System.getProperty("user.dir")
+            );
         }
     }
 
@@ -97,6 +109,9 @@ public class E2ETests {
 
         File testProjectDir = new File(tempDir, "testProject");
         copyDirectory(Path.of(projectPath), testProjectDir.toPath());
+        Path testLibPath = testProjectDir.toPath().resolve("testlibs");
+        copyDirectory(testLibDir.toPath(), testLibPath);
+        String testLibAbsolutePath = testLibPath.toFile().getAbsolutePath();
 
         BuildResult result = GradleRunner.create()
                 .withProjectDir(testProjectDir)
@@ -104,6 +119,8 @@ public class E2ETests {
                         "--gradle-user-home", gradleUserHome.getAbsolutePath(),
                         "--init-script", initScript.getAbsolutePath(),
                         "build",
+                        "-Dmaven.poms.dir=" + testLibAbsolutePath,
+                        "-Djava.library.dir=" + testLibAbsolutePath,
                         "--offline"
                 )
                 .forwardOutput()
@@ -120,6 +137,16 @@ public class E2ETests {
             if (is == null) throw new IOException("Resource not found: " + resourceName);
             return new String(is.readAllBytes(), StandardCharsets.UTF_8);
         }
+    }
+
+    private File findExistingDirectory(String... candidates) {
+        for (String candidate : candidates) {
+            File dir = new File(candidate);
+            if (dir.isDirectory()) {
+                return dir;
+            }
+        }
+        return null;
     }
 
      private void copyDirectory(Path sourceDir, Path targetDir) throws IOException {

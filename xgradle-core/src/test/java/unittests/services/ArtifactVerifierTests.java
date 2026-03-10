@@ -22,6 +22,7 @@ import com.google.inject.util.Modules;
 import org.altlinux.xgradle.impl.model.MavenCoordinate;
 import org.altlinux.xgradle.impl.services.ServicesModule;
 import org.altlinux.xgradle.interfaces.services.ArtifactVerifier;
+import org.altlinux.xgradle.interfaces.services.PomMetadataReader;
 import org.altlinux.xgradle.interfaces.services.VersionScanner;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -45,6 +46,9 @@ class ArtifactVerifierTests {
     @Mock
     private VersionScanner versionScanner;
 
+    @Mock
+    private PomMetadataReader pomMetadataReader;
+
     @Test
     @DisplayName("Recognizes POM packaging without jar file")
     void pomPackagingAlwaysExists() {
@@ -53,6 +57,7 @@ class ArtifactVerifierTests {
                     @Override
                     protected void configure() {
                         bind(VersionScanner.class).toInstance(versionScanner);
+                        bind(PomMetadataReader.class).toInstance(pomMetadataReader);
                     }
                 })
         );
@@ -81,6 +86,7 @@ class ArtifactVerifierTests {
                         @Override
                         protected void configure() {
                             bind(VersionScanner.class).toInstance(versionScanner);
+                            bind(PomMetadataReader.class).toInstance(pomMetadataReader);
                         }
                     })
             );

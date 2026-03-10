@@ -23,6 +23,8 @@ pluginManagement {
 rootProject.name = "xgradle"
 include("xgradle-core")
 include("xgradle-tool")
+include("xgradle-sbom-generator")
 
 project(":xgradle-core").projectDir = file("xgradle-core")
 project(":xgradle-tool").projectDir = file("xgradle-tool")
+project(":xgradle-sbom-generator").projectDir = file("xgradle-sbom-generator")
