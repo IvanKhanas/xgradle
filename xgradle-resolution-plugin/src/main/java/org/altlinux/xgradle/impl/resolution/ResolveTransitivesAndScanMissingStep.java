@@ -95,6 +95,7 @@ final class ResolveTransitivesAndScanMissingStep implements ResolutionStep {
         }
 
 
+        resolutionContext.getSystemArtifacts().clear();
         resolutionContext.getSystemArtifacts().putAll(resolvedMain);
         resolutionContext.getSystemArtifacts().putAll(resolvedTest);
 
@@ -104,7 +105,7 @@ final class ResolveTransitivesAndScanMissingStep implements ResolutionStep {
             Set<String> dropped = new HashSet<>(beforeScan);
             dropped.removeAll(afterScan);
             if (!dropped.isEmpty()) {
-                logger.lifecycle("Dropped {} artifacts after rescanning: {}", dropped.size(), dropped);
+                logger.debug("Dropped {} artifacts after rescanning: {}", dropped.size(), dropped);
             }
         }
     }
