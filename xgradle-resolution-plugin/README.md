@@ -74,13 +74,136 @@ gradle build \
   -Dgenerate.sbom=cyclonedx \
   --offline
 ```
-<img width="1352" height="755" alt="image" src="https://github.com/user-attachments/assets/c092b9ad-8554-4f86-a8d0-74bf76be5f64" />
-<img width="1352" height="759" alt="image" src="https://github.com/user-attachments/assets/65cd44bd-0f2d-43cb-896c-1d2fb0230ff9" />
-<img width="1352" height="751" alt="image" src="https://github.com/user-attachments/assets/da0b94ca-4bb1-4978-aada-f8148a8a7da2" />
-<img width="1352" height="752" alt="image" src="https://github.com/user-attachments/assets/38d010b6-f678-498d-8d19-a792e22bf5e4" />
-<img width="1352" height="430" alt="image" src="https://github.com/user-attachments/assets/787d08f8-95b6-4b1b-b338-2470b42bf08b" />
+
+```
+[root@82c69e916850 plumelib-options]# gradle build -Dmaven.poms.dir=/usr/share/maven-poms -Djava.library.dir=/usr/share/java -Dgenerate.sbom=cyclonedx --offline
+
+Welcome to Gradle 8.14.3!
+
+Here are the highlights of this release:
+ - Java 24 support
+ - GraalVM Native Image toolchain selection
+ - Enhancements to test reporting
+ - Build Authoring improvements
+
+For more details see https://docs.gradle.org/8.14.3/release-notes.html
+
+Starting a Gradle Daemon, 1 stopped Daemon could not be reused, use --status for details
+                                              _ _
+                     __  ____ _ _ __ __ _  __| | | ___
+                     \ \/ / _` | '__/ _` |/ _` | |/ _ \
+                      >  < (_| | | | (_| | (_| | |  __/
+                     /_/\_\__, |_|  \__,_|\__,_|_|\___| v 0.2.0
+                          |___/
 
 
+POM index built: 48 artifacts, 21 groups
 
+> Configure project :
+Skipping core plugin: java-library
+Skipping core plugin: maven-publish
+POM index built: 48 artifacts, 21 groups
+>>> Processing transitive dependencies
+Dropped 1 artifacts after rescanning: [io.github.toolfactory:narcissus]
 
+--- 
+===== APPLYING SYSTEM DEPENDENCY VERSIONS ===== ---
 
+--- Initial dependencies ---
+Found 7 dependencies
+
+--- Resolved system artifacts ---
+Resolved 20 artifacts
+
+--- Test context dependencies ---
+Test context dependencies: 21
+
+--- ===== DEPENDENCY RESOLUTION COMPLETED ===== ---
+
+--- Added artifacts to configurations ---
+Configuration 'testRuntimeOnly' (6 artifacts):
+ - org.junit.jupiter:junit-jupiter-engine:5.10.2
+ - org.junit.jupiter:junit-jupiter-api:5.10.2
+ - org.opentest4j:opentest4j:1.3.0
+ - org.junit.platform:junit-platform-commons:1.10.2
+ - org.apiguardian:apiguardian-api:1.1.2
+ - org.junit.platform:junit-platform-engine:1.10.2
+Configuration 'compileOnly' (18 artifacts):
+ - io.github.classgraph:classgraph:4.8.184
+ - org.junit.jupiter:junit-jupiter-api:5.10.2
+ - org.plumelib:reflection-util:unspecified
+ - org.plumelib:hashmap-util:unspecified
+ - org.checkerframework:checker-qual:3.52.0
+ - org.apache.commons:commons-lang3:3.19.0
+ - com.google.code.findbugs:jsr305:3.0.2
+ - org.opentest4j:opentest4j:1.3.0
+ - org.ow2.asm:asm:9.9
+ - com.google.guava:failureaccess:1.0.1
+ - org.plumelib:plume-util:1.12.2
+ - org.junit.jupiter:junit-jupiter-params:5.10.2
+ - org.plumelib:options:2.0.3
+ - org.junit.platform:junit-platform-commons:1.10.2
+ - com.google.guava:guava:31.0.1-jre
+ - org.apiguardian:apiguardian-api:1.1.2
+ - org.apache.commons:commons-text:1.15.0
+ - com.univocity:univocity-parsers:2.9.1
+Configuration 'testCompileOnly' (18 artifacts):
+ - io.github.classgraph:classgraph:4.8.184
+ - org.junit.jupiter:junit-jupiter-api:5.10.2
+ - org.plumelib:reflection-util:unspecified
+ - org.plumelib:hashmap-util:unspecified
+ - org.checkerframework:checker-qual:3.52.0
+ - org.apache.commons:commons-lang3:3.19.0
+ - com.google.code.findbugs:jsr305:3.0.2
+ - org.opentest4j:opentest4j:1.3.0
+ - org.ow2.asm:asm:9.9
+ - com.google.guava:failureaccess:1.0.1
+ - org.plumelib:plume-util:1.12.2
+ - org.junit.jupiter:junit-jupiter-params:5.10.2
+ - org.plumelib:options:2.0.3
+ - org.junit.platform:junit-platform-commons:1.10.2
+ - com.google.guava:guava:31.0.1-jre
+ - org.apiguardian:apiguardian-api:1.1.2
+ - org.apache.commons:commons-text:1.15.0
+ - com.univocity:univocity-parsers:2.9.1
+Configuration 'implementation' (4 artifacts):
+ - io.github.classgraph:classgraph:4.8.184
+ - org.plumelib:reflection-util:unspecified
+ - org.apache.commons:commons-lang3:3.19.0
+ - org.apache.commons:commons-text:1.15.0
+Configuration 'testImplementation' (4 artifacts):
+ - org.junit.jupiter:junit-jupiter-api:5.10.2
+ - org.opentest4j:opentest4j:1.3.0
+ - org.junit.platform:junit-platform-commons:1.10.2
+ - org.apiguardian:apiguardian-api:1.1.2
+
+> Task :compileJava
+warning: [options] source value 8 is obsolete and will be removed in a future release
+warning: [options] target value 8 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+/app/plumelib-options/src/main/java/org/plumelib/options/OptionsDoclet.java:1208: warning: [deprecation] removeStart(String,String) in StringUtils has been deprecated
+      startDelim = StringUtils.removeStart("* ", startDelim);
+                              ^
+/app/plumelib-options/src/main/java/org/plumelib/options/OptionsDoclet.java:1209: warning: [deprecation] removeStart(String,String) in StringUtils has been deprecated
+      endDelim = StringUtils.removeStart("* ", endDelim);
+                            ^
+5 warnings
+
+> Task :compileTestJava
+warning: [options] source value 8 is obsolete and will be removed in a future release
+warning: [options] target value 8 is obsolete and will be removed in a future release
+warning: [options] To suppress warnings about obsolete options, use -Xlint:-options.
+3 warnings
+Generated cyclonedx SBOM: /app/plumelib-options/build/reports/xgradle/sbom-cyclonedx.json
+
+[Incubating] Problems report is available at: file:///app/plumelib-options/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 4s
+5 actionable tasks: 5 executed
+```
