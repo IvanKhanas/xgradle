@@ -1,5 +1,3 @@
-# xgradle-resolution-plugin
-
 **xgradle-resolution-plugin** is the Gradle-side component of **xgradle** — an **offline-first toolkit** for Gradle builds.
 
 It is implemented as a **Gradle plugin applied to the Gradle instance** (not to a single project), so it must be
@@ -71,8 +69,18 @@ generate.sbom=spdx
 
 ```bash
 gradle build \
-  -Djava.library.dir=/usr/share/java,/usr/local/share/java \
+  -Djava.library.dir=/usr/share/java \
   -Dmaven.poms.dir=/usr/share/maven-poms \
   -Dgenerate.sbom=cyclonedx \
   --offline
 ```
+<img width="1352" height="755" alt="image" src="https://github.com/user-attachments/assets/c092b9ad-8554-4f86-a8d0-74bf76be5f64" />
+<img width="1352" height="759" alt="image" src="https://github.com/user-attachments/assets/65cd44bd-0f2d-43cb-896c-1d2fb0230ff9" />
+<img width="1352" height="751" alt="image" src="https://github.com/user-attachments/assets/da0b94ca-4bb1-4978-aada-f8148a8a7da2" />
+<img width="1352" height="752" alt="image" src="https://github.com/user-attachments/assets/38d010b6-f678-498d-8d19-a792e22bf5e4" />
+<img width="1352" height="430" alt="image" src="https://github.com/user-attachments/assets/787d08f8-95b6-4b1b-b338-2470b42bf08b" />
+
+
+
+
+
