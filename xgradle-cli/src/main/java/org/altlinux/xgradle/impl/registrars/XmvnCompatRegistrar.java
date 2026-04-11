@@ -76,32 +76,38 @@ final class XmvnCompatRegistrar implements Registrar {
             throw new EmptyRegisterCommandException(registerCommand);
         }
 
-        for (Map.Entry<String, Path> entry : artifacts.entrySet()) {
-            String pomPath = entry.getKey();
-            Path jarPath = entry.getValue();
-
-            List<String> currentCommand = new ArrayList<>(baseCommand);
-            currentCommand.add(pomPath);
-            currentCommand.add(jarPath.toString());
-
-            logger.info("\nRegistering pair: {}", String.join(" ", currentCommand));
-
-            ProcessBuilder processBuilder = new ProcessBuilder(currentCommand);
-
-            try {
-                int exitCode = commandExecutor.execute(processBuilder);
-                if (exitCode != ExitCode.SUCCESS.getExitCode()) {
-                    throw new RuntimeException("Failed to register artifact, exit code: " + exitCode);
-                }
-            } catch (IOException | InterruptedException e) {
-                throw new CommandExecutionException(currentCommand, e);
-            }
-        }
+        artifacts.entrySet().stream()
+                .forEachOrdered(artifactEntry -> registerSingleArtifact(baseCommand, artifactEntry));
 
         if (artifacts.isEmpty()) {
             logger.info("No artifacts registered");
         } else {
             logger.info("Artifacts registered successfully");
+        }
+    }
+
+    private void registerSingleArtifact(
+            List<String> baseCommand,
+            Map.Entry<String, Path> artifactEntry
+    ) {
+        String pomPath = artifactEntry.getKey();
+        Path jarPath = artifactEntry.getValue();
+
+        List<String> currentCommand = new ArrayList<>(baseCommand);
+        currentCommand.add(pomPath);
+        currentCommand.add(jarPath.toString());
+
+        logger.info("\nRegistering pair: {}", String.join(" ", currentCommand));
+
+        ProcessBuilder processBuilder = new ProcessBuilder(currentCommand);
+
+        try {
+            int exitCode = commandExecutor.execute(processBuilder);
+            if (exitCode != ExitCode.SUCCESS.getExitCode()) {
+                throw new RuntimeException("Failed to register artifact, exit code: " + exitCode);
+            }
+        } catch (IOException | InterruptedException exception) {
+            throw new CommandExecutionException(currentCommand, exception);
         }
     }
 }

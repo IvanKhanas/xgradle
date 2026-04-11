@@ -46,38 +46,38 @@ final class DefaultCommandLineParser implements CommandLineParser {
         char quoteChar = 0;
         boolean escaping = false;
 
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
+        for (int characterIndex = 0; characterIndex < input.length(); characterIndex++) {
+            char currentCharacter = input.charAt(characterIndex);
 
             if (escaping) {
-                token.append(c);
+                token.append(currentCharacter);
                 escaping = false;
                 continue;
             }
 
-            if (inQuotes && c == '\\') {
+            if (inQuotes && currentCharacter == '\\') {
                 escaping = true;
                 continue;
             }
 
-            if (!inQuotes && (c == '"' || c == '\'')) {
+            if (!inQuotes && (currentCharacter == '"' || currentCharacter == '\'')) {
                 inQuotes = true;
-                quoteChar = c;
+                quoteChar = currentCharacter;
                 continue;
             }
 
-            if (inQuotes && c == quoteChar) {
+            if (inQuotes && currentCharacter == quoteChar) {
                 inQuotes = false;
                 quoteChar = 0;
                 continue;
             }
 
-            if (!inQuotes && Character.isWhitespace(c)) {
+            if (!inQuotes && Character.isWhitespace(currentCharacter)) {
                 flush(parts, token);
                 continue;
             }
 
-            token.append(c);
+            token.append(currentCharacter);
         }
 
         if (inQuotes) {
@@ -96,16 +96,17 @@ final class DefaultCommandLineParser implements CommandLineParser {
         token.setLength(0);
     }
 
-    private static String stripWrappingQuotes(String s) {
-        if (s.length() < 2) {
-            return s;
+    private static String stripWrappingQuotes(String value) {
+        if (value.length() < 2) {
+            return value;
         }
-        char first = s.charAt(0);
-        char last = s.charAt(s.length() - 1);
+        char firstCharacter = value.charAt(0);
+        char lastCharacter = value.charAt(value.length() - 1);
 
-        if ((first == '"' && last == '"') || (first == '\'' && last == '\'')) {
-            return s.substring(1, s.length() - 1);
+        if ((firstCharacter == '"' && lastCharacter == '"')
+                || (firstCharacter == '\'' && lastCharacter == '\'')) {
+            return value.substring(1, value.length() - 1);
         }
-        return s;
+        return value;
     }
 }

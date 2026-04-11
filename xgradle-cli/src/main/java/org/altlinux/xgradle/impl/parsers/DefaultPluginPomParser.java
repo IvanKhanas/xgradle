@@ -90,7 +90,7 @@ final class DefaultPluginPomParser implements PomParser<HashMap<String, Path>> {
             return result;
         }
 
-        for (Path pomPath : filteredPomPaths) {
+        filteredPomPaths.forEach(pomPath -> {
             try {
                 Model model = readModel(pomPath);
                 ArtifactCoordinates coordinates = extractCoordinates(model);
@@ -99,7 +99,7 @@ final class DefaultPluginPomParser implements PomParser<HashMap<String, Path>> {
                     ArtifactData existing = artifactCache.get(coordinates);
                     logger.warn("Skipping duplicate plugin artifact: {} (already processed from: {})",
                             coordinates, existing.getPomPath());
-                    continue;
+                    return;
                 }
 
                 if ("pom".equals(model.getPackaging())) {
@@ -116,7 +116,7 @@ final class DefaultPluginPomParser implements PomParser<HashMap<String, Path>> {
             } catch (Exception e) {
                 logger.error("Error processing plugin POM file: {}", pomPath, e);
             }
-        }
+        });
 
         logger.info("Processed {} unique plugin artifacts", result.size());
         return result;
@@ -133,13 +133,13 @@ final class DefaultPluginPomParser implements PomParser<HashMap<String, Path>> {
                 .map(path -> path.getFileName().toString())
                 .collect(Collectors.toSet());
 
-        for (Dependency dependency : model.getDependencies()) {
+        model.getDependencies().forEach(dependency -> {
             String dependencyType = dependency.getType();
             String dependencyArtifactId = dependency.getArtifactId();
             String dependencyVersion = dependency.getVersion();
 
             if (dependencyArtifactId == null || dependencyVersion == null) {
-                continue;
+                return;
             }
 
             String expectedPomName = dependencyArtifactId + "-" + dependencyVersion + ".pom";
@@ -186,7 +186,7 @@ final class DefaultPluginPomParser implements PomParser<HashMap<String, Path>> {
                     }
                 }
             }
-        }
+        });
     }
 
     private ArtifactCoordinates extractCoordinates(Model model) {

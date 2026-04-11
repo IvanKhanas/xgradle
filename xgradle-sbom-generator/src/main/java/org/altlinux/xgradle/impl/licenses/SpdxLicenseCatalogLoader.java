@@ -71,12 +71,9 @@ final class SpdxLicenseCatalogLoader {
             }
 
             CatalogBuilder builder = new CatalogBuilder();
-            for (JsonElement entry : licenses) {
-                if (!entry.isJsonObject()) {
-                    continue;
-                }
-                indexLicenseEntry(entry.getAsJsonObject(), builder);
-            }
+            licenses.asList().stream()
+                    .filter(JsonElement::isJsonObject)
+                    .forEach(entry -> indexLicenseEntry(entry.getAsJsonObject(), builder));
 
             return builder.build();
         } catch (IOException e) {
@@ -117,9 +114,9 @@ final class SpdxLicenseCatalogLoader {
             return;
         }
 
-        for (JsonElement seeAlsoEntry : seeAlso) {
-            builder.putUrl(keyNormalizer.urlKey(normalizedString(seeAlsoEntry)), licenseId);
-        }
+        seeAlso.asList().forEach(
+                seeAlsoEntry -> builder.putUrl(keyNormalizer.urlKey(normalizedString(seeAlsoEntry)), licenseId)
+        );
     }
 
     private String normalizedString(JsonElement element) {

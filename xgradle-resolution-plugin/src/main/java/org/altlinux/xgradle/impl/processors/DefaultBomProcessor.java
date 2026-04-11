@@ -70,23 +70,16 @@ final class DefaultBomProcessor implements BomProcessor {
         Set<String> projectDependencies = context.getProjectDependencies();
         Queue<MavenCoordinate> bomQueue = new LinkedList<>();
 
-        for (String dep : projectDependencies) {
-            if (dep == null) {
-                continue;
-            }
-
-            String[] parts = dep.split(":");
-            if (parts.length < 2) {
-                continue;
-            }
-
-            MavenCoordinate coord = pomFinder.findPomForArtifact(parts[0], parts[1]);
-            if (coord != null && coord.isBom()) {
-                bomQueue.add(coord);
-                String bomId = coord.getGroupId() + ":" + coord.getArtifactId();
-                processedBoms.add(bomId);
-            }
-        }
+        projectDependencies.stream()
+                .filter(dep -> dep != null)
+                .map(dep -> dep.split(":"))
+                .filter(parts -> parts.length >= 2)
+                .map(parts -> pomFinder.findPomForArtifact(parts[0], parts[1]))
+                .filter(coord -> coord != null && coord.isBom())
+                .forEach(coord -> {
+                    bomQueue.add(coord);
+                    processedBoms.add(coord.getGroupId() + ":" + coord.getArtifactId());
+                });
 
         while (!bomQueue.isEmpty()) {
             MavenCoordinate bom = bomQueue.poll();
@@ -97,24 +90,23 @@ final class DefaultBomProcessor implements BomProcessor {
             List<String> managedDeps = new ArrayList<>();
             List<MavenCoordinate> dependencies = pomParser.parseDependencyManagement(bom.getPomPath());
 
-            for (MavenCoordinate dep : dependencies) {
-                String depId = dep.getGroupId() + ":" + dep.getArtifactId();
+            dependencies.stream().forEach(dependencyCoordinate -> {
+                String dependencyId = dependencyCoordinate.getGroupId() + ":" + dependencyCoordinate.getArtifactId();
 
-                projectDependencies.add(depId);
+                projectDependencies.add(dependencyId);
 
-                String version = dep.getVersion();
-                if (version != null && !version.isBlank()) {
-                    managedVersions.put(depId, version);
-                    managedDeps.add(depId + ":" + version);
+                String dependencyVersion = dependencyCoordinate.getVersion();
+                if (dependencyVersion != null && !dependencyVersion.isBlank()) {
+                    managedVersions.put(dependencyId, dependencyVersion);
+                    managedDeps.add(dependencyId + ":" + dependencyVersion);
                 } else {
-                    managedDeps.add(depId);
+                    managedDeps.add(dependencyId);
                 }
 
-                if (dep.isBom() && !processedBoms.contains(depId)) {
-                    bomQueue.add(dep);
-                    processedBoms.add(depId);
+                if (dependencyCoordinate.isBom() && processedBoms.add(dependencyId)) {
+                    bomQueue.add(dependencyCoordinate);
                 }
-            }
+            });
 
             bomManagedDeps.put(bomKey, managedDeps);
         }
@@ -128,20 +120,13 @@ final class DefaultBomProcessor implements BomProcessor {
             return;
         }
 
-        gradle.allprojects(p -> p.getConfigurations().all(cfg -> {
-            List<Dependency> toRemove = new ArrayList<>();
+        gradle.allprojects(project -> project.getConfigurations().all(cfg -> {
+            List<Dependency> toRemove = cfg.getDependencies().stream()
+                    .filter(dependency -> dependency.getGroup() != null && dependency.getName() != null)
+                    .filter(dependency -> processedBoms.contains(dependency.getGroup() + ":" + dependency.getName()))
+                    .collect(java.util.stream.Collectors.toList());
 
-            for (Dependency d : cfg.getDependencies()) {
-                if (d.getGroup() == null || d.getName() == null) {
-                    continue;
-                }
-                String key = d.getGroup() + ":" + d.getName();
-                if (processedBoms.contains(key)) {
-                    toRemove.add(d);
-                }
-            }
-
-            toRemove.forEach(dep -> cfg.getDependencies().remove(dep));
+            toRemove.forEach(dependency -> cfg.getDependencies().remove(dependency));
         }));
     }
 }

@@ -17,7 +17,6 @@ package org.altlinux.xgradle.impl.collectors;
 
 import org.altlinux.xgradle.interfaces.collectors.DependencyCollector;
 
-import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.invocation.Gradle;
 
 import java.util.*;
@@ -35,15 +34,17 @@ final class DefaultDependencyCollector implements DependencyCollector {
 
     @Override
     public Set<String> collect(Gradle gradle) {
-        gradle.allprojects(p -> p.getConfigurations().all(cfg -> {
-            for (Dependency d : cfg.getDependencies()) {
-                if (d.getGroup() != null && d.getName() != null) {
-                    String key = d.getGroup() + ":" + d.getName();
-                    dependencies.add(key);
-                    requestedVersions.computeIfAbsent(key, k -> new HashSet<>()).add(d.getVersion());
-                }
-            }
-        }));
+        gradle.allprojects(project -> project.getConfigurations().all(cfg ->
+                cfg.getDependencies().stream()
+                        .filter(dependency -> dependency.getGroup() != null && dependency.getName() != null)
+                        .forEach(dependency -> {
+                            String key = dependency.getGroup() + ":" + dependency.getName();
+                            dependencies.add(key);
+                            requestedVersions
+                                    .computeIfAbsent(key, dependencyKey -> new HashSet<>())
+                                    .add(dependency.getVersion());
+                        })
+        ));
         return dependencies;
     }
 

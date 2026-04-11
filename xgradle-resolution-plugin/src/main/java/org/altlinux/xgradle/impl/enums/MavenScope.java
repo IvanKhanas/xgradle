@@ -16,6 +16,8 @@
 
 package org.altlinux.xgradle.impl.enums;
 
+import java.util.Arrays;
+
 /**
  * Maven dependency scope.
  *
@@ -46,12 +48,10 @@ public enum MavenScope {
             return COMPILE;
         }
 
-        String normalized = value.trim().toLowerCase();
-        for (MavenScope s : values()) {
-            if (s.scope.equals(normalized)) {
-                return s;
-            }
-        }
-        return COMPILE;
+        String normalizedScope = value.trim().toLowerCase();
+        return Arrays.stream(values())
+                .filter(candidate -> candidate.scope.equals(normalizedScope))
+                .findFirst()
+                .orElse(COMPILE);
     }
 }

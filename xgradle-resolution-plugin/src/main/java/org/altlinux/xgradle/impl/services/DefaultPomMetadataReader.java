@@ -24,16 +24,17 @@ import org.altlinux.xgradle.interfaces.services.PomMetadata;
 import org.altlinux.xgradle.interfaces.services.PomMetadataLicense;
 import org.altlinux.xgradle.interfaces.services.PomMetadataReader;
 
-import org.apache.maven.model.License;
 import org.apache.maven.model.Model;
-import org.apache.maven.model.Scm;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Reads metadata required for SBOM enrichment from Maven POM hierarchy.
@@ -113,93 +114,64 @@ final class DefaultPomMetadataReader implements PomMetadataReader {
             List<Model> hierarchy,
             Map<String, String> properties
     ) {
-        for (int index = hierarchy.size() - 1; index >= 0; index--) {
-            Model model = hierarchy.get(index);
-            if (model == null) {
-                continue;
-            }
-
-            Scm scm = model.getScm();
-            if (scm == null) {
-                continue;
-            }
-
-            String raw = firstNonEmpty(
-                    scm.getUrl(),
-                    scm.getConnection(),
-                    scm.getDeveloperConnection()
-            );
-            String resolved = normalizeResolved(raw, properties);
-            if (resolved != null) {
-                return resolved;
-            }
-        }
-        return null;
+        return IntStream.iterate(hierarchy.size() - 1, index -> index >= 0, index -> index - 1)
+                .mapToObj(hierarchy::get)
+                .filter(model -> model != null && model.getScm() != null)
+                .map(model -> normalizeResolved(
+                        firstNonEmpty(
+                                model.getScm().getUrl(),
+                                model.getScm().getConnection(),
+                                model.getScm().getDeveloperConnection()
+                        ),
+                        properties
+                ))
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
     }
 
     private List<PomMetadataLicense> resolveLicenses(
             List<Model> hierarchy,
             Map<String, String> properties
     ) {
-        for (int index = hierarchy.size() - 1; index >= 0; index--) {
-            Model model = hierarchy.get(index);
-            if (model == null || model.getLicenses() == null || model.getLicenses().isEmpty()) {
-                continue;
-            }
-
-            List<PomMetadataLicense> resolved = new ArrayList<>();
-            for (License license : model.getLicenses()) {
-                if (license == null) {
-                    continue;
-                }
-
-                String name = normalizeResolved(license.getName(), properties);
-                String url = normalizeResolved(license.getUrl(), properties);
-                if (name == null && url == null) {
-                    continue;
-                }
-
-                resolved.add(new PomMetadataLicense(name, url));
-            }
-
-            if (!resolved.isEmpty()) {
-                return List.copyOf(resolved);
-            }
-        }
-        return List.of();
+        return IntStream.iterate(hierarchy.size() - 1, index -> index >= 0, index -> index - 1)
+                .mapToObj(hierarchy::get)
+                .filter(model -> model != null && model.getLicenses() != null && !model.getLicenses().isEmpty())
+                .map(model -> model.getLicenses().stream()
+                        .filter(license -> license != null)
+                        .map(license -> new PomMetadataLicense(
+                                normalizeResolved(license.getName(), properties),
+                                normalizeResolved(license.getUrl(), properties)
+                        ))
+                        .filter(pomLicense -> pomLicense.getName() != null || pomLicense.getUrl() != null)
+                        .collect(Collectors.toList()))
+                .filter(resolved -> !resolved.isEmpty())
+                .findFirst()
+                .map(List::copyOf)
+                .orElse(List.of());
     }
 
     private String findFirstFromChild(
             List<Model> hierarchy,
             Function<Model, String> extractor
     ) {
-        for (int index = hierarchy.size() - 1; index >= 0; index--) {
-            Model model = hierarchy.get(index);
-            if (model == null) {
-                continue;
-            }
-
-            String value = extractor.apply(model);
-            if (value != null && !value.isBlank()) {
-                return value;
-            }
-        }
-        return null;
+        return IntStream.iterate(hierarchy.size() - 1, index -> index >= 0, index -> index - 1)
+                .mapToObj(hierarchy::get)
+                .filter(model -> model != null)
+                .map(extractor)
+                .filter(value -> value != null && !value.isBlank())
+                .findFirst()
+                .orElse(null);
     }
 
     private String findFirstScmTagFromChild(List<Model> hierarchy) {
-        for (int index = hierarchy.size() - 1; index >= 0; index--) {
-            Model model = hierarchy.get(index);
-            if (model == null || model.getScm() == null) {
-                continue;
-            }
-
-            String tag = model.getScm().getTag();
-            if (tag != null && !tag.isBlank()) {
-                return tag;
-            }
-        }
-        return null;
+        return IntStream.iterate(hierarchy.size() - 1, index -> index >= 0, index -> index - 1)
+                .mapToObj(hierarchy::get)
+                .filter(model -> model != null && model.getScm() != null)
+                .map(model -> model.getScm().getTag())
+                .filter(tag -> tag != null && !tag.isBlank())
+                .findFirst()
+                .orElse(null);
     }
 
     private String normalizeResolved(
@@ -273,13 +245,11 @@ final class DefaultPomMetadataReader implements PomMetadataReader {
     }
 
     private String firstNonEmpty(String... values) {
-        for (String value : values) {
-            String normalized = normalize(value);
-            if (normalized != null) {
-                return normalized;
-            }
-        }
-        return null;
+        return Arrays.stream(values)
+                .map(this::normalize)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
     }
 
     private String normalize(String value) {

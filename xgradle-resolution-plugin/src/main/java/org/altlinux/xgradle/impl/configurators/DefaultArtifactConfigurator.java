@@ -32,7 +32,10 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 /**
  * Configurator for Artifact.
  * Implements {@link ArtifactConfigurator}.
@@ -83,36 +86,29 @@ final class DefaultArtifactConfigurator implements ArtifactConfigurator {
             Set<String> testContextDependencies,
             Map<String, MavenScope> dependencyScopes
     ) {
-        for (Map.Entry<String, MavenCoordinate> e : systemArtifacts.entrySet()) {
-            String key = e.getKey();
-            MavenCoordinate coord = e.getValue();
+        systemArtifacts.entrySet().stream()
+                .filter(entry -> entry.getKey() != null && entry.getValue() != null)
+                .filter(entry -> !shouldSkip(entry.getValue()))
+                .filter(entry -> !isSelfDependency(project, entry.getValue()))
+                .forEach(entry -> {
+                    String key = entry.getKey();
+                    MavenCoordinate coord = entry.getValue();
+                    Set<String> originalConfigs = dependencyConfigNames != null ? dependencyConfigNames.get(key) : null;
 
-            if (key == null || coord == null) {
-                continue;
-            }
+                    if (originalConfigs != null && !originalConfigs.isEmpty()) {
+                        addToOriginalConfigurations(project, key, coord, originalConfigs);
+                        return;
+                    }
 
-            if (shouldSkip(coord)) {
-                continue;
-            }
-
-            if (isSelfDependency(project, coord)) {
-                continue;
-            }
-
-            Set<String> originalConfigs = dependencyConfigNames != null ? dependencyConfigNames.get(key) : null;
-            if (originalConfigs != null && !originalConfigs.isEmpty()) {
-                addToOriginalConfigurations(project, key, coord, originalConfigs);
-            } else {
-                addByDerivedConfiguration(
-                        project,
-                        key,
-                        coord,
-                        dependencyConfigurations,
-                        testContextDependencies,
-                        dependencyScopes
-                );
-            }
-        }
+                    addByDerivedConfiguration(
+                            project,
+                            key,
+                            coord,
+                            dependencyConfigurations,
+                            testContextDependencies,
+                            dependencyScopes
+                    );
+                });
     }
 
     private boolean shouldSkip(MavenCoordinate coord) {
@@ -136,12 +132,10 @@ final class DefaultArtifactConfigurator implements ArtifactConfigurator {
 
         String notation = key + ":" + version;
 
-        for (String configName : configNames) {
-            if (configName == null || configName.isBlank()) {
-                continue;
-            }
-            safeAddToConfiguration(project, configName, notation);
-        }
+        configNames.stream()
+                .filter(Objects::nonNull)
+                .filter(configName -> !configName.isBlank())
+                .forEach(configName -> safeAddToConfiguration(project, configName, notation));
     }
 
     private void addByDerivedConfiguration(
@@ -186,21 +180,13 @@ final class DefaultArtifactConfigurator implements ArtifactConfigurator {
             return null;
         }
 
-        for (ConfigurationInfo info : infos) {
-            if (info == null) {
-                continue;
-            }
-            if (info.hasTestConfiguration()) {
-                continue;
-            }
-
-            ConfigurationType t = info.getType();
-            if (t != null && t != ConfigurationType.UNKNOWN) {
-                return t;
-            }
-        }
-
-        return null;
+        return infos.stream()
+                .filter(Objects::nonNull)
+                .filter(info -> !info.hasTestConfiguration())
+                .map(ConfigurationInfo::getType)
+                .filter(type -> type != null && type != ConfigurationType.UNKNOWN)
+                .findFirst()
+                .orElse(null);
     }
 
     private void addBasedOnScopeDefault(
@@ -238,8 +224,8 @@ final class DefaultArtifactConfigurator implements ArtifactConfigurator {
         try {
             project.getDependencies().add(configName, notation);
             trackArtifact(configName, notation);
-        } catch (Exception e) {
-            project.getLogger().debug("Cannot add to configuration '{}': {}", configName, e.getMessage());
+        } catch (Exception exception) {
+            project.getLogger().debug("Cannot add to configuration '{}': {}", configName, exception.getMessage());
         }
     }
 
@@ -249,7 +235,7 @@ final class DefaultArtifactConfigurator implements ArtifactConfigurator {
 
     private void trackArtifact(String configName, String notation) {
         configurationArtifacts
-                .computeIfAbsent(configName, k -> new LinkedHashSet<>())
+                .computeIfAbsent(configName, configurationName -> new LinkedHashSet<>())
                 .add(notation);
     }
 
@@ -258,15 +244,16 @@ final class DefaultArtifactConfigurator implements ArtifactConfigurator {
             return false;
         }
 
-        Map<String, Project> projectIndex = new HashMap<>();
         Project root = project.getRootProject();
-        for (Project p : root.getAllprojects()) {
-            Object group = p.getGroup();
-            String name = p.getName();
-            if (group != null && name != null) {
-                projectIndex.put(group + ":" + name, p);
-            }
-        }
+        Map<String, Project> projectIndex = root.getAllprojects().stream()
+                .filter(Objects::nonNull)
+                .filter(projectCandidate -> projectCandidate.getGroup() != null && projectCandidate.getName() != null)
+                .collect(Collectors.toMap(
+                        projectCandidate -> projectCandidate.getGroup() + ":" + projectCandidate.getName(),
+                        Function.identity(),
+                        (existing, replacement) -> replacement,
+                        HashMap::new
+                ));
 
         String coordKey = coord.getGroupId() + ":" + coord.getArtifactId();
         boolean isSelf = projectIndex.containsKey(coordKey);

@@ -20,7 +20,9 @@ import com.google.inject.Singleton;
 
 import org.altlinux.xgradle.impl.validation.SbomValidationUtils;
 
+import java.util.Arrays;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Shared key normalization helpers for SPDX license lookup.
@@ -57,23 +59,7 @@ final class SpdxLicenseKeyNormalizer {
             return null;
         }
 
-        StringBuilder builder = new StringBuilder(normalized.length());
-        boolean previousWasSeparator = false;
-        for (int index = 0; index < normalized.length(); index++) {
-            char current = normalized.charAt(index);
-            if (isAsciiLetterOrDigit(current)) {
-                builder.append(current);
-                previousWasSeparator = false;
-                continue;
-            }
-
-            if (!previousWasSeparator) {
-                builder.append(' ');
-                previousWasSeparator = true;
-            }
-        }
-
-        return trimToNull(builder.toString());
+        return trimToNull(normalized.replaceAll("[^a-z0-9]+", " "));
     }
 
     String reducedNameKey(String value) {
@@ -82,18 +68,12 @@ final class SpdxLicenseKeyNormalizer {
             return null;
         }
 
-        StringBuilder reduced = new StringBuilder(normalized.length());
-        for (String token : normalized.split(" ")) {
-            if (token.isBlank() || NAME_STOP_WORDS.contains(token)) {
-                continue;
-            }
-            if (reduced.length() > 0) {
-                reduced.append(' ');
-            }
-            reduced.append(token);
-        }
+        String reduced = Arrays.stream(normalized.split(" "))
+                .filter(token -> !token.isBlank())
+                .filter(token -> !NAME_STOP_WORDS.contains(token))
+                .collect(Collectors.joining(" "));
 
-        return trimToNull(reduced.toString());
+        return trimToNull(reduced);
     }
 
     String urlKey(String value) {
@@ -109,15 +89,9 @@ final class SpdxLicenseKeyNormalizer {
         normalizedUrl = dropPrefix(normalizedUrl, "http://");
         normalizedUrl = dropPrefix(normalizedUrl, "www.");
 
-        while (normalizedUrl.endsWith("/")) {
-            normalizedUrl = normalizedUrl.substring(0, normalizedUrl.length() - 1);
-        }
+        normalizedUrl = normalizedUrl.replaceAll("/+$", "");
 
         return trimToNull(normalizedUrl);
-    }
-
-    private boolean isAsciiLetterOrDigit(char value) {
-        return (value >= 'a' && value <= 'z') || (value >= '0' && value <= '9');
     }
 
     private String dropPrefix(
@@ -149,21 +123,6 @@ final class SpdxLicenseKeyNormalizer {
         if (trimmed.isEmpty()) {
             return null;
         }
-
-        StringBuilder collapsed = new StringBuilder(trimmed.length());
-        boolean previousWasSpace = false;
-        for (int index = 0; index < trimmed.length(); index++) {
-            char current = trimmed.charAt(index);
-            if (Character.isWhitespace(current)) {
-                if (!previousWasSpace) {
-                    collapsed.append(' ');
-                    previousWasSpace = true;
-                }
-                continue;
-            }
-            collapsed.append(current);
-            previousWasSpace = false;
-        }
-        return collapsed.toString();
+        return trimmed.replaceAll("\\s+", " ");
     }
 }

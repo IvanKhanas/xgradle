@@ -65,14 +65,11 @@ class FileSystemArtifactVerifier implements ArtifactVerifier {
         String basePattern = coord.getArtifactId();
         String versionedPattern = coord.getArtifactId() + "-" + coord.getVersion();
 
-        for (Path basePath : basePaths) {
-            if (checkArtifactExists(basePath, basePattern + ".jar") ||
-                    checkArtifactExists(basePath, versionedPattern + ".jar") ||
-                    checkRecursively(basePath, basePattern, coord.getVersion())) {
-                return true;
-            }
-        }
-        return false;
+        return basePaths.stream()
+                .anyMatch(basePath ->
+                        checkArtifactExists(basePath, basePattern + ".jar")
+                                || checkArtifactExists(basePath, versionedPattern + ".jar")
+                                || checkRecursively(basePath, basePattern, coord.getVersion()));
     }
 
     private boolean checkArtifactExists(Path baseDir, String fileName) {
@@ -119,11 +116,6 @@ class FileSystemArtifactVerifier implements ArtifactVerifier {
 
     private boolean isVersionString(String str) {
         if (str == null || str.isEmpty()) return false;
-        for (char c : str.toCharArray()) {
-            if (Character.isDigit(c)) {
-                return true;
-            }
-        }
-        return false;
+        return str.chars().anyMatch(Character::isDigit);
     }
 }

@@ -37,33 +37,31 @@ final class PomPropertiesCollector {
             return properties;
         }
 
-        for (Model model : pomHierarchy) {
-            if (model == null) {
-                continue;
-            }
+        pomHierarchy.stream()
+                .filter(model -> model != null)
+                .forEach(model -> {
+                    putIfNotEmpty(properties, "project.groupId", model.getGroupId());
+                    putIfNotEmpty(properties, "groupId", model.getGroupId());
+                    putIfNotEmpty(properties, "project.artifactId", model.getArtifactId());
+                    putIfNotEmpty(properties, "artifactId", model.getArtifactId());
+                    putIfNotEmpty(properties, "project.version", model.getVersion());
+                    putIfNotEmpty(properties, "version", model.getVersion());
+                    putIfNotEmpty(properties, "project.packaging", model.getPackaging());
+                    putIfNotEmpty(properties, "packaging", model.getPackaging());
 
-            putIfNotEmpty(properties, "project.groupId", model.getGroupId());
-            putIfNotEmpty(properties, "groupId", model.getGroupId());
-            putIfNotEmpty(properties, "project.artifactId", model.getArtifactId());
-            putIfNotEmpty(properties, "artifactId", model.getArtifactId());
-            putIfNotEmpty(properties, "project.version", model.getVersion());
-            putIfNotEmpty(properties, "version", model.getVersion());
-            putIfNotEmpty(properties, "project.packaging", model.getPackaging());
-            putIfNotEmpty(properties, "packaging", model.getPackaging());
-
-            if (model.getProperties() != null) {
-                model.getProperties().forEach(
-                        (key, value) -> {
-                            if (key != null && value != null) {
-                                properties.put(
-                                        key.toString(),
-                                        value.toString()
-                                );
-                            }
-                        }
-                );
-            }
-        }
+                    if (model.getProperties() != null) {
+                        model.getProperties().forEach(
+                                (key, value) -> {
+                                    if (key != null && value != null) {
+                                        properties.put(
+                                                key.toString(),
+                                                value.toString()
+                                        );
+                                    }
+                                }
+                        );
+                    }
+                });
         return properties;
     }
 

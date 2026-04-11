@@ -82,12 +82,10 @@ public final class CustomXgradleFormatter implements IUsageFormatter {
         List<ParameterDescription> parameters = commander.getParameters();
         parameters.sort(Comparator.comparingInt(p -> p.getParameter().order()));
 
-        for (ParameterDescription param : parameters) {
-            out.append(indent)
-                    .append(String.format("  %-25s", param.getNames()))
-                    .append(param.getDescription())
-                    .append("\n\n");
-        }
+        parameters.forEach(param -> out.append(indent)
+                .append(String.format("  %-25s", param.getNames()))
+                .append(param.getDescription())
+                .append("\n\n"));
     }
 
     @Override

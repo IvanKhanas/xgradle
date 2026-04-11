@@ -24,6 +24,7 @@ import org.altlinux.xgradle.interfaces.resolution.ResolutionStep;
 import org.altlinux.xgradle.interfaces.resolution.Order;
 import org.altlinux.xgradle.impl.model.ConfigurationInfoSnapshot;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -73,11 +74,9 @@ final class ApplyBomsStep implements ResolutionStep {
                 : Map.of();
         Map<String, Set<String>> resolvedConfigNames = resolutionContext.getResolvedConfigNames();
 
-        for (Map.Entry<String, Boolean> entry : testFlags.entrySet()) {
-            if (Boolean.TRUE.equals(entry.getValue())) {
-                resolutionContext.getTestContextDependencies().add(entry.getKey());
-            }
-        }
+        testFlags.entrySet().stream()
+                .filter(entry -> Boolean.TRUE.equals(entry.getValue()))
+                .forEach(entry -> resolutionContext.getTestContextDependencies().add(entry.getKey()));
 
         bomResult.getBomManagedDeps().forEach((bomKey, deps) -> {
             String[] parts = bomKey.split(":");
@@ -93,20 +92,20 @@ final class ApplyBomsStep implements ResolutionStep {
                 }
             }
 
-            for (String dep : deps) {
-                String[] d = dep.split(":");
-                if (d.length >= 2) {
-                    String depKey = d[0] + ":" + d[1];
-                    if (testFlags.getOrDefault(bomId, false)) {
-                        resolutionContext.getTestContextDependencies().add(depKey);
-                    }
-                    if (bomConfigs != null && !bomConfigs.isEmpty()) {
-                        resolvedConfigNames
-                                .computeIfAbsent(depKey, k -> new java.util.HashSet<>())
-                                .addAll(bomConfigs);
-                    }
-                }
-            }
+            deps.stream()
+                    .map(dep -> dep.split(":"))
+                    .filter(depParts -> depParts.length >= 2)
+                    .forEach(depParts -> {
+                        String depKey = depParts[0] + ":" + depParts[1];
+                        if (testFlags.getOrDefault(bomId, false)) {
+                            resolutionContext.getTestContextDependencies().add(depKey);
+                        }
+                        if (bomConfigs != null && !bomConfigs.isEmpty()) {
+                            resolvedConfigNames
+                                    .computeIfAbsent(depKey, k -> new HashSet<>())
+                                    .addAll(bomConfigs);
+                        }
+                    });
         });
     }
 }

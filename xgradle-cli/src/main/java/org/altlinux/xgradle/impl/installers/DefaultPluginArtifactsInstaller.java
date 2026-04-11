@@ -118,24 +118,21 @@ final class DefaultPluginArtifactsInstaller implements ArtifactsInstaller {
 
         Map<Path, Path> mainPomForJar = new HashMap<>();
 
-        for (Map.Entry<String, Path> entry : artifactsMap.entrySet()) {
+        artifactsMap.entrySet().forEach(entry -> {
             Path pomPath = Paths.get(entry.getKey());
-            Path jarPath = entry.getValue();
             Model model = pomModels.get(pomPath);
-
             if (model != null && !"pom".equals(model.getPackaging())) {
-                mainPomForJar.put(jarPath, pomPath);
+                mainPomForJar.put(entry.getValue(), pomPath);
             }
-        }
+        });
 
         Set<Path> pomPathsToCopy = pomChain.getPomPaths();
 
-        for (Path pomPath : pomPathsToCopy) {
+        pomPathsToCopy.forEach(pomPath -> {
             Model model = pomModels.get(pomPath);
             if (model != null && model.getArtifactId() != null) {
                 String newPomName = model.getArtifactId() + ".pom";
                 Path targetPom = targetPomDir.resolve(newPomName);
-
                 try {
                     Files.copy(pomPath, targetPom, StandardCopyOption.REPLACE_EXISTING);
                     logger.info("Copied POM: {} -> {}", pomPath, targetPom);
@@ -143,15 +140,13 @@ final class DefaultPluginArtifactsInstaller implements ArtifactsInstaller {
                     logger.error("Failed to copy POM: {}", pomPath, e);
                 }
             }
-        }
+        });
 
-        for (Map.Entry<String, Path> entry : artifactsMap.entrySet()) {
+        artifactsMap.entrySet().forEach(entry -> {
             Path jarPath = entry.getValue();
-
-           if (processedJars.contains(jarPath)) {
-                continue;
+            if (!processedJars.add(jarPath)) {
+                return;
             }
-            processedJars.add(jarPath);
 
             Path mainPomPath = mainPomForJar.get(jarPath);
 
@@ -160,7 +155,6 @@ final class DefaultPluginArtifactsInstaller implements ArtifactsInstaller {
                 if (model != null && model.getArtifactId() != null) {
                     String newJarName = model.getArtifactId() + ".jar";
                     Path targetJar = targetJarDir.resolve(newJarName);
-
                     try {
                         Files.copy(jarPath, targetJar, StandardCopyOption.REPLACE_EXISTING);
                         logger.info("Copied JAR from main POM: {} -> {} (POM: {})",
@@ -170,14 +164,12 @@ final class DefaultPluginArtifactsInstaller implements ArtifactsInstaller {
                     }
                 }
             } else {
-
                 Path firstPomPath = Paths.get(entry.getKey());
                 Model model = pomModels.get(firstPomPath);
 
                 if (model != null && model.getArtifactId() != null) {
                     String newJarName = model.getArtifactId() + ".jar";
                     Path targetJar = targetJarDir.resolve(newJarName);
-
                     try {
                         Files.copy(jarPath, targetJar, StandardCopyOption.REPLACE_EXISTING);
                         logger.warn("Copied JAR without main POM: {} -> {} (POM: {})",
@@ -187,29 +179,27 @@ final class DefaultPluginArtifactsInstaller implements ArtifactsInstaller {
                     }
                 }
             }
-        }
+        });
 
-        for (Path pomPath : pomPathsToCopy) {
+        pomPathsToCopy.forEach(pomPath -> {
             Model model = pomModels.get(pomPath);
             if (model == null || model.getArtifactId() == null) {
-                continue;
+                return;
             }
 
             Path jarPath = resolveJarPath(pomPath, model);
-            if (jarPath == null || processedJars.contains(jarPath)) {
-                continue;
+            if (jarPath == null || !processedJars.add(jarPath)) {
+                return;
             }
 
-            processedJars.add(jarPath);
             Path targetJar = targetJarDir.resolve(model.getArtifactId() + ".jar");
-
             try {
                 Files.copy(jarPath, targetJar, StandardCopyOption.REPLACE_EXISTING);
                 logger.info("Copied JAR from POM-only entry: {} -> {} (POM: {})", jarPath, targetJar, pomPath);
             } catch (IOException e) {
                 logger.error("Failed to copy JAR from POM-only entry: {}", jarPath, e);
             }
-        }
+        });
     }
 
     private Model readPomModel(Path pomPath) throws IOException, XmlPullParserException {

@@ -50,34 +50,27 @@ public class LogoPrinter {
             List<String> artLines = loadArtFromResources();
             int terminalWidth = getTerminalWidth();
 
-            int maxLength = 0;
-            for (String line : artLines) {
-                if (line.length() > maxLength) {
-                    maxLength = line.length();
-                }
-            }
+            int maxLength = artLines.stream()
+                    .mapToInt(String::length)
+                    .max()
+                    .orElse(0);
 
             int padding = Math.max(0, (terminalWidth - maxLength) / 2);
 
-            for (String line : artLines) {
-                System.out.println(" ".repeat(padding) + line);
-            }
+            artLines.forEach(line -> System.out.println(" ".repeat(padding) + line));
             System.out.println("\n");
-        } catch (Exception e) {
-            throw new RuntimeException("Banner printing error",e);
+        } catch (Exception exception) {
+            throw new RuntimeException("Banner printing error", exception);
         }
     }
 
     private static List<String> loadArtFromResources() throws IOException {
         List<String> lines = new ArrayList<>();
-        try (InputStream is = LogoPrinter.class.getClassLoader().getResourceAsStream(ART_FILE)) {
-            assert is != null;
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
-
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    lines.add(line);
-                }
+        try (InputStream inputStream = LogoPrinter.class.getClassLoader().getResourceAsStream(ART_FILE)) {
+            assert inputStream != null;
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+                reader.lines().forEach(lines::add);
             }
         }
         return lines;

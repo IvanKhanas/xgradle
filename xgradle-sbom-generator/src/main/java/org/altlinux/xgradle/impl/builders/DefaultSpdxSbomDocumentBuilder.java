@@ -31,8 +31,8 @@ import org.altlinux.xgradle.interfaces.licenses.SpdxLicenseMapper;
 import java.time.Instant;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 /**
  * Builds SPDX report JSON document from normalized SBOM components.
@@ -77,7 +77,7 @@ final class DefaultSpdxSbomDocumentBuilder implements SbomDocumentBuilder {
         document.add("creationInfo", creationInfo);
 
         JsonArray packages = new JsonArray();
-        for (int index = 0; index < components.size(); index++) {
+        IntStream.range(0, components.size()).forEach(index -> {
             SbomComponent component = components.get(index);
             JsonObject packageObject = new JsonObject();
             packageObject.addProperty("name", component.displayName());
@@ -93,7 +93,7 @@ final class DefaultSpdxSbomDocumentBuilder implements SbomDocumentBuilder {
             );
             packageObject.addProperty("filesAnalyzed", false);
             packages.add(packageObject);
-        }
+        });
 
         document.add("packages", packages);
         return document;
@@ -105,12 +105,9 @@ final class DefaultSpdxSbomDocumentBuilder implements SbomDocumentBuilder {
         }
 
         Set<String> identifiers = new LinkedHashSet<>();
-        for (SbomLicense license : licenses) {
-            Optional<String> mapped = spdxLicenseMapper.resolve(license);
-            if (mapped.isPresent()) {
-                identifiers.add(mapped.get());
-            }
-        }
+        licenses.stream()
+                .flatMap(license -> spdxLicenseMapper.resolve(license).stream())
+                .forEach(identifiers::add);
 
         if (identifiers.isEmpty()) {
             return "NOASSERTION";

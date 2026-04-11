@@ -21,7 +21,6 @@ import org.altlinux.xgradle.interfaces.configurators.ArtifactConfigurator;
 import org.altlinux.xgradle.interfaces.resolution.Order;
 import org.altlinux.xgradle.interfaces.resolution.ResolutionStep;
 import org.altlinux.xgradle.interfaces.resolution.ResolvedArtifactsRegistry;
-import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ResolvedArtifact;
 import org.gradle.api.logging.Logger;
@@ -64,33 +63,31 @@ final class CollectResolvedJarsStep implements ResolutionStep {
                 resolutionContext.getGradle()
         );
 
-        for (Project project : resolutionContext.getGradle().getRootProject().getAllprojects()) {
+        resolutionContext.getGradle().getRootProject().getAllprojects().forEach(project -> {
             Logger logger = project.getLogger();
-            for (String configName : configurationArtifacts.keySet()) {
-                if (configName == null || configName.isBlank()) {
-                    continue;
-                }
-
-                Configuration configuration = project.getConfigurations().findByName(configName);
-                if (configuration == null || !configuration.isCanBeResolved()) {
-                    continue;
-                }
-
-                configuration.getIncoming().afterResolve(resolvable -> {
-                    try {
-                        for (ResolvedArtifact artifact
-                                : configuration.getResolvedConfiguration().getResolvedArtifacts()) {
-                            File file = artifact.getFile();
-                            if (file != null && file.isFile() && isJar(file)) {
-                                resolvedJars.add(file);
-                            }
+            configurationArtifacts.keySet().stream()
+                    .filter(configName -> configName != null && !configName.isBlank())
+                    .forEach(configName -> {
+                        Configuration configuration = project.getConfigurations().findByName(configName);
+                        if (configuration == null || !configuration.isCanBeResolved()) {
+                            return;
                         }
-                    } catch (RuntimeException e) {
-                        logger.debug("Failed to collect resolved jars for '{}': {}", configName, e.getMessage());
-                    }
-                });
-            }
-        }
+                        configuration.getIncoming().afterResolve(resolvable -> {
+                            try {
+                                configuration.getResolvedConfiguration().getResolvedArtifacts().stream()
+                                        .map(ResolvedArtifact::getFile)
+                                        .filter(file -> file != null && file.isFile() && isJar(file))
+                                        .forEach(resolvedJars::add);
+                            } catch (RuntimeException exception) {
+                                logger.debug(
+                                        "Failed to collect resolved jars for '{}': {}",
+                                        configName,
+                                        exception.getMessage()
+                                );
+                            }
+                        });
+                    });
+        });
     }
 
     private boolean isJar(File file) {

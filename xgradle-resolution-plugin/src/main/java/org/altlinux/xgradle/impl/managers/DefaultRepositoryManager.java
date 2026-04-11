@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -79,7 +80,7 @@ final class DefaultRepositoryManager implements RepositoryManager {
     private List<File> scanDirectories(List<File> baseDirs) {
         LinkedHashSet<File> allDirs = new LinkedHashSet<>();
         int scanDepth = XGradleConfig.getIntProperty(SCAN_DEPTH_KEY, DEFAULT_SCAN_DEPTH);
-        for (File baseDir : baseDirs) {
+        baseDirs.forEach(baseDir -> {
             File root = baseDir.getAbsoluteFile();
             Path basePath = root.toPath();
             allDirs.add(root);
@@ -90,7 +91,7 @@ final class DefaultRepositoryManager implements RepositoryManager {
             } catch (Exception e) {
                 logger.error("Directory scan error: {}", e.getMessage());
             }
-        }
+        });
         return new ArrayList<>(allDirs);
     }
 
@@ -98,15 +99,12 @@ final class DefaultRepositoryManager implements RepositoryManager {
         if (baseDirs == null || baseDirs.isEmpty()) {
             return List.of();
         }
-        List<File> validDirs = new ArrayList<>();
-        List<File> invalidDirs = new ArrayList<>();
-        for (File dir : baseDirs) {
-            if (dir != null && dir.isDirectory() && dir.canRead()) {
-                validDirs.add(dir);
-            } else {
-                invalidDirs.add(dir);
-            }
-        }
+        List<File> validDirs = baseDirs.stream()
+                .filter(dir -> dir != null && dir.isDirectory() && dir.canRead())
+                .collect(Collectors.toList());
+        List<File> invalidDirs = baseDirs.stream()
+                .filter(dir -> dir == null || !dir.isDirectory() || !dir.canRead())
+                .collect(Collectors.toList());
         if (!invalidDirs.isEmpty()) {
             logger.warn("Skipping invalid lib directories: {}", invalidDirs);
         }

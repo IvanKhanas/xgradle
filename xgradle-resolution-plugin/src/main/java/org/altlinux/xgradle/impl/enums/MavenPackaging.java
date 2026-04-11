@@ -15,6 +15,7 @@
  */
 package org.altlinux.xgradle.impl.enums;
 
+import java.util.Arrays;
 import java.util.Locale;
 /**
  * Enumeration of Maven Packaging.
@@ -43,12 +44,10 @@ public enum MavenPackaging {
         if (packaging == null) {
             return JAR;
         }
-        String p = packaging.toLowerCase(Locale.ROOT);
-        for (MavenPackaging mp : values()) {
-            if (mp.packaging.equals(p)) {
-                return mp;
-            }
-        }
-        return JAR;
+        String normalizedPackaging = packaging.toLowerCase(Locale.ROOT);
+        return Arrays.stream(values())
+                .filter(candidate -> candidate.packaging.equals(normalizedPackaging))
+                .findFirst()
+                .orElse(JAR);
     }
 }

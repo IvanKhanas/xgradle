@@ -25,6 +25,7 @@ import org.altlinux.xgradle.interfaces.services.VersionScanner;
 import org.altlinux.xgradle.impl.model.MavenCoordinate;
 import org.gradle.api.logging.Logger;
 
+import java.util.LinkedHashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -80,28 +81,23 @@ final class ResolveTransitivesAndScanMissingStep implements ResolutionStep {
         Map<String, MavenCoordinate> resolvedMain = versionScanner.scanSystemArtifacts(mainDependencyKeys);
         Map<String, MavenCoordinate> resolvedTest = versionScanner.scanSystemArtifacts(testDependencyKeys);
 
-        for (Map.Entry<String, MavenCoordinate> entry : resolvedTest.entrySet()) {
-            MavenCoordinate coordinate = entry.getValue();
-            if (coordinate == null) {
-                continue;
-            }
-
-            resolvedTest.put(
-                    entry.getKey(),
-                    coordinate.toBuilder()
-                            .testContext(true)
-                            .build()
-            );
-        }
-
+        Map<String, MavenCoordinate> resolvedTestWithContext = new LinkedHashMap<>();
+        resolvedTest.forEach((key, coordinate) -> resolvedTestWithContext.put(
+                key,
+                coordinate == null
+                        ? null
+                        : coordinate.toBuilder()
+                        .testContext(true)
+                        .build()
+        ));
 
         resolutionContext.getSystemArtifacts().clear();
         resolutionContext.getSystemArtifacts().putAll(resolvedMain);
-        resolutionContext.getSystemArtifacts().putAll(resolvedTest);
+        resolutionContext.getSystemArtifacts().putAll(resolvedTestWithContext);
 
         if (!beforeScan.isEmpty()) {
             Set<String> afterScan = new HashSet<>(resolvedMain.keySet());
-            afterScan.addAll(resolvedTest.keySet());
+            afterScan.addAll(resolvedTestWithContext.keySet());
             Set<String> dropped = new HashSet<>(beforeScan);
             dropped.removeAll(afterScan);
             if (!dropped.isEmpty()) {

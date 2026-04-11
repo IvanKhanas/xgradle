@@ -18,7 +18,6 @@ package org.altlinux.xgradle.impl.parsers;
 
 import org.altlinux.xgradle.impl.model.MavenCoordinate;
 import org.altlinux.xgradle.impl.model.MavenCoordinateBuilder;
-import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 
 import java.util.LinkedHashMap;
@@ -45,42 +44,17 @@ final class PomDependenciesParser {
             return resolvedByGroupAndArtifact;
         }
 
-        for (Model model : pomHierarchy) {
-            if (model == null || model.getDependencies() == null) {
-                continue;
-            }
-
-            for (Dependency dependency : model.getDependencies()) {
-                MavenCoordinate coordinate =
-                        PomDependencyUtils.convertDependency(dependency);
-
-                coordinate =
-                        PomDependencyUtils.resolveProperties(
-                                coordinate,
-                                properties,
-                                propertiesCollector
-                        );
-
-                coordinate =
-                        applyDependencyManagement(
-                                coordinate,
-                                managedByGroupAndArtifact
-                        );
-
-                if (!coordinate.isValid()) {
-                    continue;
-                }
-
-                String groupAndArtifact =
-                        coordinate.getGroupId()
-                                + ":" + coordinate.getArtifactId();
-
-                resolvedByGroupAndArtifact.put(
-                        groupAndArtifact,
+        pomHierarchy.stream()
+                .filter(model -> model != null && model.getDependencies() != null)
+                .flatMap(model -> model.getDependencies().stream())
+                .map(PomDependencyUtils::convertDependency)
+                .map(coordinate -> PomDependencyUtils.resolveProperties(coordinate, properties, propertiesCollector))
+                .map(coordinate -> applyDependencyManagement(coordinate, managedByGroupAndArtifact))
+                .filter(MavenCoordinate::isValid)
+                .forEach(coordinate -> resolvedByGroupAndArtifact.put(
+                        coordinate.getGroupId() + ":" + coordinate.getArtifactId(),
                         coordinate
-                );
-            }
-        }
+                ));
         return resolvedByGroupAndArtifact;
     }
 

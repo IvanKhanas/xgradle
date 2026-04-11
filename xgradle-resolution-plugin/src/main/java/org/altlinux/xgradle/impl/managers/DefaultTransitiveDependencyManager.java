@@ -85,47 +85,47 @@ final class DefaultTransitiveDependencyManager implements TransitiveDependencyMa
             List<MavenCoordinate> dependencies = pomParser
                     .parseDependencies(current.getPomPath());
 
-            for (MavenCoordinate dep : dependencies) {
-                String depKey = dep.getGroupId() + ":" + dep.getArtifactId();
-                mavenScopeManager.updateScope(dependencyScopes, depKey, dep.getScope());
-                if (MavenScope.TEST.equals(dep.getScope())) continue;
+            dependencies.stream().forEach(dependencyCoordinate -> {
+                String dependencyKey = dependencyCoordinate.getGroupId() + ":" + dependencyCoordinate.getArtifactId();
+                mavenScopeManager.updateScope(dependencyScopes, dependencyKey, dependencyCoordinate.getScope());
+                if (MavenScope.TEST.equals(dependencyCoordinate.getScope())) {
+                    return;
+                }
 
                 if (parentConfigs != null && !parentConfigs.isEmpty()) {
                     Set<String> standardConfigs = filterStandardConfigurations(parentConfigs);
                     if (standardConfigs.isEmpty()) {
-                        skippedDependencies.add(depKey);
-                        continue;
+                        skippedDependencies.add(dependencyKey);
+                        return;
                     }
 
                     dependencyConfigNames
-                            .computeIfAbsent(depKey, k -> new HashSet<>())
+                            .computeIfAbsent(dependencyKey, artifactKey -> new HashSet<>())
                             .addAll(standardConfigs);
                 }
 
-                MavenCoordinate resolvedDep = systemArtifacts.get(depKey);
-                if (resolvedDep == null) {
-                    resolvedDep = pomFinder.findPomForArtifact(
-                            dep.getGroupId(), dep.getArtifactId());
-                    if (resolvedDep == null) {
-                        logger.warn("Skipping not found dependency: {}", depKey);
-                        skippedDependencies.add(depKey);
-                        continue;
+                MavenCoordinate resolvedDependency = systemArtifacts.get(dependencyKey);
+                if (resolvedDependency == null) {
+                    resolvedDependency = pomFinder.findPomForArtifact(
+                            dependencyCoordinate.getGroupId(), dependencyCoordinate.getArtifactId());
+                    if (resolvedDependency == null) {
+                        logger.warn("Skipping not found dependency: {}", dependencyKey);
+                        skippedDependencies.add(dependencyKey);
+                        return;
                     }
-                    systemArtifacts.put(depKey, resolvedDep);
+                    systemArtifacts.put(dependencyKey, resolvedDependency);
                 }
 
-                resolvedDep = resolvedDep.toBuilder()
+                resolvedDependency = resolvedDependency.toBuilder()
                         .testContext(current.isTestContext())
                         .build();
 
-                systemArtifacts.put(depKey, resolvedDep);
+                systemArtifacts.put(dependencyKey, resolvedDependency);
 
-
-                if (!processedArtifacts.contains(depKey)) {
-                    processedArtifacts.add(depKey);
-                    queue.add(resolvedDep);
+                if (processedArtifacts.add(dependencyKey)) {
+                    queue.add(resolvedDependency);
                 }
-            }
+            });
         }
         return skippedDependencies;
     }
@@ -134,21 +134,17 @@ final class DefaultTransitiveDependencyManager implements TransitiveDependencyMa
         if (configNames == null || configNames.isEmpty()) {
             return Collections.emptySet();
         }
-        Set<String> filtered = new HashSet<>();
-        for (String name : configNames) {
-            if (isStandardConfigurationName(name)) {
-                filtered.add(name);
-            }
-        }
-        return filtered;
+        return configNames.stream()
+                .filter(this::isStandardConfigurationName)
+                .collect(java.util.stream.Collectors.toCollection(HashSet::new));
     }
 
     private boolean isStandardConfigurationName(String name) {
         if (name == null) {
             return false;
         }
-        String n = name.trim().toLowerCase(Locale.ROOT);
-        switch (n) {
+        String normalizedName = name.trim().toLowerCase(Locale.ROOT);
+        switch (normalizedName) {
             case "api":
             case "implementation":
             case "compileonly":

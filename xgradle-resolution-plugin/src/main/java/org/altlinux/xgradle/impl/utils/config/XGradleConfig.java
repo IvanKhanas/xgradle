@@ -79,15 +79,14 @@ public final class XGradleConfig {
 
     public static void initSystemProperties() {
         ensureLoaded();
-        for (String key : SUPPORTED_KEYS) {
-            if (System.getProperty(key) != null) {
-                continue;
-            }
-            String value = getConfigValue(key);
-            if (value != null) {
-                System.setProperty(key, value);
-            }
-        }
+        SUPPORTED_KEYS.stream()
+                .filter(key -> System.getProperty(key) == null)
+                .forEach(key -> {
+                    String value = getConfigValue(key);
+                    if (value != null) {
+                        System.setProperty(key, value);
+                    }
+                });
     }
 
     static void resetForTests() {

@@ -89,32 +89,31 @@ final class DefaultJavadocProcessor implements PomProcessor<HashMap<String, Path
         HashMap<String, Path> filteredArtifacts = new HashMap<>();
         Set<String> processedCoordinates = new HashSet<>();
 
-        for (HashMap.Entry<String, Path> entry : artifacts.entrySet()) {
+        artifacts.entrySet().stream().forEach(entry -> {
             Path pomPath = Path.of(entry.getKey());
             Path javadocPath = entry.getValue();
 
             try {
                 ArtifactCoordinates coordinates = extractCoordinatesFromPom(pomPath);
-                if (coordinates != null) {
-                    String coordKey = coordinates.getGroupId() + ":" + coordinates.getArtifactId();
-
-                    if (!processedCoordinates.contains(coordKey)) {
-                        processedCoordinates.add(coordKey);
-                        filteredArtifacts.put(pomPath.toString(), javadocPath);
-                        logger.debug("Added Javadoc artifact: {} for coordinates: {}",
-                                javadocPath.getFileName(), coordKey);
-                    } else {
-                        logger.debug("Filtered out duplicate Javadoc artifact: {} for coordinates: {}",
-                                javadocPath.getFileName(), coordKey);
-                    }
-                } else {
+                if (coordinates == null) {
                     filteredArtifacts.put(pomPath.toString(), javadocPath);
+                    return;
                 }
-            } catch (Exception e) {
+
+                String coordKey = coordinates.getGroupId() + ":" + coordinates.getArtifactId();
+                if (processedCoordinates.add(coordKey)) {
+                    filteredArtifacts.put(pomPath.toString(), javadocPath);
+                    logger.debug("Added Javadoc artifact: {} for coordinates: {}",
+                            javadocPath.getFileName(), coordKey);
+                } else {
+                    logger.debug("Filtered out duplicate Javadoc artifact: {} for coordinates: {}",
+                            javadocPath.getFileName(), coordKey);
+                }
+            } catch (Exception exception) {
                 logger.warn("Failed to extract coordinates from POM: {}, adding artifact anyway", pomPath);
                 filteredArtifacts.put(pomPath.toString(), javadocPath);
             }
-        }
+        });
 
         logger.debug("Filtered {} Javadoc artifacts to {} unique artifacts by groupId:artifactId",
                 artifacts.size(), filteredArtifacts.size());

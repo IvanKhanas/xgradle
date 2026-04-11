@@ -73,7 +73,7 @@ final class XmvnBomCompatRegistrar implements Registrar {
             throw new EmptyRegisterCommandException(command);
         }
 
-        for (Path part : artifacts) {
+        artifacts.forEach(part -> {
             List<String> currentCommand = new ArrayList<>(commandParts);
             currentCommand.add(part.toString());
             logger.info("Registering BOM: {}", String.join(" ", currentCommand));
@@ -89,7 +89,7 @@ final class XmvnBomCompatRegistrar implements Registrar {
             } catch (IOException | InterruptedException e) {
                 throw new CommandExecutionException(currentCommand, e);
             }
-        }
+        });
 
         if (artifacts.isEmpty()) {
             logger.info("No BOM registered");

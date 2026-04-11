@@ -66,7 +66,7 @@ final class ConcurrentJavadocParser implements PomParser<HashMap<String, Path>> 
 
         HashMap<String, Path> javadocMap = new HashMap<>();
 
-        for (Path pomPath : pomPaths) {
+        pomPaths.forEach(pomPath -> {
             try {
                 Path javadocPath = findJavadocForPom(pomPath);
                 if (javadocPath != null && Files.exists(javadocPath)) {
@@ -75,7 +75,7 @@ final class ConcurrentJavadocParser implements PomParser<HashMap<String, Path>> 
             } catch (Exception e) {
                 logger.error("Error processing POM file for Javadoc: {}", pomPath, e);
             }
-        }
+        });
 
         logger.info("Found {} Javadoc JAR files from {} POM files", javadocMap.size(), pomPaths.size());
         return javadocMap;

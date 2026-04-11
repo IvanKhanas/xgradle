@@ -16,7 +16,6 @@
 package org.altlinux.xgradle.impl.parsers;
 
 import org.altlinux.xgradle.impl.model.MavenCoordinate;
-import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 
 import java.util.LinkedHashMap;
@@ -42,40 +41,22 @@ final class PomDependencyManagementParser {
             return managedByGroupAndArtifact;
         }
 
-        for (Model model : pomHierarchy) {
-            if (model == null
-                    || model.getDependencyManagement() == null
-                    || model.getDependencyManagement().getDependencies() == null) {
-                continue;
-            }
-
-            for (Dependency dependency
-                    : model.getDependencyManagement().getDependencies()) {
-
-                MavenCoordinate managedDependency =
-                        PomDependencyUtils.convertDependency(dependency);
-
-                managedDependency =
-                        PomDependencyUtils.resolveProperties(
-                                managedDependency,
-                                properties,
-                                propertiesCollector
-                        );
-
-                if (!managedDependency.isValid()) {
-                    continue;
-                }
-
-                String groupAndArtifact =
-                        managedDependency.getGroupId()
-                                + ":" + managedDependency.getArtifactId();
-
-                managedByGroupAndArtifact.put(
-                        groupAndArtifact,
+        pomHierarchy.stream()
+                .filter(model -> model != null
+                        && model.getDependencyManagement() != null
+                        && model.getDependencyManagement().getDependencies() != null)
+                .flatMap(model -> model.getDependencyManagement().getDependencies().stream())
+                .map(PomDependencyUtils::convertDependency)
+                .map(managedDependency -> PomDependencyUtils.resolveProperties(
+                        managedDependency,
+                        properties,
+                        propertiesCollector
+                ))
+                .filter(MavenCoordinate::isValid)
+                .forEach(managedDependency -> managedByGroupAndArtifact.put(
+                        managedDependency.getGroupId() + ":" + managedDependency.getArtifactId(),
                         managedDependency
-                );
-            }
-        }
+                ));
         return managedByGroupAndArtifact;
     }
 }

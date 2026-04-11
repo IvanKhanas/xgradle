@@ -85,14 +85,11 @@ class DependencyVersionScanner implements VersionScanner {
         List<MavenCoordinate> dependencies = pomParser
                 .parseDependencies(parentCoord.getPomPath());
 
-        for (MavenCoordinate dep : dependencies) {
-            if (MavenScope.PROVIDED.equals(dep.getScope()) || MavenScope.RUNTIME.equals(dep.getScope())) {
-                String depKey = dep.getGroupId() + ":" + dep.getArtifactId();
-                if (!versions.containsKey(depKey) && !dependencyQueue.contains(depKey)) {
-                    dependencyQueue.add(depKey);
-                }
-            }
-        }
+        dependencies.stream()
+                .filter(dep -> MavenScope.PROVIDED.equals(dep.getScope()) || MavenScope.RUNTIME.equals(dep.getScope()))
+                .map(dep -> dep.getGroupId() + ":" + dep.getArtifactId())
+                .filter(depKey -> !versions.containsKey(depKey) && !dependencyQueue.contains(depKey))
+                .forEach(dependencyQueue::add);
     }
 
     private void resolveGradlePlugin(String pluginDep, Map<String, MavenCoordinate> versions) {
@@ -142,11 +139,13 @@ class DependencyVersionScanner implements VersionScanner {
                 "gradle-plugin-" + baseName, baseName + "-gradle"
         };
 
-        for (String artifactId : artifactIds) {
-            MavenCoordinate coord = pomFinder.findPomForArtifact(pluginId, artifactId);
-            if (coord != null && artifactVerifier.verifyArtifactExists(coord)) {
-                return coord;
-            }
+        MavenCoordinate found = Arrays.stream(artifactIds)
+                .map(artifactId -> pomFinder.findPomForArtifact(pluginId, artifactId))
+                .filter(coord -> coord != null && artifactVerifier.verifyArtifactExists(coord))
+                .findFirst()
+                .orElse(null);
+        if (found != null) {
+            return found;
         }
 
         if (pluginId.contains(".")) {
@@ -156,11 +155,13 @@ class DependencyVersionScanner implements VersionScanner {
                     "gradle-" + withoutDomain + "-plugin", withoutDomain + "-gradle-plugin"
             };
 
-            for (String artifactId : extendedArtifactIds) {
-                MavenCoordinate coord = pomFinder.findPomForArtifact(pluginId, artifactId);
-                if (coord != null && artifactVerifier.verifyArtifactExists(coord)) {
-                    return coord;
-                }
+            MavenCoordinate extendedFound = Arrays.stream(extendedArtifactIds)
+                    .map(artifactId -> pomFinder.findPomForArtifact(pluginId, artifactId))
+                    .filter(coord -> coord != null && artifactVerifier.verifyArtifactExists(coord))
+                    .findFirst()
+                    .orElse(null);
+            if (extendedFound != null) {
+                return extendedFound;
             }
         }
 

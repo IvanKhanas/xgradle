@@ -86,7 +86,7 @@ public final class DefaultPluginPomChainResolver implements PluginPomChainResolv
                            Map<Path, Model> pomModels,
                            Map<String, Path> pomByCoords) {
         Set<Path> allPomPaths = pomContainer.getAllPoms(searchingDirectory);
-        for (Path pomPath : allPomPaths) {
+        allPomPaths.forEach(pomPath -> {
             try {
                 Model model = readPomModel(pomPath);
                 pomModels.put(pomPath, model);
@@ -94,10 +94,10 @@ public final class DefaultPluginPomChainResolver implements PluginPomChainResolv
                 if (key != null) {
                     pomByCoords.putIfAbsent(key, pomPath);
                 }
-            } catch (IOException | XmlPullParserException e) {
-                logger.error("Failed to read POM file: {}", pomPath, e);
+            } catch (IOException | XmlPullParserException exception) {
+                logger.error("Failed to read POM file: {}", pomPath, exception);
             }
-        }
+        });
     }
 
     private Set<Path> resolvePomChain(
@@ -110,9 +110,7 @@ public final class DefaultPluginPomChainResolver implements PluginPomChainResolv
         LinkedHashSet<Path> collected = new LinkedHashSet<>();
 
         if (artifactsMap != null) {
-            for (String pomPathStr : artifactsMap.keySet()) {
-                collected.add(Paths.get(pomPathStr));
-            }
+            artifactsMap.keySet().forEach(pomPathStr -> collected.add(Paths.get(pomPathStr)));
         }
 
         if (artifactNames != null && !artifactNames.isEmpty()) {
@@ -136,12 +134,10 @@ public final class DefaultPluginPomChainResolver implements PluginPomChainResolv
             }
 
             if (model.getDependencies() != null) {
-                for (Dependency dependency : model.getDependencies()) {
-                    Path depPath = resolvePom(dependency, pomByCoords);
-                    if (depPath != null && visited.add(depPath)) {
-                        queue.add(depPath);
-                    }
-                }
+                model.getDependencies().stream()
+                        .map(dependency -> resolvePom(dependency, pomByCoords))
+                        .filter(depPath -> depPath != null && visited.add(depPath))
+                        .forEach(queue::add);
             }
         }
 
@@ -191,8 +187,8 @@ public final class DefaultPluginPomChainResolver implements PluginPomChainResolv
 
     private Model readPomModel(Path pomPath) throws IOException, XmlPullParserException {
         MavenXpp3Reader reader = new MavenXpp3Reader();
-        try (FileInputStream fis = new FileInputStream(pomPath.toFile())) {
-            return reader.read(fis);
+        try (FileInputStream inputStream = new FileInputStream(pomPath.toFile())) {
+            return reader.read(inputStream);
         }
     }
 }

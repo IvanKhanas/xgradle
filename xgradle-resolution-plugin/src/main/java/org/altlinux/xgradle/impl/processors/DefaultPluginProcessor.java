@@ -98,13 +98,13 @@ final class DefaultPluginProcessor implements PluginProcessor {
         List<MavenCoordinate> dependencies = pomParser
                 .parseDependencies(bomCoord.getPomPath());
 
-        for (MavenCoordinate dep : dependencies) {
+        dependencies.forEach(dep -> {
             if (dep.isBom()) {
                 processBomPlugin(dep, requested, processedBoms);
             } else {
                 usePlugin(requested, dep);
             }
-        }
+        });
     }
 
     private void usePlugin(PluginResolveDetails requested, MavenCoordinate coord) {

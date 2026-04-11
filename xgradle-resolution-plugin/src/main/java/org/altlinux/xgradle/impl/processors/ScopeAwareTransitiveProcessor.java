@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Applies test-context markers to root artifacts and delegates transitive traversal to TransitiveDependencyManager.
@@ -59,26 +60,17 @@ final class ScopeAwareTransitiveProcessor implements TransitiveProcessor {
                 ? Collections.emptySet()
                 : testContextDependencies;
 
-        Set<String> mainDependencies = new HashSet<>();
-        Set<String> testDependencies = new HashSet<>();
-
-        for (Map.Entry<String, MavenCoordinate> entry : systemArtifacts.entrySet()) {
-            String artifactKey = entry.getKey();
-            MavenCoordinate coordinate = entry.getValue();
-
+        systemArtifacts.replaceAll((artifactKey, coordinate) -> {
             if (coordinate == null) {
-                continue;
+                return null;
             }
-
             if (testContext.contains(artifactKey) && !coordinate.isTestContext()) {
-                systemArtifacts.put(
-                        artifactKey,
-                        coordinate.toBuilder()
-                                .testContext(true)
-                                .build()
-                );
+                return coordinate.toBuilder()
+                        .testContext(true)
+                        .build();
             }
-        }
+            return coordinate;
+        });
 
         Set<String> skippedDependencies = transitiveManager.configure(
                 systemArtifacts,
@@ -86,14 +78,18 @@ final class ScopeAwareTransitiveProcessor implements TransitiveProcessor {
                 dependencyConfigNames
         );
 
-        for (Map.Entry<String, MavenCoordinate> entry : systemArtifacts.entrySet()) {
-            MavenCoordinate coordinate = entry.getValue();
-            if (coordinate != null && coordinate.isTestContext()) {
-                testDependencies.add(entry.getKey());
-            } else {
-                mainDependencies.add(entry.getKey());
-            }
-        }
+        Map<Boolean, Set<String>> partitionedDependencies = systemArtifacts.entrySet().stream()
+                .collect(Collectors.partitioningBy(
+                        entry -> entry.getValue() != null && entry.getValue().isTestContext(),
+                        Collectors.mapping(Map.Entry::getKey, Collectors.toSet())
+                ));
+
+        Set<String> mainDependencies = new HashSet<>(
+                partitionedDependencies.getOrDefault(false, Collections.emptySet())
+        );
+        Set<String> testDependencies = new HashSet<>(
+                partitionedDependencies.getOrDefault(true, Collections.emptySet())
+        );
 
         return new TransitiveResult(mainDependencies, testDependencies, skippedDependencies);
     }

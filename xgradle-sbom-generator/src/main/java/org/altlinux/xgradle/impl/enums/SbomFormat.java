@@ -17,6 +17,7 @@ package org.altlinux.xgradle.impl.enums;
 
 import org.altlinux.xgradle.impl.validation.SbomValidationUtils;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 /**
@@ -49,12 +50,9 @@ public enum SbomFormat {
             normalized = "cyclonedx";
         }
 
-        for (SbomFormat format : values()) {
-            if (format.propertyValue.equals(normalized)) {
-                return Optional.of(format);
-            }
-        }
-
-        return Optional.empty();
+        final String normalizedValue = normalized;
+        return Arrays.stream(values())
+                .filter(format -> format.propertyValue.equals(normalizedValue))
+                .findFirst();
     }
 }

@@ -26,6 +26,7 @@ import org.gradle.api.logging.Logger;
 
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.IntStream;
 /**
  * Index for POM.
  * Implements {@link PomIndex}.
@@ -61,26 +62,25 @@ final class DefaultPomIndex implements PomIndex {
         Map<String, MavenCoordinate> newByGa = new LinkedHashMap<>();
         Map<String, List<MavenCoordinate>> newByGroup = new LinkedHashMap<>();
 
-        for (Path pomPath : pomFiles) {
-            MavenCoordinate coord = pomParser.parsePom(pomPath);
-            if (coord == null) {
-                continue;
-            }
+        pomFiles.stream()
+                .map(pomParser::parsePom)
+                .filter(Objects::nonNull)
+                .forEach(coordinate -> {
+                    String groupArtifactKey = coordinate.getGroupId() + ":" + coordinate.getArtifactId();
 
-            String ga = coord.getGroupId() + ":" + coord.getArtifactId();
+                    MavenCoordinate previousCoordinate = newByGa.get(groupArtifactKey);
+                    if (previousCoordinate == null
+                            || isNewer(coordinate.getVersion(), previousCoordinate.getVersion())) {
+                        newByGa.put(groupArtifactKey, coordinate);
+                    }
 
-            MavenCoordinate prev = newByGa.get(ga);
-            if (prev == null || isNewer(coord.getVersion(), prev.getVersion())) {
-                newByGa.put(ga, coord);
-            }
+                    newByGroup.computeIfAbsent(coordinate.getGroupId(), groupId -> new ArrayList<>())
+                            .add(coordinate);
+                });
 
-            newByGroup.computeIfAbsent(coord.getGroupId(), k -> new ArrayList<>()).add(coord);
-        }
-
-        for (Map.Entry<String, List<MavenCoordinate>> e : newByGroup.entrySet()) {
-            e.getValue().sort(Comparator.comparing(MavenCoordinate::getArtifactId)
-                    .thenComparing(MavenCoordinate::getVersion, this::compareVersions));
-        }
+        newByGroup.values().forEach(coordinates -> coordinates.sort(
+                Comparator.comparing(MavenCoordinate::getArtifactId)
+                        .thenComparing(MavenCoordinate::getVersion, this::compareVersions)));
 
         byGa = newByGa;
         byGroup = newByGroup;
@@ -103,39 +103,53 @@ final class DefaultPomIndex implements PomIndex {
         return Collections.unmodifiableMap(byGa);
     }
 
-    private boolean isNewer(String a, String b) {
-        return compareVersions(a, b) > 0;
+    private boolean isNewer(String leftVersion, String rightVersion) {
+        return compareVersions(leftVersion, rightVersion) > 0;
     }
 
-    private int compareVersions(String a, String b) {
-        if (a == null && b == null) return 0;
-        if (a == null) return -1;
-        if (b == null) return 1;
-        String[] pa = a.split("[.-]");
-        String[] pb = b.split("[.-]");
-        int n = Math.max(pa.length, pb.length);
-        for (int i = 0; i < n; i++) {
-            String sa = i < pa.length ? pa[i] : "0";
-            String sb = i < pb.length ? pb[i] : "0";
-            int cmp = comparePart(sa, sb);
-            if (cmp != 0) return cmp;
+    private int compareVersions(String leftVersion, String rightVersion) {
+        if (leftVersion == null && rightVersion == null) {
+            return 0;
         }
-        return 0;
+        if (leftVersion == null) {
+            return -1;
+        }
+        if (rightVersion == null) {
+            return 1;
+        }
+
+        String[] leftParts = leftVersion.split("[.-]");
+        String[] rightParts = rightVersion.split("[.-]");
+        int maxLength = Math.max(leftParts.length, rightParts.length);
+
+        return IntStream.range(0, maxLength)
+                .map(index -> {
+                    String leftPart = index < leftParts.length ? leftParts[index] : "0";
+                    String rightPart = index < rightParts.length ? rightParts[index] : "0";
+                    return comparePart(leftPart, rightPart);
+                })
+                .filter(partComparison -> partComparison != 0)
+                .findFirst()
+                .orElse(0);
     }
 
-    private int comparePart(String a, String b) {
-        boolean na = a.chars().allMatch(Character::isDigit);
-        boolean nb = b.chars().allMatch(Character::isDigit);
+    private int comparePart(String leftPart, String rightPart) {
+        boolean leftIsNumeric = leftPart.chars().allMatch(Character::isDigit);
+        boolean rightIsNumeric = rightPart.chars().allMatch(Character::isDigit);
 
-        if (na && nb) {
-            int ia = Integer.parseInt(a);
-            int ib = Integer.parseInt(b);
-            return Integer.compare(ia, ib);
+        if (leftIsNumeric && rightIsNumeric) {
+            int leftNumericPart = Integer.parseInt(leftPart);
+            int rightNumericPart = Integer.parseInt(rightPart);
+            return Integer.compare(leftNumericPart, rightNumericPart);
         }
 
-        if (na) return 1;
-        if (nb) return -1;
+        if (leftIsNumeric) {
+            return 1;
+        }
+        if (rightIsNumeric) {
+            return -1;
+        }
 
-        return a.compareTo(b);
+        return leftPart.compareTo(rightPart);
     }
 }

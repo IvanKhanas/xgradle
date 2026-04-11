@@ -40,7 +40,8 @@ import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
-import java.util.HashSet;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * Default implementation of JavadocInstaller for installing Javadoc artifacts.
@@ -95,9 +96,9 @@ final class DefaultJavadocInstaller implements JavadocInstaller {
             throw new RuntimeException("Failed to create target directory", e);
         }
 
-        int copiedCount = 0;
+        AtomicInteger copiedCount = new AtomicInteger(0);
 
-        for (HashMap.Entry<String, Path> entry : javadocMap.entrySet()) {
+        javadocMap.entrySet().forEach(entry -> {
             Path pomPath = Paths.get(entry.getKey());
             Path javadocPath = entry.getValue();
 
@@ -109,7 +110,7 @@ final class DefaultJavadocInstaller implements JavadocInstaller {
 
                     Files.copy(javadocPath, targetJavadocPath, StandardCopyOption.REPLACE_EXISTING);
                     logger.info("Copied Javadoc: {} -> {}", javadocPath.getFileName(), targetJavadocPath);
-                    copiedCount++;
+                    copiedCount.incrementAndGet();
                 } else {
                     logger.warn("Could not extract artifactId from POM: {}, skipping Javadoc: {}",
                             pomPath, javadocPath.getFileName());
@@ -117,12 +118,12 @@ final class DefaultJavadocInstaller implements JavadocInstaller {
             } catch (Exception e) {
                 logger.error("Failed to process Javadoc artifact: {}", javadocPath, e);
             }
-        }
+        });
 
         String pathForMfiles = preparePathForMfiles(jarInstallationDir);
         updateMfilesJavadocFile(pathForMfiles);
 
-        logger.debug("Successfully installed {} Javadoc artifacts to {}", copiedCount, targetDir);
+        logger.debug("Successfully installed {} Javadoc artifacts to {}", copiedCount.get(), targetDir);
     }
 
     private String preparePathForMfiles(String originalPath) {
@@ -155,15 +156,11 @@ final class DefaultJavadocInstaller implements JavadocInstaller {
                         currentDir, targetPath);
             } else {
 
-                Set<String> existingPaths = new HashSet<>();
                 List<String> lines = Files.readAllLines(mfilesJavadoc);
-
-                for (String line : lines) {
-                    String trimmedLine = line.trim();
-                    if (!trimmedLine.isEmpty()) {
-                        existingPaths.add(trimmedLine);
-                    }
-                }
+                Set<String> existingPaths = lines.stream()
+                        .map(String::trim)
+                        .filter(trimmedLine -> !trimmedLine.isEmpty())
+                        .collect(Collectors.toSet());
 
                 if (!existingPaths.contains(targetPath)) {
 

@@ -37,6 +37,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Collects SBOM components from resolved Maven coordinates and resolved JAR files.
@@ -78,27 +79,21 @@ public final class DefaultSbomComponentCollector implements SbomComponentCollect
             return;
         }
 
-        for (MavenCoordinate coordinate : artifacts) {
-            if (!isEligibleCoordinate(coordinate)) {
-                continue;
-            }
-
-            String uniqueKey = uniqueKey(coordinate);
-            if (components.containsKey(uniqueKey)) {
-                continue;
-            }
-
-            PomMetadata metadata = readPomMetadata(coordinate, metadataByPomPath);
-            SbomComponent component = SbomComponent.maven(
-                    coordinate.getGroupId(),
-                    coordinate.getArtifactId(),
-                    coordinate.getVersion(),
-                    metadata.getProjectUrl(),
-                    metadata.getScmUrl(),
-                    toSbomLicenses(metadata.getLicenses())
-            );
-            components.put(uniqueKey, component);
-        }
+        artifacts.stream()
+                .filter(this::isEligibleCoordinate)
+                .filter(coordinate -> !components.containsKey(uniqueKey(coordinate)))
+                .forEach(coordinate -> {
+                    PomMetadata metadata = readPomMetadata(coordinate, metadataByPomPath);
+                    SbomComponent component = SbomComponent.maven(
+                            coordinate.getGroupId(),
+                            coordinate.getArtifactId(),
+                            coordinate.getVersion(),
+                            metadata.getProjectUrl(),
+                            metadata.getScmUrl(),
+                            toSbomLicenses(metadata.getLicenses())
+                    );
+                    components.put(uniqueKey(coordinate), component);
+                });
     }
 
     private void appendPluginComponents(
@@ -110,22 +105,20 @@ public final class DefaultSbomComponentCollector implements SbomComponentCollect
             return;
         }
 
-        for (MavenCoordinate coordinate : artifacts) {
-            if (!isEligibleCoordinate(coordinate)) {
-                continue;
-            }
-
-            PomMetadata metadata = readPomMetadata(coordinate, metadataByPomPath);
-            SbomComponent component = SbomComponent.mavenPlugin(
-                    coordinate.getGroupId(),
-                    coordinate.getArtifactId(),
-                    coordinate.getVersion(),
-                    metadata.getProjectUrl(),
-                    metadata.getScmUrl(),
-                    toSbomLicenses(metadata.getLicenses())
-            );
-            components.put(uniqueKey(coordinate), component);
-        }
+        artifacts.stream()
+                .filter(this::isEligibleCoordinate)
+                .forEach(coordinate -> {
+                    PomMetadata metadata = readPomMetadata(coordinate, metadataByPomPath);
+                    SbomComponent component = SbomComponent.mavenPlugin(
+                            coordinate.getGroupId(),
+                            coordinate.getArtifactId(),
+                            coordinate.getVersion(),
+                            metadata.getProjectUrl(),
+                            metadata.getScmUrl(),
+                            toSbomLicenses(metadata.getLicenses())
+                    );
+                    components.put(uniqueKey(coordinate), component);
+                });
     }
 
     private void appendResolvedJarComponents(
@@ -137,13 +130,12 @@ public final class DefaultSbomComponentCollector implements SbomComponentCollect
             return;
         }
 
-        for (File jar : resolvedJars) {
-            if (jar == null || !jar.isFile()) {
-                continue;
-            }
-            SbomComponent component = SbomComponent.file(jar.getName());
-            components.putIfAbsent(component.uniqueKey(), component);
-        }
+        resolvedJars.stream()
+                .filter(jar -> jar != null && jar.isFile())
+                .forEach(jar -> {
+                    SbomComponent component = SbomComponent.file(jar.getName());
+                    components.putIfAbsent(component.uniqueKey(), component);
+                });
     }
 
     private boolean isEligibleCoordinate(MavenCoordinate coordinate) {
@@ -192,13 +184,9 @@ public final class DefaultSbomComponentCollector implements SbomComponentCollect
             return List.of();
         }
 
-        List<SbomLicense> result = new ArrayList<>();
-        for (PomMetadataLicense metadataLicense : metadataLicenses) {
-            if (metadataLicense == null) {
-                continue;
-            }
-            result.add(new SbomLicense(metadataLicense.getName(), metadataLicense.getUrl()));
-        }
-        return List.copyOf(result);
+        return metadataLicenses.stream()
+                .filter(metadataLicense -> metadataLicense != null)
+                .map(metadataLicense -> new SbomLicense(metadataLicense.getName(), metadataLicense.getUrl()))
+                .collect(Collectors.toUnmodifiableList());
     }
 }

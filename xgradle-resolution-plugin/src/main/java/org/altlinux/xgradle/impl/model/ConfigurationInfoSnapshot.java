@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Immutable snapshot of declared dependency usage across configurations.
@@ -56,20 +57,28 @@ public final class ConfigurationInfoSnapshot {
     private static Map<String, Set<ConfigurationInfo>> deepImmutableConfigurationInfoMap(
             Map<String, Set<ConfigurationInfo>> source
     ) {
-        Map<String, Set<ConfigurationInfo>> copy = new LinkedHashMap<>();
-        for (Map.Entry<String, Set<ConfigurationInfo>> entry : source.entrySet()) {
-            copy.put(entry.getKey(), Set.copyOf(entry.getValue()));
-        }
-        return Collections.unmodifiableMap(copy);
+        return Collections.unmodifiableMap(
+                source.entrySet().stream()
+                        .collect(Collectors.toMap(
+                                Map.Entry::getKey,
+                                entry -> Set.copyOf(entry.getValue()),
+                                (left, right) -> right,
+                                LinkedHashMap::new
+                        ))
+        );
     }
 
     private static Map<String, Set<String>> deepImmutableStringSetMap(
             Map<String, Set<String>> source
     ) {
-        Map<String, Set<String>> copy = new LinkedHashMap<>();
-        for (Map.Entry<String, Set<String>> entry : source.entrySet()) {
-            copy.put(entry.getKey(), Set.copyOf(entry.getValue()));
-        }
-        return Collections.unmodifiableMap(copy);
+        return Collections.unmodifiableMap(
+                source.entrySet().stream()
+                        .collect(Collectors.toMap(
+                                Map.Entry::getKey,
+                                entry -> Set.copyOf(entry.getValue()),
+                                (left, right) -> right,
+                                LinkedHashMap::new
+                        ))
+        );
     }
 }

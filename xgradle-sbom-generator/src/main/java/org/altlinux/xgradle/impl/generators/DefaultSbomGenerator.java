@@ -82,18 +82,16 @@ final class DefaultSbomGenerator implements SbomGenerator {
 
     private Map<SbomFormat, SbomDocumentBuilder> indexBuilders(Set<SbomDocumentBuilder> builders) {
         Map<SbomFormat, SbomDocumentBuilder> indexedBuilders = new EnumMap<>(SbomFormat.class);
-        for (SbomDocumentBuilder builder : builders) {
-            if (builder == null) {
-                continue;
-            }
-
-            SbomDocumentBuilder previous = indexedBuilders.put(builder.format(), builder);
-            if (previous != null) {
-                throw new IllegalStateException(
-                        "Duplicate SBOM document builder for format: " + builder.format()
-                );
-            }
-        }
+        builders.stream()
+                .filter(builder -> builder != null)
+                .forEach(builder -> {
+                    SbomDocumentBuilder previous = indexedBuilders.put(builder.format(), builder);
+                    if (previous != null) {
+                        throw new IllegalStateException(
+                                "Duplicate SBOM document builder for format: " + builder.format()
+                        );
+                    }
+                });
 
         return Map.copyOf(indexedBuilders);
     }

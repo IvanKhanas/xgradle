@@ -57,12 +57,16 @@ final class MavenPomHierarchyLoader implements PomHierarchyLoader {
         final int MAX_DEPTH = 10;
 
         while (currentPath != null && depth < MAX_DEPTH) {
-                Model model = loadModel(currentPath);
-            if (model == null) break;
+            Model model = loadModel(currentPath);
+            if (model == null) {
+                break;
+            }
 
             stack.push(model);
             Parent parent = model.getParent();
-            if (parent == null) break;
+            if (parent == null) {
+                break;
+            }
 
             currentPath = resolveParentPath(currentPath, parent);
             depth++;
@@ -71,11 +75,11 @@ final class MavenPomHierarchyLoader implements PomHierarchyLoader {
     }
 
     private Model loadModel(Path pomPath) {
-        return modelCache.computeIfAbsent(pomPath.toString(), k -> {
-            try (InputStream is = Files.newInputStream(pomPath)) {
-                return modelReader.read(is, null);
-            } catch (Exception e) {
-                logger.debug("Failed to load POM: {}", pomPath, e);
+        return modelCache.computeIfAbsent(pomPath.toString(), cacheKey -> {
+            try (InputStream inputStream = Files.newInputStream(pomPath)) {
+                return modelReader.read(inputStream, null);
+            } catch (Exception exception) {
+                logger.debug("Failed to load POM: {}", pomPath, exception);
                 return null;
             }
         });

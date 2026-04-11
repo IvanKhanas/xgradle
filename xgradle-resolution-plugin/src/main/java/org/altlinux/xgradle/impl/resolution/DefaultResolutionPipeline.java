@@ -42,9 +42,7 @@ final class DefaultResolutionPipeline implements ResolutionPipeline {
 
     @Override
     public ResolutionContext run(ResolutionContext ext) {
-        for (ResolutionStep step : resolutionSteps) {
-            step.execute(ext);
-        }
+        resolutionSteps.forEach(step -> step.execute(ext));
         return ext;
     }
 

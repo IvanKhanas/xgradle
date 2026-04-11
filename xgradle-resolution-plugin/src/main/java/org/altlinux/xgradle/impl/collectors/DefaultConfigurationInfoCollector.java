@@ -87,26 +87,24 @@ final class DefaultConfigurationInfoCollector implements ConfigurationInfoCollec
     ) {
         ConfigurationInfo configurationInfo = new ConfigurationInfo(configuration);
 
-        for (Dependency dependency : configuration.getDependencies()) {
-            String dependencyKey = toDependencyKey(dependency);
-            if (dependencyKey == null) {
-                continue;
-            }
+        configuration.getDependencies().stream()
+                .map(DefaultConfigurationInfoCollector::toDependencyKey)
+                .filter(dependencyKey -> dependencyKey != null)
+                .forEach(dependencyKey -> {
+                    dependencyConfigurations
+                            .computeIfAbsent(dependencyKey, key -> new HashSet<>())
+                            .add(configurationInfo);
 
-            dependencyConfigurations
-                    .computeIfAbsent(dependencyKey, key -> new HashSet<>())
-                    .add(configurationInfo);
+                    dependencyConfigNames
+                            .computeIfAbsent(dependencyKey, key -> new HashSet<>())
+                            .add(configuration.getName());
 
-            dependencyConfigNames
-                    .computeIfAbsent(dependencyKey, key -> new HashSet<>())
-                    .add(configuration.getName());
-
-            if (configurationInfo.hasTestConfiguration()) {
-                testDependencyFlags.put(dependencyKey, true);
-            } else {
-                testDependencyFlags.putIfAbsent(dependencyKey, false);
-            }
-        }
+                    if (configurationInfo.hasTestConfiguration()) {
+                        testDependencyFlags.put(dependencyKey, true);
+                    } else {
+                        testDependencyFlags.putIfAbsent(dependencyKey, false);
+                    }
+                });
     }
 
     private static String toDependencyKey(Dependency dependency) {

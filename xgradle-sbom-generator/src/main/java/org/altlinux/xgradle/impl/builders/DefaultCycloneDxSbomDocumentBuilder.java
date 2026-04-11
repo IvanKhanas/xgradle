@@ -24,7 +24,6 @@ import com.google.inject.Singleton;
 import org.altlinux.xgradle.impl.enums.SbomComponentKind;
 import org.altlinux.xgradle.impl.enums.SbomFormat;
 import org.altlinux.xgradle.impl.models.SbomComponent;
-import org.altlinux.xgradle.impl.models.SbomLicense;
 import org.altlinux.xgradle.impl.validation.SbomValidationUtils;
 import org.altlinux.xgradle.interfaces.builders.SbomDocumentBuilder;
 
@@ -81,7 +80,7 @@ final class DefaultCycloneDxSbomDocumentBuilder implements SbomDocumentBuilder {
         document.add("metadata", metadata);
 
         JsonArray componentsArray = new JsonArray();
-        for (SbomComponent component : components) {
+        components.stream().forEach(component -> {
             JsonObject componentObject = new JsonObject();
             componentObject.addProperty("type", toCycloneDxType(component));
 
@@ -115,7 +114,7 @@ final class DefaultCycloneDxSbomDocumentBuilder implements SbomDocumentBuilder {
             addCycloneDxLicenses(componentObject, component);
             addCycloneDxProperties(componentObject, component);
             componentsArray.add(componentObject);
-        }
+        });
 
         document.add("components", componentsArray);
         return document;
@@ -159,28 +158,26 @@ final class DefaultCycloneDxSbomDocumentBuilder implements SbomDocumentBuilder {
         }
 
         JsonArray licenses = new JsonArray();
-        for (SbomLicense license : component.getLicenses()) {
-            if (license == null) {
-                continue;
-            }
+        component.getLicenses().stream()
+                .filter(license -> license != null)
+                .forEach(license -> {
+                    JsonObject inner = new JsonObject();
+                    String name = SbomValidationUtils.normalizeNullable(license.getName());
+                    String url = SbomValidationUtils.normalizeNullable(license.getUrl());
+                    if (name != null) {
+                        inner.addProperty("name", name);
+                    }
+                    if (url != null) {
+                        inner.addProperty("url", url);
+                    }
+                    if (inner.size() == 0) {
+                        return;
+                    }
 
-            JsonObject inner = new JsonObject();
-            String name = SbomValidationUtils.normalizeNullable(license.getName());
-            String url = SbomValidationUtils.normalizeNullable(license.getUrl());
-            if (name != null) {
-                inner.addProperty("name", name);
-            }
-            if (url != null) {
-                inner.addProperty("url", url);
-            }
-            if (inner.size() == 0) {
-                continue;
-            }
-
-            JsonObject wrapper = new JsonObject();
-            wrapper.add("license", inner);
-            licenses.add(wrapper);
-        }
+                    JsonObject wrapper = new JsonObject();
+                    wrapper.add("license", inner);
+                    licenses.add(wrapper);
+                });
 
         if (licenses.size() > 0) {
             componentObject.add("licenses", licenses);
