@@ -49,6 +49,7 @@ xgradle-resolution-plugin is configured via **system properties** or the user co
 |---|---|
 | `java.library.dir` | One or more directories containing **system JARs** (comma-separated). |
 | `maven.poms.dir` | Directory containing **system Maven POM metadata**. |
+| `disable.xgradle=true` | Completely disables xgradle plugin logic for the current build. |
 | `disable.logo=true` | Disable ASCII banner printing. |
 | `enable.ansi.color=true` | Enable ANSI colors in xgradle logs. |
 | `xgradle.scan.depth` | Max directory scan depth for system artifacts (default `3`). |
@@ -59,6 +60,7 @@ Example config file (`~/.xgradle/xgradle.config`):
 ```
 java.library.dir=/usr/share/java,/usr/local/share/java
 maven.poms.dir=/usr/share/maven-poms
+disable.xgradle=false
 disable.logo=true
 enable.ansi.color=true
 xgradle.scan.depth=3

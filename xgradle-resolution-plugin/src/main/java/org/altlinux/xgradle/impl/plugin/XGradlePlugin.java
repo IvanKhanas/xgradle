@@ -42,6 +42,9 @@ public final class XGradlePlugin implements Plugin<Gradle> {
     @Override
     public void apply(@NotNull Gradle gradle) {
         XGradleConfig.initSystemProperties();
+        if (isDisabled()) {
+            return;
+        }
         if (LogoPrinter.isLogoEnabled(gradle)) {
             LogoPrinter.printCenteredBanner();
         }
@@ -55,6 +58,10 @@ public final class XGradlePlugin implements Plugin<Gradle> {
 
         gradle.beforeSettings(plugins::handle);
         gradle.projectsEvaluated(dependencies::handle);
+    }
+
+    private boolean isDisabled() {
+        return "true".equalsIgnoreCase(XGradleConfig.getProperty("disable.xgradle", "false"));
     }
 
 }
