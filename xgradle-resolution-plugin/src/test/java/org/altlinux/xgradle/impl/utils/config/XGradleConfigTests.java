@@ -38,6 +38,7 @@ class XGradleConfigTests {
     private String prevHome;
     private String prevJavaLib;
     private String prevMavenPoms;
+    private String prevDisableXGradle;
     private String prevScanDepth;
 
     @BeforeEach
@@ -45,6 +46,7 @@ class XGradleConfigTests {
         prevHome = System.getProperty("user.home");
         prevJavaLib = System.getProperty("java.library.dir");
         prevMavenPoms = System.getProperty("maven.poms.dir");
+        prevDisableXGradle = System.getProperty("disable.xgradle");
         prevScanDepth = System.getProperty("xgradle.scan.depth");
 
         XGradleConfig.resetForTests();
@@ -57,6 +59,7 @@ class XGradleConfigTests {
         restoreProperty("user.home", prevHome);
         restoreProperty("java.library.dir", prevJavaLib);
         restoreProperty("maven.poms.dir", prevMavenPoms);
+        restoreProperty("disable.xgradle", prevDisableXGradle);
         restoreProperty("xgradle.scan.depth", prevScanDepth);
         XGradleConfig.resetForTests();
     }
@@ -84,11 +87,13 @@ class XGradleConfigTests {
     @Test
     @DisplayName("initSystemProperties sets missing values from config")
     void initSystemPropertiesSetsMissingValues() throws Exception {
-        writeConfig("maven.poms.dir=/tmp/poms");
+        writeConfig("maven.poms.dir=/tmp/poms\ndisable.xgradle=true");
         System.clearProperty("maven.poms.dir");
+        System.clearProperty("disable.xgradle");
 
         XGradleConfig.initSystemProperties();
         assertEquals("/tmp/poms", System.getProperty("maven.poms.dir"));
+        assertEquals("true", System.getProperty("disable.xgradle"));
     }
 
     @Test
