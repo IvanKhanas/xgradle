@@ -36,6 +36,7 @@ import java.util.List;
 public class LogoPrinter {
 
     private static final String ART_FILE = "logo.txt";
+    private static final int DEFAULT_TERMINAL_WIDTH = 80;
 
     public static boolean isLogoEnabled() {
         return isLogoEnabled(null);
@@ -78,22 +79,23 @@ public class LogoPrinter {
 
     private static int getTerminalWidth() {
         try {
-            if (System.getProperty("os.name").toLowerCase().contains("linux")) {
-                Process process = Runtime.getRuntime()
-                        .exec(new String[]{"bash", "-c", "tput cols"});
-
-                try (BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(process.getInputStream()))) {
-
-                    String width = reader.readLine();
-                    if (width != null) {
-                        return Integer.parseInt(width.trim());
-                    }
-                }
-            }
+            return getTerminalWidth(System.console() != null, System.getenv("COLUMNS"));
         } catch (Exception ignored) {
         }
-        return 80;
+        return DEFAULT_TERMINAL_WIDTH;
+    }
+
+    private static int getTerminalWidth(boolean hasConsole, String columns) {
+        if (!hasConsole) {
+            return DEFAULT_TERMINAL_WIDTH;
+        }
+        if (columns != null) {
+            int width = Integer.parseInt(columns.trim());
+            if (width > 0) {
+                return width;
+            }
+        }
+        return DEFAULT_TERMINAL_WIDTH;
     }
 
     private static boolean isBuildSrcBuild(Gradle gradle) {

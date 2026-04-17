@@ -27,11 +27,20 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.mockito.Mockito.*;
 
 /**
@@ -147,5 +156,68 @@ class LogoPrinterTests {
 
         String output = out.toString();
         assertFalse(output.isEmpty(), "Banner output should not be empty");
+    }
+
+    @Test
+    @DisplayName("printCenteredBanner: uses default width when console is unavailable")
+    void printCenteredBannerUsesDefaultWidthWhenConsoleUnavailable() throws Exception {
+        assumeTrue(System.console() == null);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(out));
+
+        LogoPrinter.printCenteredBanner();
+
+        List<String> artLines = loadArtLines();
+        int maxLength = artLines.stream()
+                .mapToInt(String::length)
+                .max()
+                .orElse(0);
+        int padding = Math.max(0, (80 - maxLength) / 2);
+        String[] printedLines = out.toString(StandardCharsets.UTF_8).split("\\R");
+
+        assertEquals(" ".repeat(padding) + artLines.get(0), printedLines[0]);
+    }
+
+    @Test
+    @DisplayName("getTerminalWidth(hasConsole, columns): uses COLUMNS env when console is available")
+    void getTerminalWidthUsesColumnsEnvWhenConsoleAvailable() throws Exception {
+        assertEquals(120, invokeGetTerminalWidth(true, " 120 "));
+    }
+
+    @Test
+    @DisplayName("getTerminalWidth(hasConsole, columns): throws for invalid COLUMNS")
+    void getTerminalWidthUsesDefaultWidthForInvalidColumns() throws Exception {
+        InvocationTargetException exception = assertThrows(
+                InvocationTargetException.class,
+                () -> invokeGetTerminalWidth(true, "abc"));
+        assertInstanceOf(NumberFormatException.class, exception.getCause());
+    }
+
+    @Test
+    @DisplayName("getTerminalWidth(hasConsole, columns): uses default width for false console flag")
+    void getTerminalWidthUsesDefaultWidthForNullConsole() throws Exception {
+        assertEquals(80, invokeGetTerminalWidth(false, "120"));
+    }
+
+    @Test
+    @DisplayName("getTerminalWidth(hasConsole, columns): uses default width for non-positive columns")
+    void getTerminalWidthUsesDefaultWidthForNonPositiveColumns() throws Exception {
+        assertEquals(80, invokeGetTerminalWidth(true, "0"));
+    }
+
+    private List<String> loadArtLines() throws Exception {
+        try (InputStream inputStream = LogoPrinter.class.getClassLoader().getResourceAsStream("logo.txt")) {
+            assertNotNull(inputStream);
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+                return reader.lines().collect(Collectors.toList());
+            }
+        }
+    }
+
+    private int invokeGetTerminalWidth(boolean hasConsole, String columns) throws Exception {
+        Method method = LogoPrinter.class.getDeclaredMethod("getTerminalWidth", boolean.class, String.class);
+        method.setAccessible(true);
+        return (int) method.invoke(null, hasConsole, columns);
     }
 }
